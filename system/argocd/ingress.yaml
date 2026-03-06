@@ -4,6 +4,8 @@ kind: IngressRoute
 metadata:
   name: argocd-server-ingress
   namespace: argocd
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   entryPoints:
     - web
