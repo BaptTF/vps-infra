@@ -38,13 +38,15 @@ metadata:
   name: whoami
   namespace: default
 spec:
+  ingressClassName: traefik
   rules:
-  - http:
+  - host: whoami.192.168.122.133.nip.io
+    http:
       paths:
-      - path: /whoami
+      - path: /
         pathType: Prefix
         backend:
           service:
-            name: whoami
+            name: whoami  # <-- Make sure this matches your whoami Service name!
             port:
-              number: 80
+              number: 80  # <-- Make sure this matches your whoami Service port!
