@@ -47,6 +47,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: whoami  # <-- Make sure this matches your whoami Service name!
+            name: whoami
             port:
-              number: 80  # <-- Make sure this matches your whoami Service port!
+              number: 80
