@@ -1,0 +1,24 @@
+# Install cert-manager CRDs first
+apiVersion: v1
+kind: CustomResourceDefinition
+metadata:
+  name: certificates.cert-manager.io
+---
+# cert-manager installation via Helm (apply this manifest)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-manager
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificates", "issuers", "clusterissuers"]
+  verbs: ["*"]
