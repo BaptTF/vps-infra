@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jujudb
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/BaptTF/vps-infra.git'
+    targetRevision: HEAD
+    path: workloads/jujudb
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

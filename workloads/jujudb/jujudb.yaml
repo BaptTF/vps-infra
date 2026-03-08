@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jujudb
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: jujudb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jujudb
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jujudb
+  template:
+    metadata:
+      labels:
+        app: jujudb
+    spec:
+      containers:
+      - name: jujudb
+        image: git.bapttf.com/bapttf/jujudb:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "jujudb"
+        - name: PORT
+          value: "8080"
+        - name: LOG_FORMAT
+          value: "json"
+        - name: TEST_MODE
+          value: "false"
+        - name: PRODUCTION
+          value: "true"
+        envFrom:
+        - secretRef:
+            name: jujudb-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jujudb
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`jujudb.bapttf.com`)
+    kind: Rule
+    services:
+    - name: jujudb
+      port: 8080
+  tls: {}
