@@ -1,0 +1,23 @@
+# Traefik OpenTelemetry configuration
+# Add this to your Traefik configuration to send traces to OpenTelemetry Collector
+# This can be done via dynamic configuration or arguments
+
+# Example Traefik arguments to enable OpenTelemetry:
+# --experimental.tracing=true
+# --tracing.otlp=true
+# --tracing.otlp.endpoint=otel-collector.monitoring.svc:4317
+# --tracing.otlp.grpc=true
+
+# For k3s, you can add this to /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-otel-config
+  namespace: kube-system
+data:
+  config.yaml: |
+    experimental:
+      tracing:
+        otlp:
+          endpoint: otel-collector.monitoring.svc:4317
+          grpc: true

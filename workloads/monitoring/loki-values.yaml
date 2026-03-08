@@ -1,0 +1,118 @@
+# Loki values
+# https://github.com/grafana/helm-charts/tree/main/charts/loki
+
+loki:
+  auth_enabled: false
+  
+  server:
+    http_listen_port: 3100
+    grpc_listen_port: 9096
+  
+  common:
+    instance_addr: 127.0.0.1
+    path_prefix: /var/loki
+    storage:
+      filesystem:
+        chunks_directory: /var/loki/chunks
+        rules_directory: /var/loki/rules
+    replication_factor: 1
+    ring:
+      instance_addr: 127.0.0.1
+      kvstore:
+        store: inmemory
+  
+  schema_config:
+    configs:
+      - from: 2024-01-01
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+  
+  limits_config:
+    allow_structured_metadata: false
+    reject_old_samples_max_age: 168h
+    creation_grace_period: 10m
+    max_cache_freshness_per_query: 10m
+    deletion_mode: filter-and-delete
+  
+  compactor:
+    working_directory: /var/loki/compactor
+    retention_enabled: true
+    delete_request_store: filesystem
+
+storage:
+  type: filesystem
+
+persistence:
+  enabled: true
+  storageClassName: local-path
+  size: 5Gi
+
+# Promtail configuration for log collection
+promtail:
+  enabled: true
+  
+  # Scrape journals and journal
+  serviceMonitor:
+    enabled: false
+  
+  # Promtail configuration
+  config:
+    serverPort: 3101
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+    
+    scrapeConfigs:
+      # Scrape logs from journal
+      - job_name: journal
+        journal:
+          path: /var/log/journal
+          max_age: 12h
+          labels:
+            job: journal
+        relabel_configs:
+          - source_labels: ['__journal_unit']
+            target_label: unit
+      
+      # Scrape pod logs from /var/log/pods
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: pod
+      
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+      
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        action: replace
+        target_label: container
+      
+      - action: replace
+        replacement: /var/log/pods/*$1/*.log
+        source_labels:
+          - __meta_kubernetes_pod_uid
+          - __meta_kubernetes_pod_container_name
+        target_label: __path__
+    
+      # Host logs
+      - job_name: hostlogs
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: hostlogs
+              __path__: /var/log/{syslog,auth.log,*.log}
+
+# Enable metrics for Loki
+monitoring:
+  selfMonitoring:
+    enabled: true
+    grafanaAgent:
+      installOperator: false
