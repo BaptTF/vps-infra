@@ -1,5 +1,6 @@
 #!/bin/bash
 # Migration script: Docker -> Kubernetes (k3s)
+# This script only migrates DATA. ArgoCD manages the deployment.
 
 set -e
 
@@ -8,24 +9,20 @@ NAMESPACE="default"
 
 echo "=== Forgejo Migration: Docker -> k3s ==="
 
-# Check if Docker container is running
+# Stop Docker container
 if docker ps | grep -q forgejo; then
-    echo "[1/4] Stopping Docker forgejo..."
+    echo "[1/3] Stopping Docker forgejo..."
     docker stop forgejo
     docker rm forgejo
 fi
 
-# Create PVC
-echo "[2/4] Creating PVC..."
-kubectl apply -f workloads/forgejo/forgejo.yaml -n ${NAMESPACE}
-
-# Wait for PVC to be bound
-echo "[3/4] Waiting for PVC to be bound..."
-kubectl wait --for=jsonpath='{.status.phase}'=Bound pvc/forgejo-data -n ${NAMESPACE} --timeout=60s
+# Wait for PVC to be bound (created by ArgoCD)
+echo "[2/3] Waiting for PVC to be bound..."
+kubectl wait --for=jsonpath='{.status.phase}'=Bound pvc/forgejo-data -n ${NAMESPACE} --timeout=120s || echo "WARNING: PVC not ready"
 
 # Copy data
-echo "[4/4] Copying data to PVC..."
-DATA_PV=$(kubectl get pv -l pvcName=forgejo-data -o jsonpath='{.items[0].spec.local.path}')
+echo "[3/3] Copying data to PVC..."
+DATA_PV=$(kubectl get pv -l pvcName=forgejo-data -o jsonpath='{.items[0].spec.local.path}' 2>/dev/null || echo "")
 
 if [ -z "$DATA_PV" ]; then
     echo "Error: Could not find PVC path"
@@ -34,14 +31,9 @@ fi
 
 echo "Copying from ${FORGEJO_DATA_PATH} to ${DATA_PV}"
 sudo cp -r ${FORGEJO_DATA_PATH}/* ${DATA_PV}/
-
-# Set permissions
 sudo chown -R 1000:1000 ${DATA_PV}/
 
 echo "=== Migration complete ==="
 echo ""
-echo "Note: SSH is exposed on port 22 inside the container."
-echo "To access SSH, use: ssh -p 22 git@git.bapttf.com"
-echo "(Make sure port 22 is forwarded to the Forgejo pod)"
-echo ""
-echo "Deploy to k3s with: kubectl apply -f workloads/forgejo/forgejo.yaml"
+echo "ArgoCD has deployed Forgejo at: https://git.bapttf.com"
+echo "SSH is available at port 2222"
