@@ -69,9 +69,11 @@ Wait for ArgoCD to sync (this will deploy Infisical).
 | infrastructure | `/cloudflare` | `api-token` |
 | infrastructure | `/tailscale` | `client-id`, `client-secret` |
 | infrastructure | `/garage` | `rpc-secret`, `admin-token`, `metrics-token` |
+| infrastructure | `/meilisearch` | `master-key` |
 | monitoring | `/grafana` | `admin-password` |
 | couchdb | `/couchdb` | `COUCHDB_USER`, `COUCHDB_PASSWORD` |
 | lacoope | `/backend` | `postgres-password`, `session-key`, `admin-email`, `admin-password-hash`, `garage-access-key`, `garage-secret-key` |
+| jujudb | `/app` | `db-user`, `db-password`, `app-password`, `session-key` |
 
 ### Step 7: Update InfisicalSecret project IDs
 
@@ -83,6 +85,8 @@ Edit these files and replace project IDs:
 - `workloads/garage/01-garage-infisical-secret.yaml`
 - `workloads/lacoope/01-backend-infisical-secret.yaml`
 - `workloads/tailscale/01-tailscale-infisical-secret.yaml`
+- `workloads/meilisearch/01-meilisearch-infisical-secret.yaml`
+- `workloads/jujudb/01-jujudb-infisical-secret.yaml`
 
 ```bash
 git add .
@@ -97,6 +101,7 @@ git push
 ./scripts/migrate-couchdb.sh
 ./scripts/migrate-forgejo.sh
 ./scripts/migrate-garage.sh
+./scripts/migrate-meilisearch.sh
 ./scripts/migrate-monitoring.sh
 ```
 
@@ -115,6 +120,8 @@ git push
 | CouchDB | https://obsidian-livesync.bapttf.com |
 | Garage S3 | https://s3.garage.bapttf.com |
 | Garage UI | https://garage-ui.bapttf.com |
+| Meilisearch | https://meilisearch.bapttf.com |
+| JujuDB | https://jujudb.bapttf.com |
 | LaCoope | https://lacoope.bapttf.com |
 | LaCoope API | https://lacoope-api.bapttf.com |
 | Tailscale | VPN (connect via Tailscale client) |
