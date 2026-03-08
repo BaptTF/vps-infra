@@ -6,8 +6,8 @@ metadata:
 spec:
   project: system
   source:
-    repoURL: https://charts.infisical.com
-    chart: infisical-k8-operator
+    repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts
+    chart: secrets-operator
     targetRevision: 0.10.0
     helm:
       releaseName: infisical-operator
