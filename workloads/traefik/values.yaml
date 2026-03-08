@@ -1,0 +1,75 @@
+# Traefik values for k3s
+# https://github.com/traefik/traefik-helm-chart
+
+# Namespace
+namespace: traefik
+
+# Service configuration
+service:
+  spec:
+    type: LoadBalancer
+    externalIP: 192.168.122.133
+
+# EntryPoints configuration
+ports:
+  web:
+    port: 80
+    expose: true
+    exposedPort: 80
+  websecure:
+    port: 443
+    expose: true
+    exposedPort: 443
+
+# Enable OpenTelemetry tracing
+tracing:
+  enabled: true
+  serviceName: traefik
+  otlp:
+    enabled: true
+    endpoint: "otel-collector.monitoring.svc:4317"
+    grpc: true
+    http: true
+
+# IngressClass configuration
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+  name: traefik
+
+# Enable dashboard
+dashboard:
+  enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    hosts:
+      - traefik.bapttf.com
+    tls: []
+
+# Logs configuration
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+
+# Metrics configuration
+metrics:
+  prometheus:
+    enabled: true
+    entryPoint: metrics
+
+# Security
+security:
+  podsAntiAffinity: true
+
+# Resource limits
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
