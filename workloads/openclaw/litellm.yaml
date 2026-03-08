@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 4000
+    targetPort: 4000
+  selector:
+    app: litellm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    metadata:
+      labels:
+        app: litellm
+    spec:
+      containers:
+      - name: litellm
+        image: ghcr.io/berriai/litellm:main-latest
+        ports:
+        - containerPort: 4000
+          name: http
+        command:
+        - --config
+        - /app/config.yaml
+        - --port
+        - "4000"
+        - --num_workers
+        - "1"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: config
+        configMap:
+          name: litellm-config
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: litellm
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`litellm.bapttf.com`)
+    kind: Rule
+    services:
+    - name: litellm
+      port: 4000
+  tls: {}

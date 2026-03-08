@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openclaw-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openclaw-ssh
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+    storage: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openclaw
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 18789
+    targetPort: 18789
+  - name: ssh
+    port: 22
+    targetPort: 22
+    nodePort: 22222
+  selector:
+    app: openclaw
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openclaw
+  template:
+    metadata:
+      labels:
+        app: openclaw
+    spec:
+      containers:
+      - name: openclaw
+        image: ghcr.io/bapttf/openclaw-lea-config:latest
+        ports:
+        - containerPort: 18789
+          name: http
+        env:
+        - name: OPENCLAW_SSH_ENABLED
+          value: "true"
+        - name: OPENCLAW_SSH_PORT
+          value: "22"
+        - name: OPENCLAW_CONFIG_PATH
+          value: "/home/node/.openclaw/lea/openclaw.json"
+        envFrom:
+        - secretRef:
+            name: openclaw-secrets
+        volumeMounts:
+        - name: data
+          mountPath: /home/node/.openclaw
+        - name: ssh
+          mountPath: /home/node/.ssh
+        - name: config
+          mountPath: /home/node/.config
+        - name: litellm-config
+          mountPath: /home/node/litellm/config.yaml
+          subPath: config.yaml
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: openclaw-data
+      - name: ssh
+        persistentVolumeClaim:
+          claimName: openclaw-ssh
+      - name: config
+        emptyDir: {}
+      - name: litellm-config
+        configMap:
+          name: litellm-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-config
+  namespace: default
+data:
+  config.yaml: |
+    # Placeholder - replace with actual litellm config
+    model_list: []
+    litellm_settings:
+      drop_params: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: openclaw
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`openclaw.bapttf.com`)
+    kind: Rule
+    services:
+    - name: openclaw
+      port: 18789
+  tls: {}
