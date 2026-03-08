@@ -1,0 +1,186 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garage-meta
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garage-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage
+  namespace: default
+spec:
+  ports:
+  - name: rpc
+    port: 3901
+    targetPort: 3901
+  - name: s3
+    port: 3900
+    targetPort: 3900
+  - name: web
+    port: 3902
+    targetPort: 3902
+  - name: admin
+    port: 3903
+    targetPort: 3903
+  selector:
+    app: garage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garage
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: garage
+  template:
+    metadata:
+      labels:
+        app: garage
+    spec:
+      containers:
+      - name: garage
+        image: dxflrs/garage:v2.1.0
+        ports:
+        - containerPort: 3900
+          name: s3
+        - containerPort: 3901
+          name: rpc
+        - containerPort: 3902
+          name: web
+        - containerPort: 3903
+          name: admin
+        env:
+        - name: RUST_LOG
+          value: "garage=info"
+        envFrom:
+        - secretRef:
+            name: garage-credentials
+        volumeMounts:
+        - name: config
+          mountPath: /etc/garage.toml
+          subPath: garage.toml
+        - name: meta
+          mountPath: /var/lib/garage/meta
+        - name: data
+          mountPath: /var/lib/garage/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: config
+        configMap:
+          name: garage-config
+      - name: meta
+        persistentVolumeClaim:
+          claimName: garage-meta
+      - name: data
+        persistentVolumeClaim:
+          claimName: garage-data
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: garage-config
+  namespace: default
+data:
+  garage.toml: |
+    metadata_dir = "/var/lib/garage/meta"
+    data_dir = "/var/lib/garage/data"
+    db_engine = "sqlite"
+    
+    replication_factor = 1
+    
+    rpc_bind_addr = "[::]:3901"
+    rpc_public_addr = "garage.default.svc.cluster.local:3901"
+    
+    [s3_api]
+    s3_region = "garage"
+    api_bind_addr = "[::]:3900"
+    root_domain = ".s3.garage.bapttf.com"
+    
+    [s3_web]
+    bind_addr = "[::]:3902"
+    root_domain = ".garage.bapttf.com"
+    index = "index.html"
+    
+    [k2v_api]
+    api_bind_addr = "[::]:3904"
+    
+    [admin]
+    api_bind_addr = "[::]:3903"
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: garage-s3
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostRegexp(`^.+\.s3.garage.bapttf.com$`)
+    kind: Rule
+    services:
+    - name: garage
+      port: 3900
+  tls: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: garage-web
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostRegexp(`^.+\.garage.bapttf.com$`)
+    kind: Rule
+    services:
+    - name: garage
+      port: 3902
+  tls: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: garage-ui
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`garage-ui.bapttf.com`)
+    kind: Rule
+    services:
+    - name: garage
+      port: 3903
+  tls: {}
