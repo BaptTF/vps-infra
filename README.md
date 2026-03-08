@@ -74,6 +74,8 @@ Wait for ArgoCD to sync (this will deploy Infisical).
 | couchdb | `/couchdb` | `COUCHDB_USER`, `COUCHDB_PASSWORD` |
 | lacoope | `/backend` | `postgres-password`, `session-key`, `admin-email`, `admin-password-hash`, `garage-access-key`, `garage-secret-key` |
 | jujudb | `/app` | `db-user`, `db-password`, `app-password`, `session-key` |
+| openclaw | `/app` | (env vars for openclaw) |
+| openclaw | `/litellm` | `aws-access-key-id`, `aws-secret-access-key`, `master-key` |
 
 ### Step 7: Update InfisicalSecret project IDs
 
@@ -87,6 +89,7 @@ Edit these files and replace project IDs:
 - `workloads/tailscale/01-tailscale-infisical-secret.yaml`
 - `workloads/meilisearch/01-meilisearch-infisical-secret.yaml`
 - `workloads/jujudb/01-jujudb-infisical-secret.yaml`
+- `workloads/openclaw/01-openclaw-infisical-secret.yaml`
 
 ```bash
 git add .
@@ -102,6 +105,7 @@ git push
 ./scripts/migrate-forgejo.sh
 ./scripts/migrate-garage.sh
 ./scripts/migrate-meilisearch.sh
+./scripts/migrate-openclaw.sh
 ./scripts/migrate-monitoring.sh
 ```
 
@@ -124,6 +128,8 @@ git push
 | JujuDB | https://jujudb.bapttf.com |
 | LaCoope | https://lacoope.bapttf.com |
 | LaCoope API | https://lacoope-api.bapttf.com |
+| OpenCLAW | https://openclaw.bapttf.com |
+| LiteLLM | https://litellm.bapttf.com |
 | Tailscale | VPN (connect via Tailscale client) |
 
 ---
