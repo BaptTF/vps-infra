@@ -173,6 +173,8 @@ tailscale status
 # Example: curl http://<internal-ip>:8080
 ```
 
+The Tailscale operator is automatically configured via GitOps. Namespaces with `tailscale.com/operator: "true"` label will have services exposed automatically.
+
 ## Note
 
 HTTPS certificates via Let's Encrypt will work after:

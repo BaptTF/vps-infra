@@ -1,0 +1,15 @@
+# Tailscale namespace and labels for exposing services
+# These labels enable the Tailscale operator to expose Kubernetes services
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: default
+  labels:
+    tailscale.com/operator: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    tailscale.com/operator: "true"
