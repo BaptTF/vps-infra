@@ -44,7 +44,6 @@ grafana:
   # Grafana admin credentials - managed via Infisical (see 01-grafana-infisical-secret.yaml)
   admin:
     existingSecret: grafana-credentials
-    userKey: admin-password
     passwordKey: admin-password
   
   # Grafana ingress
