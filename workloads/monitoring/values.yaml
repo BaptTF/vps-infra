@@ -41,8 +41,11 @@ alertmanager:
 grafana:
   enabled: true
   
-  # Grafana admin credentials - should use SealedSecret or external secrets
-  adminPassword: admin
+  # Grafana admin credentials - managed via Infisical (see 01-grafana-infisical-secret.yaml)
+  admin:
+    existingSecret: grafana-credentials
+    userKey: admin-password
+    passwordKey: admin-password
   
   # Grafana ingress
   ingress:

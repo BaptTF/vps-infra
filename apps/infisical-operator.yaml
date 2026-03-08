@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infisical-operator
+  namespace: argocd
+spec:
+  project: system
+  source:
+    repoURL: https://charts.infisical.com
+    chart: infisical-k8-operator
+    targetRevision: 0.10.0
+    helm:
+      releaseName: infisical-operator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infisical
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
