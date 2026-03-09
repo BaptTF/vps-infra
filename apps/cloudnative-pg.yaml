@@ -6,9 +6,9 @@ metadata:
 spec:
   project: system
   source:
-    repoURL: https://cloudnative-pg.github.io/charts
+    repoURL: https://cloudnative-pg.io/charts
     chart: cloudnative-pg
-    targetRevision: 1.21.0
+    targetRevision: 0.27.1
     helm:
       releaseName: cnpg
   destination:
