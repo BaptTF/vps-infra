@@ -3,16 +3,39 @@ kind: Application
 metadata:
   name: traefik
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: system
+  project: default
   source:
-    repoURL: https://traefik.github.io/charts
+    repoURL: https://helm.traefik.io/traefik
+    targetRevision: 32.1.1
     chart: traefik
-    targetRevision: 30.0.0
     helm:
-      releaseName: traefik
-      valueFiles:
-        - https://raw.githubusercontent.com/BaptTF/vps-infra/main/workloads/traefik/values.yaml
+      values: |
+        ingressClass:
+          enabled: true
+          isDefaultClass: true
+        
+        providers:
+          kubernetesCRD:
+            enabled: true
+          kubernetesIngress:
+            enabled: true
+            publishedService:
+              enabled: true
+        
+        ports:
+          web:
+            redirectTo:
+              port: websecure
+          websecure:
+            tls:
+              enabled: true
+        
+        ingressRoute:
+          dashboard:
+            enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
@@ -21,4 +44,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - ServerSideApply=true
+      - CreateNamespace=true
