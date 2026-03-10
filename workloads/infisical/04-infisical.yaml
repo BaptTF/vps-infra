@@ -36,7 +36,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`infisical.bapttf.com`)
+  - match: Host(`infisical.192.168.122.133.nip.io`)
     kind: Rule
     services:
     - name: infisical
