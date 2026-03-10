@@ -9,7 +9,7 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:16.4
   
   storage:
-    storageClassName: local-path
+    storageClass: local-path
     size: 5Gi
   
   bootstrap:
@@ -19,19 +19,20 @@ spec:
       secret:
         name: infisical-db-credentials
   
-  configuration:
-    sharedBuffers: 128MB
-    maxConnections: 100
-    effectiveCacheSize: 512MB
-    maintenanceWorkMem: 64MB
-    checkpointCompletionTarget: 0.9
-    walBuffers: 16MB
-    defaultStatisticsTarget: 100
-    randomPageCost: 1.1
-    effectiveIoConcurrency: 200
-    workMem: 4MB
-    minWalSize: 80MB
-    maxWalSize: 1GB
+  postgresql:
+    parameters:
+      shared_buffers: "128MB"
+      max_connections: "100"
+      effective_cache_size: "512MB"
+      maintenance_work_mem: "64MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "4MB"
+      min_wal_size: "80MB"
+      max_wal_size: "1GB"
   
   resources:
     requests:
