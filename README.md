@@ -53,15 +53,49 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 # brew install kubeseal
 ```
 
-### Step 6: Generate SealedSecret for Infisical DB
+### Step 6: Generate SealedSecret for Infisical
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: infisical-secrets
+  namespace: infisical
+type: Opaque
+stringData:
+  # Generate with: openssl rand -base64 32
+  AUTH_SECRET: "CHANGE_ME_generate_with_openssl_rand_base64_32"
+  
+  # Generate with: openssl rand -hex 16
+  ENCRYPTION_KEY: "CHANGE_ME_generate_with_openssl_rand_hex_16"
+  
+  # PostgreSQL connection string
+  # Format: postgresql://username:password@hostname:port/database
+  # For cloudnative-pg: postgresql://infisical:YOUR_DB_PASSWORD@infisical-db-rw.infisical.svc.cluster.local:5432/infisical
+  # DB_CONNECTION_URI: "postgresql://infisical:CHANGE_DB_PASSWORD@infisical-db-rw.infisical.svc.cluster.local:5432/infisical"
+  
+  # Redis URL
+  # Format: redis://:password@hostname:port or redis://hostname:port (no auth)
+  # REDIS_URL: "redis://infisical-redis.infisical.svc.cluster.local:6379"
+  
+  # Your site URL
+  SITE_URL: "https://infisical.bapttf.com"
+```
 
 ```bash
+kubeseal --controller-namespace kube-system --controller-name sealed-secrets --fetch-cert > pub-cert.pem
+```
+```bash
+kubeseal --format yaml --cert pub-cert.pem < workloads/infisical/06-infisical-secrets.yaml > workloads/infisical/06-infisical-secrets-sealed.yaml
+```
+
+<!--```bash
 kubectl create secret generic infisical-db-credentials \
   -n infisical \
   --from-literal=username=infisical \
   --from-literal=password='YOUR_PASSWORD' \
   -o yaml | kubeseal --format yaml > workloads/infisical/03-db-credentials.yaml
-```
+```-->
 
 ### Step 7: Commit and push
 

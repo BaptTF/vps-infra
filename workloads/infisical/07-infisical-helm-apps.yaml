@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infisical-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/'
+    chart: infisical-standalone
+    # It is highly recommended to pin this to a specific chart version in production
+    targetRevision: '*' 
+    helm:
+      values: |
+        # Disable the chart's built-in dependencies since you are providing your own
+        postgresql:
+          enabled: false
+        redis:
+          enabled: false
+        
+        # Disable the chart's built-in Ingress since you provided a Traefik IngressRoute
+        ingress:
+          enabled: false
+          
+        # (Optional) Pin the application image version. 
+        # By default, the chart might use an older or latest tag.
+        # infisical:
+        #   image:
+        #     tag: "v0.151.0"
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: infisical
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
