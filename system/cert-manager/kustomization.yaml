@@ -13,3 +13,4 @@ helmCharts:
 
 resources:
   - 02-cloudflare-infisical-secret.yaml
+  - 01-clusterissuer.yaml
