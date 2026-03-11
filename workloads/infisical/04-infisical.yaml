@@ -14,6 +14,6 @@ spec:
     kind: Rule
     services:
     - name: infisical-standalone
-      port: 80
+      port: 8080
   tls:
     certResolver: letsencrypt-prod
