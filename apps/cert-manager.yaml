@@ -6,16 +6,11 @@ metadata:
 spec:
   project: system
   source:
-    repoURL: https://charts.jetstack.io
-    chart: cert-manager
-    targetRevision: v1.15.0
-    helm:
-      releaseName: cert-manager
-      parameters:
-        - name: installCRDs
-          value: "true"
+    repoURL: 'https://github.com/BaptTF/vps-infra.git'
+    targetRevision: HEAD
+    path: system/cert-manager
   destination:
-    server: https://kubernetes.default.svc
+    server: 'https://kubernetes.default.svc'
     namespace: cert-manager
   syncPolicy:
     automated:
@@ -23,3 +18,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
