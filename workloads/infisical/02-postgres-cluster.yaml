@@ -35,9 +35,9 @@ spec:
       max_wal_size: "1GB"
   
   resources:
-    requests:
-      memory: "256Mi"
-      cpu: "100m"
+    # requests:
+    #   memory: "256Mi"
+    #   cpu: "100m"
     limits:
       memory: "512Mi"
       cpu: "500m"
