@@ -119,8 +119,8 @@ kubectl create secret generic infisical-universal-auth \
   --namespace tailscale \
   --from-literal=clientId="$CLIENT_ID" \
   --from-literal=clientSecret="$CLIENT_SECRET" \
-  --dry-run=client -o yaml | kubeseal --format yaml --cert pub-cert.pem > system/tailscale/00-infisical-auth-secret.yaml && git add system/tailscale/00-infisical-auth-secret.yaml && \
-  git commit -m "chore: update"
+  --dry-run=client -o yaml | kubeseal --format yaml --cert pub-cert.pem > system/infisical/08-infisical-auth-secret.yaml && git add system/infisical/08-infisical-auth-secret.yaml && \
+  git commit -m "chore: create infisical univ auth"
 ```
 
 ### Step 10: Update InfisicalSecret project IDs
