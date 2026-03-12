@@ -118,7 +118,7 @@ For the InfisicalSecret CR to authenticate with Infisical, you need to create a 
 CLIENT_ID="your-machine-identity-client-id" \
 CLIENT_SECRET="your-machine-identity-client-secret" \
 kubectl create secret generic infisical-universal-auth \
-  --namespace tailscale \
+  --namespace infisical \
   --from-literal=clientId="$CLIENT_ID" \
   --from-literal=clientSecret="$CLIENT_SECRET" \
   --dry-run=client -o yaml | kubeseal --format yaml --cert pub-cert.pem > system/infisical/08-infisical-auth-secret.yaml && git add system/infisical/08-infisical-auth-secret.yaml && \
