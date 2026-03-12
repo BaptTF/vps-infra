@@ -53,58 +53,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 # brew install kubeseal
 ```
 
-### Step 6: Generate SealedSecret for Infisical
-
-```bash
-DB_PASSWORD=$(openssl rand -hex 16)
-kubectl create secret generic infisical-db-credentials \
-  --namespace infisical \
-  --from-literal=username="infisical" \
-  --from-literal=password="$DB_PASSWORD" \
-  --dry-run=client -o yaml | kubeseal --format yaml --cert pub-cert.pem > workloads/infisical/03-db-credentials.yaml && \
-kubectl create secret generic infisical-secrets \
-  --namespace infisical \
-  --from-literal=AUTH_SECRET="$(openssl rand -base64 32)" \
-  --from-literal=ENCRYPTION_KEY="$(openssl rand -hex 16)" \
-  --from-literal=DB_CONNECTION_URI="postgresql://infisical:${DB_PASSWORD}@infisical-db-rw.infisical.svc.cluster.local:5432/infisical" \
-  --from-literal=REDIS_URL="redis://infisical-redis.infisical.svc.cluster.local:6379" \
-  --from-literal=SITE_URL="https://infisical.192.168.122.133.nip.io" \
-  --dry-run=client -o yaml | kubeseal --format yaml --cert pub-cert.pem > workloads/infisical/06-infisical-secrets-sealed.yaml && \
-
-```
-
-### Step 7: Commit and push
-
-```bash
-git add workloads/infisical/03-db-credentials.yaml workloads/infisical/06-infisical-secrets-sealed.yaml && \
-git commit -m "chore: generate and seal new database credentials and infisical secrets" && \
-git push
-```
-
-Wait for ArgoCD to sync (this will deploy Infisical).
-
-### Step 8: Configure Infisical
-
-1. Access `https://infisical.bapttf.com` (use self-signed cert warning)
-2. Create admin account
-3. Create projects and add secrets:
-
-| Project | Path | Keys |
-|---------|------|------|
-| infrastructure | `/cloudflare` | `api-token` |
-| infrastructure | `/tailscale` | `client-id`, `client-secret` |
-| infrastructure | `/garage` | `rpc-secret`, `admin-token`, `metrics-token` |
-| infrastructure | `/meilisearch` | `master-key` |
-| monitoring | `/grafana` | `admin-password` |
-| couchdb | `/couchdb` | `COUCHDB_USER`, `COUCHDB_PASSWORD` |
-| lacoope | `/backend` | `postgres-password`, `session-key`, `admin-email`, `admin-password-hash`, `garage-access-key`, `garage-secret-key` |
-| jujudb | `/app` | `db-user`, `db-password`, `app-password`, `session-key` |
-| openclaw | `/app` | (env vars for openclaw) |
-| openclaw | `/litellm` | `aws-access-key-id`, `aws-secret-access-key`, `master-key` |
-
-4. Change the ProjectSlug to "infrastructure"
-
-### Step 9: Generate SealedSecret for Infisical Machine Identity
+### Step 6: Generate SealedSecret for Infisical Machine Identity
 
 For the InfisicalSecret CR to authenticate with Infisical, you need to create a machine identity and seal its credentials.
 
@@ -121,31 +70,11 @@ kubectl create secret generic infisical-universal-auth \
   --namespace infisical \
   --from-literal=clientId="$CLIENT_ID" \
   --from-literal=clientSecret="$CLIENT_SECRET" \
-  --dry-run=client -o yaml | kubeseal --format yaml --cert pub-cert.pem > system/infisical/08-infisical-auth-secret.yaml && git add system/infisical/08-infisical-auth-secret.yaml && \
+  --dry-run=client -o yaml | kubeseal --format yaml --cert pub-cert.pem > system/infisical/00-infisical-auth-secret.yaml && git add system/infisical/00-infisical-auth-secret.yaml && \
   git commit -m "chore: create infisical univ auth"
 ```
 
-### Step 10: Update InfisicalSecret project IDs
-
-Edit these files and replace project IDs:
-- `system/cert-manager/02-cloudflare-secret.yaml`
-- `workloads/infisical/02-tailscale-infisical-secret.yaml`
-- `workloads/obsidian-livesync/couchdb.yaml`
-- `workloads/monitoring/01-grafana-infisical-secret.yaml`
-- `workloads/garage/01-garage-infisical-secret.yaml`
-- `workloads/lacoope/01-backend-infisical-secret.yaml`
-- `system/tailscale/01-tailscale-infisical-secret.yaml`
-- `workloads/meilisearch/01-meilisearch-infisical-secret.yaml`
-- `workloads/jujudb/01-jujudb-infisical-secret.yaml`
-- `workloads/openclaw/01-openclaw-infisical-secret.yaml`
-
-```bash
-git add .
-git commit -m "feat: configure Infisical project IDs"
-git push
-```
-
-### Step 11: Migrate data
+### Step 7: Migrate data
 
 ```bash
 ./scripts/migrate-vaultwarden.sh
@@ -191,8 +120,8 @@ After Infisical is deployed, add your Tailscale OAuth credentials:
 - **Project**: `infrastructure`
 - **Path**: `/tailscale`
 - **Keys**:
-  - `client-id`: Your Tailscale OAuth client ID
-  - `client-secret`: Your Tailscale OAuth client secret
+  - `client_id`: Your Tailscale OAuth client ID
+  - `client_secret`: Your Tailscale OAuth client secret
 
 ### 2. Create OAuth Client (first time only)
 
@@ -240,6 +169,4 @@ This can be added directly to your service definitions in Git.
 ## Note
 
 HTTPS certificates via Let's Encrypt will work after:
-- Infisical is deployed
-- Cloudflare API token is added to Infisical
 - ArgoCD syncs the InfisicalSecret
