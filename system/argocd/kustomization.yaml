@@ -6,6 +6,7 @@ namespace: argocd
 resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   - ingress.yaml
+  - tailscale-ingress.yaml
 
 patches:
   - path: insecure-patch.yaml

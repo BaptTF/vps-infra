@@ -1,0 +1,24 @@
+# system/argocd/ingress-tailscale.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-tailnet
+  namespace: argocd
+spec:
+  # This is the magic line that tells Tailscale to take over this Ingress
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        # This will be the hostname of the machine on your Tailnet
+        - argocd
+  rules:
+    - host: argocd
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
