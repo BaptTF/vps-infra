@@ -102,6 +102,8 @@ Wait for ArgoCD to sync (this will deploy Infisical).
 | openclaw | `/app` | (env vars for openclaw) |
 | openclaw | `/litellm` | `aws-access-key-id`, `aws-secret-access-key`, `master-key` |
 
+4. Change the ProjectSlug to "infrastructure"
+
 ### Step 9: Generate SealedSecret for Infisical Machine Identity
 
 For the InfisicalSecret CR to authenticate with Infisical, you need to create a machine identity and seal its credentials.
