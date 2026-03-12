@@ -13,9 +13,9 @@ helmCharts:
 
 resources:
   - 00-namespaces.yaml
-  - 01-clusterissuer.yaml
   - 02-postgres-cluster.yaml
   - 03-db-credentials.yaml
   - 04-ingress.yaml
   - 05-redis.yaml
   - 06-infisical-secrets-sealed.yaml
+  - 08-infisical-auth-secret.yaml
