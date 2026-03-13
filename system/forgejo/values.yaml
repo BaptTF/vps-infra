@@ -33,9 +33,9 @@ gitea:
     
   config:
     server:
-      DOMAIN: git.example.com
+      DOMAIN: git.192.168.122.133.nip.io
       ROOT_URL: "https://git.192.168.122.133.nip.io/"
-      SSH_DOMAIN: git.example.com
+      SSH_DOMAIN: git.192.168.122.133.nip.io
       SSH_PORT: 22
       SSH_LISTEN_PORT: 22
     database:
