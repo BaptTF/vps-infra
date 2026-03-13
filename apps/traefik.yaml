@@ -7,13 +7,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://helm.traefik.io/traefik
-    targetRevision: 32.1.1
-    chart: traefik
-    helm:
-      valueFiles:
-        - system/traefik/values.yaml
+  sources:
+    - repoURL: https://helm.traefik.io/traefik
+      targetRevision: 32.1.1
+      chart: traefik
+      helm:
+        valueFiles:
+          - $values/system/traefik/values.yaml
+    - repoURL: https://github.com/BaptTF/vps-infra.git
+      targetRevision: main                         
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
