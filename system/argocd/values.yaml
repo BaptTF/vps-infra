@@ -2,6 +2,6 @@
 configs:
   cm:
     # This keeps your Kustomize Helm support enabled for OTHER apps
-    helm.enabled: "true"
+    kustomize.buildOptions: --enable-helm
   params:
       server.insecure: true
