@@ -2,7 +2,7 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
   name: forgejo-db
-  namespace: postgres
+  namespace: cnpg-system
 spec:
   name: forgejo
   owner: forgejo
