@@ -41,6 +41,6 @@ gitea:
     database:
       DB_TYPE: postgres
       # Point across namespaces to the shared cluster's Read/Write service
-      HOST: shared-db-rw.database.svc.cluster.local:5432
+      HOST: postgres-cluster-rw.cnpg-system.svc.cluster.local:5432
       NAME: forgejo
       USER: forgejo
