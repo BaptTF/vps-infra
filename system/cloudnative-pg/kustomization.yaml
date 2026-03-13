@@ -12,3 +12,4 @@ helmCharts:
 resources:
   - cluster.yaml
   - databases.yaml
+  - database-infisical-secrets.yaml
