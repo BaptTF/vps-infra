@@ -6,9 +6,9 @@ spec:
   instances: 1
   storage:
     size: 2Gi
-    managed:
-      roles:
-        - name: forgejo
-          login: true
-          passwordSecret:
-            name: forgejo-db-secret
+  managed:
+    roles:
+      - name: forgejo
+        login: true
+        passwordSecret:
+          name: forgejo-db-secret
