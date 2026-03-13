@@ -12,30 +12,8 @@ spec:
     targetRevision: 32.1.1
     chart: traefik
     helm:
-      values: |
-        ingressClass:
-          enabled: true
-          isDefaultClass: true
-        
-        providers:
-          kubernetesCRD:
-            enabled: true
-          kubernetesIngress:
-            enabled: true
-            publishedService:
-              enabled: true
-        
-        ports:
-          web:
-            redirectTo:
-              port: websecure
-          websecure:
-            tls:
-              enabled: true
-        
-        ingressRoute:
-          dashboard:
-            enabled: true
+      valueFiles:
+        - system/traefik/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
