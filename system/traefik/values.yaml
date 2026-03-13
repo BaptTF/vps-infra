@@ -21,6 +21,12 @@ ports:
     expose:
       default: true
     exposedPort: 443
+  ssh:
+    port: 22
+    expose:
+      default: true
+    exposedPort: 22
+    protocol: TCP
 
 # Enable OpenTelemetry tracing
 tracing:
