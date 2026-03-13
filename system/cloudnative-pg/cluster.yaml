@@ -8,7 +8,10 @@ spec:
     size: 2Gi
   managed:
     roles:
-      - name: forgejo
+      - connectionLimit: -1	
+        ensure: present	
+        inherit: true
+        name: forgejo
         login: true
         passwordSecret:
           name: forgejo-db-secret
