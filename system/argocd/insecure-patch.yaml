@@ -1,8 +1,0 @@
-# system/argocd/insecure-patch.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: argocd-cmd-params-cm
-data:
-  server.insecure: "true"
-  kustomize.buildOptions: "--enable-helm"

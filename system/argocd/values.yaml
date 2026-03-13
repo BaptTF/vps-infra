@@ -1,0 +1,7 @@
+# system/argocd/values.yaml
+configs:
+  cm:
+    # This keeps your Kustomize Helm support enabled for OTHER apps
+    kustomize.buildOptions: "--enable-helm"
+  params:
+      server.insecure: true
