@@ -6,13 +6,11 @@ metadata:
 spec:
   project: system
   source:
-    repoURL: https://cloudnative-pg.github.io/charts
-    chart: cloudnative-pg
-    targetRevision: 0.27.0
-    helm:
-      releaseName: cnpg
+    repoURL: 'https://github.com/BaptTF/vps-infra.git'
+    targetRevision: HEAD
+    path: system/cloudnative-pg
   destination:
-    server: https://kubernetes.default.svc
+    server: 'https://kubernetes.default.svc'
     namespace: cnpg-system
   syncPolicy:
     automated:
