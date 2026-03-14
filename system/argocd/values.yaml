@@ -1,4 +1,20 @@
 # system/argocd/values.yaml
+# Désactiver la Haute Disponibilité (comme le install.yaml)
+redis-ha:
+  enabled: false
+
+# Forcer l'utilisation du Redis standard
+redis:
+  enabled: true
+
+# S'assurer que les composants annexes standards sont activés
+dex:
+  enabled: true
+applicationSet:
+  enabled: true
+notifications:
+  enabled: true
+ 
 configs:
   cm:
     # This keeps your Kustomize Helm support enabled for OTHER apps
