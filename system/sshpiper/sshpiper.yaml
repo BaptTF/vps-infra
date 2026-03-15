@@ -43,6 +43,7 @@ spec:
             - "--log-level=trace"
             - /sshpiperd/plugins/yaml
             - "--config=/etc/sshpiper/rules.yaml"
+            - "--no-check-perm"
           volumeMounts:
             - name: config-volume
               mountPath: /etc/sshpiper
