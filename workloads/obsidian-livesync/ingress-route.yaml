@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: obsidian-livesync
+  namespace: couchdb
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`obsidian-livesync.bapttf.com`)
+      kind: Rule
+      services:
+        # Matches the fullnameOverride service name
+        - name: couchdb
+          port: 5984
+  tls: {}

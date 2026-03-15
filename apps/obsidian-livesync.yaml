@@ -11,8 +11,10 @@ spec:
     path: workloads/obsidian-livesync
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: default
+    namespace: couchdb
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+  syncOptions:
+      - CreateNamespace=true
