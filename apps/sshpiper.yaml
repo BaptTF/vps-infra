@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: sshpiper-system
-  namespace: sshpiper
+  namespace: argocd
 spec:
   project: system
   source:
@@ -11,7 +11,7 @@ spec:
     path: system/sshpiper
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: infisical
+    namespace: sshpiper
   syncPolicy:
     automated:
       prune: true
