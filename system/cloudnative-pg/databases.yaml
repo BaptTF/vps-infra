@@ -19,3 +19,14 @@ spec:
   owner: jujudb
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lacoope-db
+  namespace: cnpg-system
+spec:
+  name: lacoope
+  owner: lacoope
+  cluster:
+    name: postgres-cluster

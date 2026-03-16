@@ -23,3 +23,10 @@ spec:
         login: true
         passwordSecret:
           name: jujudb-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: lacoope
+        login: true
+        passwordSecret:
+          name: lacoope-db-secret

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# On peut définir des labels communs qui s'appliqueront à toutes les ressources de cette app
+commonLabels:
+  app.kubernetes.io/part-of: lacoope
+
+resources:
+  - infisical-secret.yaml
+  - backend.yaml
+  - frontend.yaml

@@ -1,21 +1,8 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: lacoope-backend
-  namespace: default
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    app: lacoope-backend
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lacoope-backend
-  namespace: default
+  namespace: lacoope
 spec:
   replicas: 1
   selector:
@@ -27,63 +14,78 @@ spec:
         app: lacoope-backend
     spec:
       containers:
-      - name: backend
-        image: git.bapttf.com/bapttf/lacoopebackend:latest
-        ports:
-        - containerPort: 8080
-          name: http
-        env:
-        - name: ECHO_ENV
-          value: "production"
-        - name: DB_HOST
-          value: "postgres"
-        - name: DB_PORT
-          value: "5432"
-        - name: POSTGRES_DB
-          value: "lacoope"
-        - name: SERVER_PORT
-          value: "8080"
-        - name: FRONTEND_URL
-          value: "https://lacoope.bapttf.com"
-        - name: GARAGE_ENDPOINT
-          value: "http://garage:3900"
-        - name: GARAGE_REGION
-          value: "garage"
-        envFrom:
-        - secretRef:
-            name: lacoope-backend-secrets
-        livenessProbe:
-          httpGet:
-            path: /v1/health
-            port: 8080
-          initialDelaySeconds: 40
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /v1/health
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: backend
+          image: git.bapttf.com/bapttf/lacoopebackend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: lacoope-backend-secret
+          env:
+            - name: ECHO_ENV
+              value: "production"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: FRONTEND_URL
+              value: "https://lacoope.192.168.122.133.nip.io"
+            - name: DB_HOST
+              value: "postgres-cluster-rw.cnpg-system.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "lacoope"
+            - name: POSTGRES_USER
+              value: "lacoope"
+            - name: IMAGE_MAX_WIDTH
+              value: "1920"
+            - name: IMAGE_MAX_HEIGHT
+              value: "1080"
+            - name: IMAGE_JPEG_QUALITY
+              value: "75"
+            - name: IMAGE_MAX_SIZE
+              value: "10485760"
+            - name: GARAGE_ENDPOINT
+              value: "http://minio.minio.svc.cluster.local:9000"
+            - name: GARAGE_BUCKET
+              value: "lacoope-images" 
+            - name: GARAGE_REGION
+              value: "us-east-1"
+            - name: GARAGE_WEB_ENDPOINT
+              value: "https://s3.192.168.122.133.nip.io/lacoope-images"
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lacoope-backend
+  namespace: lacoope
+spec:
+  selector:
+    app: lacoope-backend
+  ports:
+    - port: 8080
+      targetPort: 8080
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: lacoope-api
-  namespace: default
+  name: lacoope-api-ingress
+  namespace: lacoope
 spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`lacoope-api.bapttf.com`)
-    kind: Rule
-    services:
-    - name: lacoope-backend
-      port: 8080
+    - match: Host(`lacoope-api.192.168.122.133.nip.io`)
+      kind: Rule
+      services:
+        - name: lacoope-backend
+          port: 8080
   tls: {}

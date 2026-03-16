@@ -11,8 +11,10 @@ spec:
     path: workloads/lacoope
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: default
+    namespace: lacoope
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
