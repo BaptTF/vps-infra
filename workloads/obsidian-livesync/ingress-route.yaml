@@ -11,6 +11,6 @@ spec:
       kind: Rule
       services:
         # Matches the fullnameOverride service name
-        - name: couchdb-couchdb
+        - name: couchdb-svc-couchdb
           port: 5984
   tls: {}
