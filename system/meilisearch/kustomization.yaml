@@ -10,7 +10,7 @@ resources:
 helmCharts:
   - name: meilisearch
     repo: https://meilisearch.github.io/meilisearch-kubernetes
-    version: 0.8.2 # Check for the latest chart version
+    version: 0.27.0 # Check for the latest chart version
     releaseName: meilisearch
     namespace: meilisearch
     valuesFile: values.yaml
