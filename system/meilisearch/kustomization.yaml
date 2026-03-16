@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: meilisearch
+
+# 1. Include your custom resources
+resources:
+  - infisical-secret.yaml
+
+# 2. Render the official Helm chart
+helmCharts:
+  - name: meilisearch
+    repo: https://meilisearch.github.io/meilisearch-kubernetes
+    version: 0.8.2 # Check for the latest chart version
+    releaseName: meilisearch
+    namespace: meilisearch
+    valuesFile: values.yaml
+
+# 3. Patch the Helm output to inject the Infisical Secret
+patches:
+  - path: patch-env.yaml

@@ -1,0 +1,21 @@
+image:
+  repository: getmeili/meilisearch
+  tag: v1.6 # Matching your old setup
+
+# Replaces your docker-compose volume
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: "local-path" # Native to k3s
+
+service:
+  type: ClusterIP
+  port: 7700
+
+# We leave this blank so it defaults to pulling from the environment variables
+# which we will inject via our Kustomize patch.
+auth:
+  masterKey: ""
+
+# The Helm chart automatically includes Liveness and Readiness probes, 
+# replacing your docker-compose healthcheck.
