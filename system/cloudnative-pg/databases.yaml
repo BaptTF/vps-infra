@@ -8,14 +8,3 @@ spec:
   owner: forgejo
   cluster:
     name: postgres-cluster
----
-apiVersion: postgresql.cnpg.io/v1
-kind: Database
-metadata:
-  name: jujudb-db
-  namespace: cnpg-system
-spec:
-  name: jujudb
-  owner: jujudb
-  cluster:
-    name: postgres-cluster
