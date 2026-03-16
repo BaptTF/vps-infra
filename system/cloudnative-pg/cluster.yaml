@@ -19,7 +19,7 @@ spec:
       - connectionLimit: -1
         ensure: present
         inherit: true
-        name: jujud
+        name: jujudb
         login: true
         passwordSecret:
           name: jujudb-db-secret
