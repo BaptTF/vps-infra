@@ -14,12 +14,6 @@ configMapGenerator:
     files:
       - config.yaml=litellm_config.yaml
 
-# Generates a Secret from an .env file
-secretGenerator:
-  - name: openclaw-env
-    envs:
-      - .env.example # In production, see the "A Note on Secrets" section below
-
 # Uses Kustomize's Helm integration
 helmCharts:
   - name: litellm
