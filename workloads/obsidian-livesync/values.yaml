@@ -1,5 +1,6 @@
 fullnameOverride: "couchdb"
 
+clusterSize: 1
 # We set this to false because we are providing the secret via Infisical
 createAdminSecret: false
 
