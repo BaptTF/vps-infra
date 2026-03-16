@@ -1,0 +1,34 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: minio-s3-api
+  namespace: minio
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Matches your exact Garage compose regex
+    - match: HostRegexp(`^.+\.garage\.192.168.122.133\.nip\.io$`)
+      kind: Rule
+      services:
+        - name: minio
+          port: 9000
+  tls:
+    certResolver: letencrypt
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: minio-webui
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Reusing your UI domain
+    - match: Host(`minio-ui.192.168.122.133.nip.io`)
+      kind: Rule
+      services:
+        - name: minio-console
+          port: 9001
+  tls:
+    certResolver: letencrypt

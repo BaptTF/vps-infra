@@ -1,0 +1,32 @@
+mode: standalone
+replicas: 1
+
+resources:
+  requests:
+    memory: 512Mi
+
+persistence:
+  enabled: true
+  size: 20Gi
+  accessMode: ReadWriteOnce
+
+# 1. Point the Root login to the Infisical secret
+# MinIO automatically looks for the keys "rootUser" and "rootPassword" inside this secret
+existingSecret: "minio-credentials"
+
+buckets:
+  - name: "lacoope-images"
+    policy: "public"
+    purge: false
+
+users:
+  - accessKey: "backend-app"
+    # 2. Tell the user to pull its secretKey from the Infisical secret
+    existingSecret: "minio-credentials"
+    existingSecretKey: "backendAppSecret"
+    policy: "readwrite"
+
+ingress:
+  enabled: false
+consoleIngress:
+  enabled: false
