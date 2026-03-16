@@ -1,4 +1,4 @@
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: minio-s3-api
@@ -13,10 +13,9 @@ spec:
       services:
         - name: minio
           port: 9000
-  tls:
-    certResolver: letencrypt
+  tls: {}
 ---
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: minio-webui
@@ -30,5 +29,4 @@ spec:
       services:
         - name: minio-console
           port: 9001
-  tls:
-    certResolver: letencrypt
+  tls: {}
