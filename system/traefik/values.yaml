@@ -33,7 +33,7 @@ tracing:
   otlp:
     grpc:
       enabled: true
-      endpoint: "otel-collector.monitoring.svc:4317"
+      endpoint: "tempo.monitoring.svc.cluster.local:4317"
     http:
       enabled: false
 
@@ -73,7 +73,11 @@ logs:
 metrics:
   prometheus:
     enabled: true
-    entryPoint: metrics
+    addRoutersLabels: true
+    addEntryPointsLabels: true
+    addServicesLabels: true
+  serviceMonitor:
+    enabled: true
 
 # Security
 security:

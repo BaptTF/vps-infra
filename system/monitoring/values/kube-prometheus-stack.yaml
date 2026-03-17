@@ -1,0 +1,32 @@
+# Disable components K3s doesn't expose standardly to avoid dead targets
+kubeControllerManager:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+
+grafana:
+  enabled: true
+  # Link the Infisical secret here!
+  admin:
+    existingSecret: "grafana-auth"
+    userKey: "admin-user"
+    passwordKey: "admin-password"
+  
+  # Automatically provision data sources for Logs and Traces
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki:3100
+      access: proxy
+    - name: Tempo
+      type: tempo
+      url: http://tempo:3100
+      access: proxy
+
+prometheus:
+  prometheusSpec:
+    # Tell Prometheus to automatically pick up ServiceMonitors (like Traefik's)
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
