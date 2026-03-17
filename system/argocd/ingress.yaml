@@ -8,8 +8,10 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`argocd.192.168.122.133.nip.io`)
+  - match: Host(`argocd.bapttf.com`)
     kind: Rule
     services:
     - name: argocd-server
       port: 80
+  tls:
+    secretName: tls-certificate
