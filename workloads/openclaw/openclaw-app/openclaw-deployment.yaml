@@ -19,6 +19,13 @@ spec:
       containers:
         - name: openclaw
           image: ghcr.io/bapttf/openclaw-lea-config:latest
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"         
+              memory: "1Gi"
           ports:
             - containerPort: 22
               name: ssh
