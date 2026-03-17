@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-  - infisical-secrets.yaml
+  - infisical-secret.yaml
 
 helmCharts:
   - name: kube-prometheus-stack
