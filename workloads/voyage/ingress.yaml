@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`voyage.192.168.122.133.nip.io`)
+    - match: Host(`voyage.bapttf.com`)
       kind: Rule
       services:
         - name: voyage

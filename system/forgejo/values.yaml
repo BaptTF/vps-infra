@@ -2,7 +2,7 @@ ingress:
   enabled: true
   className: traefik
   hosts:
-    - host: git.192.168.122.133.nip.io
+    - host: git.bapttf.com
       paths:
         - path: /
           pathType: Prefix
@@ -29,9 +29,9 @@ gitea:
         secretName: forgejo-db-secret
   config:
     server:
-      DOMAIN: git.192.168.122.133.nip.io
-      ROOT_URL: "http://git.192.168.122.133.nip.io/"
-      SSH_DOMAIN: git.192.168.122.133.nip.io
+      DOMAIN: git.bapttf.com
+      ROOT_URL: "http://git.bapttf.com/"
+      SSH_DOMAIN: git.bapttf.com
       SSH_PORT: 22
       SSH_LISTEN_PORT: 22
     repository:

@@ -28,7 +28,7 @@ spec:
             - name: SERVER_PORT
               value: "8080"
             - name: FRONTEND_URL
-              value: "https://lacoope.192.168.122.133.nip.io"
+              value: "https://lacoope.bapttf.com"
             - name: DB_HOST
               value: "postgres-cluster-rw.cnpg-system.svc.cluster.local"
             - name: DB_PORT
@@ -52,7 +52,7 @@ spec:
             - name: GARAGE_REGION
               value: "us-east-1"
             - name: GARAGE_WEB_ENDPOINT
-              value: "https://s3.192.168.122.133.nip.io/lacoope-images"
+              value: "https://s3.bapttf.com/lacoope-images"
           livenessProbe:
             httpGet:
               path: /v1/health
@@ -83,7 +83,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`lacoope-api.192.168.122.133.nip.io`)
+    - match: Host(`lacoope-api.bapttf.com`)
       kind: Rule
       services:
         - name: lacoope-backend

@@ -23,7 +23,7 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: PUBLIC_API_BASE_URL
-              value: "https://lacoope-api.192.168.122.133.nip.io/v1"
+              value: "https://lacoope-api.bapttf.com/v1"
           livenessProbe:
             httpGet:
               path: /health
@@ -54,7 +54,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`lacoope.192.168.122.133.nip.io`)
+    - match: Host(`lacoope.bapttf.com`)
       kind: Rule
       services:
         - name: lacoope-frontend

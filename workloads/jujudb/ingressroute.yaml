@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`jujudb.192.168.122.133.nip.io`)
+    - match: Host(`jujudb.bapttf.com`)
       kind: Rule
       services:
         - name: jujudb

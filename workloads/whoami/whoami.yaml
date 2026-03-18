@@ -41,7 +41,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`whoami.192.168.122.133.nip.io`)
+  - match: Host(`whoami.bapttf.com`)
     kind: Rule
     services:
     - name: whoami

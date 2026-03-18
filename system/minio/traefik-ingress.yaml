@@ -8,7 +8,7 @@ spec:
     - websecure
   routes:
     # Matches your exact Garage compose regex
-    - match: Host(`s3.192.168.122.133.nip.io`)
+    - match: Host(`s3.bapttf.com`)
       kind: Rule
       services:
         - name: minio

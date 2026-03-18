@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`couchdb.192.168.122.133.nip.io`)
+    - match: Host(`couchdb.bapttf.com`)
       kind: Rule
       services:
         # Matches the fullnameOverride service name
