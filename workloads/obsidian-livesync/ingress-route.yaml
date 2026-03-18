@@ -7,10 +7,11 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`couchdb.bapttf.com`)
+    - match: Host(`obsidian-livesync.bapttf.com`)
       kind: Rule
       services:
         # Matches the fullnameOverride service name
         - name: couchdb-svc-couchdb
           port: 5984
-  tls: {}
+  tls: 
+     secretName: tls-certificate
