@@ -7,9 +7,9 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-    hosts:
+    - hosts:
       - git.bapttf.com
-    secretName: tls-certificate
+      secretName: tls-certificate
 
 persistence:
   enabled: true
