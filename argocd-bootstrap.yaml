@@ -33802,18 +33802,3 @@ spec:
   tls:
   - hosts:
     - argocd
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: argocd-server-ingress
-  namespace: argocd
-spec:
-  entryPoints:
-  - websecure
-  routes:
-  - kind: Rule
-    match: Host(`argocd.192.168.122.133.nip.io`)
-    services:
-    - name: argocd-server
-      port: 80
