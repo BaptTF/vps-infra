@@ -33,7 +33,7 @@ spec:
         - containerPort: 80
         env:
         - name: DOMAIN
-          value: "https://vault.192.168.122.133.nip.io"
+          value: "https://vault.bapttf.com"
         volumeMounts:
         - name: data
           mountPath: /data
@@ -64,9 +64,10 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`vault.192.168.122.133.nip.io`)
+  - match: Host(`vault.bapttf.com`)
     kind: Rule
     services:
     - name: vaultwarden
       port: 80
-  tls: {}
+  tls:
+    secretName: tls-certificate
