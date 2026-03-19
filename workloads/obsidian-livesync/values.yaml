@@ -15,7 +15,6 @@ couchdbConfig:
   chttpd_auth:
     require_valid_user: "true"
     # Note: 'secret' in ini is 'cookie_auth_secret' in the chart config
-    secret: "59e70ec63773686d33f31cf380f60dd3" 
   cluster:
     n: 1
   httpd:
