@@ -28,7 +28,22 @@ sudo sysctl -p /etc/sysctl.d/99-inotify.conf
 ### Step 1: Install k3s (without Traefik)
 
 ```bash
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh 
+# 1. On récupère l'IP de Tailscale dans une variable
+TS_IP=$(tailscale ip -4)
+
+# 2. On s'assure que le dossier de configuration existe
+sudo mkdir -p /etc/rancher/k3s
+
+# 3. On écrit la configuration avec tee en injectant la variable
+cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml > /dev/null
+bind-address: "$TS_IP"
+node-ip: "$TS_IP"
+advertise-address: "$TS_IP"
+tls-san:
+  - "$TS_IP"
+flannel-iface: "tailscale0"
+EOF
 ```
 
 ### Step 2: Configure kubectl access
