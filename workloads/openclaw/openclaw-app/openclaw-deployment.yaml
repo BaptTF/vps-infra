@@ -25,7 +25,7 @@ spec:
               memory: "512Mi"
             limits:
               cpu: "2000m"         
-              memory: "2Gi"
+              memory: "1.5Gi"
           ports:
             - containerPort: 22
               name: ssh
@@ -40,7 +40,7 @@ spec:
             - name: OPENCLAW_CONFIG_PATH
               value: "/home/node/.openclaw/lea/openclaw.json"
             - name: NODE_OPTIONS
-              value: "--max-old-space-size=1024 --max-semi-space-size=16"
+              value: "--max-old-space-size=1280 --max-semi-space-size=16"
           volumeMounts:
             - name: openclaw-data
               mountPath: /home/node/.openclaw
