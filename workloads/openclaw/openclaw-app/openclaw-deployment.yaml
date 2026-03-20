@@ -48,6 +48,8 @@ spec:
               mountPath: /home/node/.ssh
             - name: openclaw-config
               mountPath: /home/node/.config
+            - name: openclaw-home
+              mountPath: /mnt/home
       securityContext:
         fsGroup: 1000
       volumes:
@@ -60,6 +62,6 @@ spec:
         - name: openclaw-config
           persistentVolumeClaim:
             claimName: openclaw-config-pvc
-        - name: litellm-config-vol
-          configMap:
-            name: litellm-config
+        - name: openclaw-home
+          persistentVolumeClaim:
+            claimName: openclaw-home-pvc
