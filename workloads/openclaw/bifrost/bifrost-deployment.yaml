@@ -1,46 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: litellm
+  name: bifrost
   labels:
-    app: litellm
+    app: bifrost
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: litellm
+      app: bifrost
   template:
     metadata:
       labels:
-        app: litellm
+        app: bifrost
     spec:
       containers:
-        - name: litellm
-          image: ghcr.io/berriai/litellm:main-latest
+        - name: bifrost
+          image: maximhq/bifrost:latest
           resources:
             requests:
               cpu: "100m"
-              memory: "512Mi"
+              memory: "128Mi"
             limits:
               cpu: "1000m"
-              memory: "1Gi"
-          args: 
-            - "--config"
-            - "/app/config.yaml"
-            - "--port"
+              memory: "512Mi"
+          args:
+            - "-app-dir"
+            - "/app/data"
+            - "-port"
             - "4000"
-            - "--num_workers"
-            - "1"
           ports:
             - containerPort: 4000
           envFrom:
             - secretRef:
-                name: litellm-secret
+                name: bifrost-secret
           volumeMounts:
             - name: config-volume
-              mountPath: /app/config.yaml
-              subPath: config.yaml
+              mountPath: /app/data/config.json
+              subPath: config.json
       volumes:
         - name: config-volume
           configMap:
-            name: litellm-config
+            name: bifrost-config

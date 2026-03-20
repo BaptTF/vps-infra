@@ -1,0 +1,33 @@
+{
+  "providers": {
+    "bedrock": {
+      "keys": [
+        {
+          "name": "bedrock-main",
+          "models": [
+            "us.anthropic.claude-sonnet-4-20250514-v1:0",
+            "us.anthropic.claude-sonnet-4-6",
+            "us.anthropic.claude-opus-4-5-20251101-v1:0",
+            "us.anthropic.claude-opus-4-6-v1",
+            "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+            "amazon.titan-embed-text-v2:0"
+          ],
+          "weight": 1.0,
+          "bedrock_key_config": {
+            "access_key": "env.AWS_ACCESS_KEY_ID",
+            "secret_key": "env.AWS_SECRET_ACCESS_KEY",
+            "region": "us-west-2",
+            "deployments": {
+              "claude-sonnet": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+              "claude-sonnet-46": "us.anthropic.claude-sonnet-4-6",
+              "claude-opus": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+              "claude-opus-46": "us.anthropic.claude-opus-4-6-v1",
+              "claude-haiku": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+              "titan-embed-v2": "amazon.titan-embed-text-v2:0"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

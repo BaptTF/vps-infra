@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: litellm
   labels:
-    app: litellm
+    app: bifrost
 spec:
   selector:
-    app: litellm
+    app: bifrost
   ports:
     - protocol: TCP
       port: 4000

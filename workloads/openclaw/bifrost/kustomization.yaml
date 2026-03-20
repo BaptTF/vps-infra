@@ -3,10 +3,10 @@ kind: Kustomization
 
 resources:
   - infisical-secret.yaml
-  - litellm-deployment.yaml
-  - litellm-service.yaml
+  - bifrost-deployment.yaml
+  - bifrost-service.yaml
 
 configMapGenerator:
-  - name: litellm-config
+  - name: bifrost-config
     files:
-      - config.yaml=litellm_config.yaml
+      - config.json=bifrost_config.json

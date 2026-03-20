@@ -4,4 +4,4 @@ namespace: openclaw
 
 resources:
   - openclaw-app/
-  - litellm
+  - bifrost
