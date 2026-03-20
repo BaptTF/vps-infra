@@ -6,3 +6,5 @@ resources:
   - openclaw-pvc.yaml
   - openclaw-deployment.yaml
   - openclaw-service.yaml
+  - certificate.yaml
+  - openclaw-ingress.yaml
