@@ -26,3 +26,8 @@ configs:
     reposerver.parallelism.limit: "5"
   secret:
     githubSecret: "$argocd-webhook-secret:webhook-token"
+
+repoServer:
+  env:
+    - name: ARGOCD_EXEC_TIMEOUT
+      value: "5m"
