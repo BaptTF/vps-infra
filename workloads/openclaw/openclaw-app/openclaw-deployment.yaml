@@ -39,9 +39,8 @@ spec:
               value: "22"
             - name: OPENCLAW_CONFIG_PATH
               value: "/home/node/.openclaw/lea/openclaw.json"
-            # Point to the Litellm service created by the Helm chart
-            - name: LITELLM_URL 
-              value: "http://litellm.openclaw.svc.cluster.local:4000" 
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1024 --optimize-for-size --max-semi-space-size=16"
           volumeMounts:
             - name: openclaw-data
               mountPath: /home/node/.openclaw
