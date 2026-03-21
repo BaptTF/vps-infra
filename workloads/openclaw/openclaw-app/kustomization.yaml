@@ -8,3 +8,4 @@ resources:
   - openclaw-service.yaml
   - certificate.yaml
   - openclaw-ingress.yaml
+  - egress-tailscale.yaml
