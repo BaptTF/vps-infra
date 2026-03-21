@@ -26,6 +26,7 @@ configs:
     reposerver.parallelism.limit: "5"
     server.repo.server.timeout.seconds: "300"
     controller.repo.server.timeout.seconds: "300"
+    server.webhook.github.secret: "$argocd-webhook-secret:webhook-token"
 
 repoServer:
   env:
