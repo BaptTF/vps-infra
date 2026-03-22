@@ -32,8 +32,8 @@ spec:
           ports:
             - containerPort: 22
               name: ssh
-            - containerPort: 18789
-              name: gateway
+            # - containerPort: 18789
+            #   name: gateway
           # livenessProbe:
           #   httpGet:
           #     path: /health
