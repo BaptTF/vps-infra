@@ -20,13 +20,13 @@ configs:
     # This keeps your Kustomize Helm support enabled for OTHER apps
     kustomize.buildOptions: --enable-helm
     timeout.reconciliation: "600s"
+    webhook.github.secret: "$argocd-webhook-secret:webhook-token"
   params:
     server.insecure: true
     reposerver.git.shallow.clone: "true"
     reposerver.parallelism.limit: "5"
     server.repo.server.timeout.seconds: "300"
     controller.repo.server.timeout.seconds: "300"
-    server.webhook.github.secret: "$argocd-webhook-secret:webhook-token"
 
 repoServer:
   env:
