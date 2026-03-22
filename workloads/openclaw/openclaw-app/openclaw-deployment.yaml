@@ -10,7 +10,10 @@ spec:
     matchLabels:
       app: openclaw
   strategy:
-    type: Recreate # Required if using ReadWriteOnce PVCs across node changes
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # spin up new pod before killing old one
+      maxUnavailable: 0   # old pod stays up until new pod is Ready
   template:
     metadata:
       labels:
