@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: openclaw-ssh
 spec:
+  publishNotReadyAddresses: true
   selector:
     app: openclaw
   ports:
