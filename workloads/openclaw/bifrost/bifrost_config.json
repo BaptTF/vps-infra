@@ -3,7 +3,9 @@
     "bedrock": {
       "keys": [
         {
-          "name": "bedrock-key-1",
+          "bedrock_key_config": {
+            "region": "us-west-2"
+          },
           "models": [
             "us.anthropic.claude-sonnet-4-20250514-v1:0",
             "us.anthropic.claude-sonnet-4-6",
@@ -12,10 +14,8 @@
             "us.anthropic.claude-3-5-haiku-20241022-v1:0",
             "amazon.titan-embed-text-v2:0"
           ],
-          "weight": 1.0,
-          "bedrock_key_config": {
-            "region": "us-west-2"
-          }
+          "name": "bedrock-key-1",
+          "weight": 1.0
         }
       ],
       "network_config": {
@@ -23,6 +23,53 @@
         "max_retries": 3,
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
+      }
+    },
+    "gemini": {
+      "keys": [
+        {
+          "name": "google-ai-studio-key",
+          "value": "env.GOOGLE_API_KEY",
+          "models": [
+            "gemini-2.5-pro",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "default_request_timeout_in_seconds": 300,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    },
+    "xai": {
+      "keys": [
+        {
+          "name": "xai-api-key",
+          "value": "env.XAI_API_KEY",
+          "models": [
+            "grok-4-1-fast-non-reasoning",
+            "grok-4-1-fast-reasoning"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://api.x.ai",
+        "default_request_timeout_in_seconds": 300,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "chat_completion": true,
+          "chat_completion_stream": true
+        }
       }
     }
   }
