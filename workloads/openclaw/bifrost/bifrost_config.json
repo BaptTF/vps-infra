@@ -37,7 +37,7 @@
         }
       ],
       "network_config": {
-        "base_url": "https://llm.chutes.ai/v1"
+        "base_url": "https://llm.chutes.ai"
       }
     }
   }
