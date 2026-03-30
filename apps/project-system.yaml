@@ -3,6 +3,8 @@ kind: AppProject
 metadata:
   name: system
   namespace: argocd
+  annotations:
+      argocd.argoproj.io/manifest-generate-paths: .
 spec:
   description: System applications (monitoring, security, etc.)
   destinations:
