@@ -24,6 +24,21 @@
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
       }
+    },
+    "openai": {
+      "keys": [
+        {
+          "name": "chutes-api-key",
+          "value": "env.CHUTES_API_TOKEN",
+          "models": [
+            "MiniMaxAI/MiniMax-M2.5-TEE"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://llm.chutes.ai/v1"
+      }
     }
   }
 }
