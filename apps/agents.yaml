@@ -13,7 +13,7 @@ spec:
     path: workloads/agents
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: agents
+    namespace: openclaw
   syncPolicy:
     automated:
       prune: true
@@ -24,6 +24,6 @@ spec:
     - group: ""
       kind: Service
       name: nas-proxy
-      namespace: agents
+      namespace: openclaw
       jsonPointers:
       - /spec/externalName
