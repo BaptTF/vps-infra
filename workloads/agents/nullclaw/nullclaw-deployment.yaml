@@ -28,12 +28,6 @@ spec:
             - containerPort: 3000
               name: http
               protocol: TCP
-          env:
-            - name: TELEGRAM_BOT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: nullclaw-secrets
-                  key: telegram-bot-token
           volumeMounts:
             - name: config
               mountPath: /nullclaw-data/config.json
