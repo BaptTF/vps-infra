@@ -5,6 +5,8 @@ metadata:
   namespace: default
   labels:
     app: nullclaw
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   strategy:
