@@ -4,6 +4,8 @@ metadata:
   name: openclaw
   labels:
     app: openclaw
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   selector:

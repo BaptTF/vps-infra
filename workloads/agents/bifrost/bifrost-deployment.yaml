@@ -3,7 +3,9 @@ kind: Deployment
 metadata:
   name: bifrost
   labels:
-    app: bifrost
+    app: bifrost  
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   selector:

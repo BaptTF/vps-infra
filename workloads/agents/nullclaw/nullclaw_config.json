@@ -18,8 +18,8 @@
     {
       "hint": "fast",
       "provider": "bifrost",
-      "model": "gemini/gemini-flash-latest",
-      "cost_class": "cheap"
+      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "cost_class": "free"
     },
     {
       "hint": "balanced",
@@ -30,14 +30,14 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "gemini/gemini-pro-latest",
+      "model": "openai/zai-org/GLM-5-TEE",
       "cost_class": "standard"
     },
     {
       "hint": "vision",
       "provider": "bifrost",
-      "model": "gemini/gemini-flash-latest",
-      "cost_class": "cheap"
+      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "cost_class": "free"
     }
   ],
   "channels": {
