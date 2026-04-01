@@ -23,11 +23,9 @@ spec:
       initContainers:
         - name: init-config
           image: busybox:1.36
-          command: 
-            - /bin/sh
-            - -c
-            - |
-              envsubst < /config-template/config.json > /config/config.json
+          command: ["/bin/sh", "-c"]
+          args:
+            - sed 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' /config-template/config.json > /config/config.json
           env:
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
