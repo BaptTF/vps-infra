@@ -4,14 +4,7 @@
       "keys": [
         {
           "name": "bedrock-key-1",
-          "models": [
-            "us.anthropic.claude-sonnet-4-20250514-v1:0",
-            "us.anthropic.claude-sonnet-4-6",
-            "us.anthropic.claude-opus-4-5-20251101-v1:0",
-            "us.anthropic.claude-opus-4-6-v1",
-            "us.anthropic.claude-3-5-haiku-20241022-v1:0",
-            "amazon.titan-embed-text-v2:0"
-          ],
+          "models": ["*"],
           "weight": 1.0,
           "bedrock_key_config": {
             "region": "us-west-2"
@@ -39,7 +32,27 @@
         }
       ],
       "network_config": {
-        "base_url": "https://llm.chutes.ai"
+        "base_url": "https://llm.chutes.ai",
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    } 
+    "gemini": {
+      "keys": [
+        {
+          "name": "gemini-key-1",
+          "value": "env.GOOGLE_API_KEY",
+          "models": ["*"],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
       }
     }
   }
