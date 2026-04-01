@@ -18,7 +18,7 @@
     {
       "hint": "fast",
       "provider": "bifrost",
-      "model": "deepseek-ai/DeepSeek-V3.2-TEE",
+      "model": "gemini/gemini-flash-latest",
       "cost_class": "cheap"
     },
     {
@@ -30,13 +30,13 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "openai/zai-org/GLM-5-TEE",
+      "model": "gemini/gemini-pro-latest",
       "cost_class": "standard"
     },
     {
       "hint": "vision",
       "provider": "bifrost",
-      "model": "openai/MiniMaxAI/MiniMax-M2.5-TEE",
+      "model": "gemini/gemini-flash-latest",
       "cost_class": "cheap"
     }
   ],
