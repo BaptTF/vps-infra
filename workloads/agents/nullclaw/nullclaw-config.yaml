@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nullclaw-config
+  namespace: openclaw
+data:
+  config.json: |
+    {
+      "models": {
+        "providers": {
+          "chutes": {
+            "base_url": "http://bifrost.openclaw.svc.cluster.local:8080/v1",
+            "api_key": "dummy"
+          },
+          "bedrock": {
+            "base_url": "http://bifrost.openclaw.svc.cluster.local:8080/v1"
+          }
+        }
+      },
+      "agents": {
+        "defaults": {
+          "model": {
+            "primary": "chutes/openai/MiniMaxAI/MiniMax-M2.5-TEE"
+          }
+        }
+      },
+      "model_routes": [
+        {
+          "hint": "balanced",
+          "provider": "chutes",
+          "model": "openai/MiniMaxAI/MiniMax-M2.5-TEE",
+          "cost_class": "cheap"
+        }
+      ],
+      "channels": {
+        "telegram": {
+          "accounts": {
+            "main": {
+              "bot_token": "${TELEGRAM_BOT_TOKEN}",
+              "allow_from": ["974020023", "8348834293"],
+              "require_mention": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "backend": "hybrid",
+        "auto_save": true,
+        "embedding_provider": "bedrock",
+        "embedding_model": "amazon.titan-embed-text-v2:0",
+        "vector_weight": 0.7,
+        "keyword_weight": 0.3,
+        "hygiene_enabled": true,
+        "snapshot_enabled": false
+      },
+      "gateway": {
+        "host": "0.0.0.0",
+        "port": 3000,
+        "require_pairing": false
+      },
+      "autonomy": {
+        "level": "full",
+        "workspace_only": true,
+        "max_actions_per_hour": "unlimited",
+        "allowed_commands": ["*"],
+        "allowed_paths": ["*"],
+        "require_approval_for_medium_risk": true,
+        "block_high_risk_commands": false
+      },
+      "http_request": {
+        "enabled": true,
+        "search_provider": "auto",
+        "search_fallback_providers": ["jina", "duckduckgo"]
+      },
+      "reliability": {
+        "provider_retries": 2,
+        "provider_backoff_ms": 500
+      },
+      "security": {
+        "sandbox": {
+          "backend": "auto"
+        },
+        "audit": {
+          "enabled": true
+        },
+        "diagnostics": {
+          "api_error_max_chars": 2000
+        }
+      }
+    }

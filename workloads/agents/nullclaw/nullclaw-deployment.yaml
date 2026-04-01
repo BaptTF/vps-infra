@@ -2,11 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nullclaw
-  namespace: default
+  namespace: openclaw
   labels:
     app: nullclaw
-  annotations:
-    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   strategy:
@@ -22,6 +20,25 @@ spec:
       labels:
         app: nullclaw
     spec:
+      initContainers:
+        - name: init-config
+          image: busybox:1.36
+          command: 
+            - /bin/sh
+            - -c
+            - |
+              envsubst < /config-template/config.json > /config/config.json
+          env:
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-secret
+                  key: TELEGRAM_BOT_TOKEN
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: config
+              mountPath: /config
       containers:
         - name: nullclaw
           image: ghcr.io/nullclaw/nullclaw:latest
@@ -68,12 +85,11 @@ spec:
               memory: "256Mi"
               cpu: "500m"
       volumes:
+        - name: config-template
+          configMap:
+            name: nullclaw-config
         - name: config
-          secret:
-            secretName: nullclaw-secret
-            items:
-              - key: NULLCLAW_CONFIG
-                path: config.json
+          emptyDir: {}
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-data

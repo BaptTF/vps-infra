@@ -5,3 +5,4 @@ resources:
   - infisical-secret.yaml
   - nullclaw-pvc.yaml
   - nullclaw-deployment.yaml
+  - nullclaw-config.yaml
