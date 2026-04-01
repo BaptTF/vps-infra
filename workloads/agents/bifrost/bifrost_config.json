@@ -38,7 +38,7 @@
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
       }
-    } 
+    }, 
     "gemini": {
       "keys": [
         {
