@@ -54,7 +54,7 @@
           "models": [
             "gemini-3.1-pro-preview",
             "gemini-pro-latest",
-            "gemini-flash-latest",
+            "gemini-flash-latest"
           ],
           "weight": 1.0
         }
