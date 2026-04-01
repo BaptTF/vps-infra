@@ -4,7 +4,14 @@
       "keys": [
         {
           "name": "bedrock-key-1",
-          "models": ["*"],
+          "models": [
+            "us.anthropic.claude-sonnet-4-20250514-v1:0",
+            "us.anthropic.claude-sonnet-4-6",
+            "us.anthropic.claude-opus-4-5-20251101-v1:0",
+            "us.anthropic.claude-opus-4-6-v1",
+            "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+            "amazon.titan-embed-text-v2:0"
+          ],
           "weight": 1.0,
           "bedrock_key_config": {
             "region": "us-west-2"
@@ -44,7 +51,11 @@
         {
           "name": "gemini-key-1",
           "value": "env.GOOGLE_API_KEY",
-          "models": ["*"],
+          "models": [
+            "gemini-3.1-pro-preview",
+            "gemini-pro-latest",
+            "gemini-flash-latest",
+          ],
           "weight": 1.0
         }
       ],
