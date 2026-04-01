@@ -5,4 +5,8 @@ resources:
   - infisical-secret.yaml
   - nullclaw-pvc.yaml
   - nullclaw-deployment.yaml
-  - nullclaw-config.yaml
+
+configMapGenerator:
+  - name: nullclaw-config
+    files:
+      - config.json=nullclaw_config.json
