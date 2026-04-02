@@ -52,73 +52,90 @@
     }
   },
   "memory": {
-    "backend": "hybrid",
+    "backend": "sqlite",
     "auto_save": true,
-    "provider": "bifrost",
-    "model": "bedrock/amazon.titan-embed-text-v2:0",
-    "vector_weight": 0.7,
-    "keyword_weight": 0.3,
-    "hygiene_enabled": true,
-    "snapshot_enabled": false,
-    "chunking": {
-      "max_tokens": 512,
-      "overlap": 64
-    },
-    "sync": {
-      "mode": "best_effort",
-      "embed_timeout_ms": 15000,
-      "vector_timeout_ms": 5000,
-      "embed_max_retries": 2,
-      "vector_max_retries": 2
-    },
-    "query": {
-      "max_results": 6,
-      "min_score": 0.0,
-      "merge_strategy": "rrf",
-      "rrf_k": 60,
-      "hybrid": {
+    "citations": "auto",
+    "search": {
+      "enabled": true,
+      "provider": "bifrost",
+      "model": "bedrock/amazon.titan-embed-text-v2:0",
+      "store": {
+        "kind": "ann"
+      },
+      "query": {
+        "max_results": 6,
+        "min_score": 0.0,
+        "merge_strategy": "rrf",
+        "rrf_k": 60,
+        "hybrid": {
+          "enabled": true,
+          "vector_weight": 0.7,
+          "text_weight": 0.3,
+          "candidate_multiplier": 4,
+          "mmr": { "enabled": true, "lambda": 0.7 },
+          "temporal_decay": { "enabled": true, "half_life_days": 30 }
+        }
+      },
+      "chunking": {
+        "max_tokens": 512,
+        "overlap": 64
+      },
+      "sync": {
+        "mode": "best_effort",
+        "embed_timeout_ms": 15000,
+        "vector_timeout_ms": 5000,
+        "embed_max_retries": 2,
+        "vector_max_retries": 2
+      },
+      "cache": {
         "enabled": true,
-        "vector_weight": 0.7,
-        "text_weight": 0.3,
-        "candidate_multiplier": 4,
-        "mmr": { "enabled": true, "lambda": 0.7 },
-        "temporal_decay": { "enabled": true, "half_life_days": 30 }
+        "max_entries": 10000
       }
     },
-    "cache": {
+    "qmd": {
+      "enabled": false,
+      "command": "qmd",
+      "search_mode": "search",
+      "include_default_memory": true
+    },
+    "lifecycle": {
+      "hygiene_enabled": true,
+      "archive_after_days": 7,
+      "purge_after_days": 30,
+      "preserve_before_purge": true,
+      "conversation_retention_days": 30,
+      "snapshot_enabled": false,
+      "snapshot_on_hygiene": false,
+      "auto_hydrate": true
+    },
+    "response_cache": {
       "enabled": true,
-      "max_entries": 10000
+      "ttl_minutes": 60,
+      "max_entries": 5000
+    },
+    "summarizer": {
+      "enabled": true,
+      "window_size_tokens": 4000,
+      "summary_max_tokens": 500,
+      "auto_extract_semantic": true
+    },
+    "retrieval_stages": {
+      "query_expansion_enabled": true,
+      "adaptive_retrieval_enabled": true,
+      "adaptive_keyword_max_tokens": 3,
+      "adaptive_vector_min_tokens": 6,
+      "llm_reranker_enabled": true,
+      "llm_reranker_max_candidates": 10,
+      "llm_reranker_timeout_ms": 5000
+    },
+    "reliability": {
+      "rollout_mode": "off",
+      "circuit_breaker_failures": 5,
+      "circuit_breaker_cooldown_ms": 30000,
+      "shadow_hybrid_percent": 0,
+      "canary_hybrid_percent": 0,
+      "fallback_policy": "degrade"
     }
-  },
-  "qmd": {
-    "enabled": false,
-    "command": "qmd",
-    "search_mode": "search",
-    "include_default_memory": true
-  },
-  "retrieval_stages": {
-    "query_expansion_enabled": true,
-    "adaptive_retrieval_enabled": true,
-    "adaptive_keyword_max_tokens": 3,
-    "adaptive_vector_min_tokens": 6,
-    "llm_reranker_enabled": true,
-    "llm_reranker_max_candidates": 10,
-    "llm_reranker_timeout_ms": 5000
-  },
-  "lifecycle": {
-    "hygiene_enabled": true,
-    "archive_after_days": 7,
-    "purge_after_days": 30,
-    "preserve_before_purge": true,
-    "conversation_retention_days": 30,
-    "snapshot_enabled": false,
-    "snapshot_on_hygiene": false,
-    "auto_hydrate": true
-  },
-  "response_cache": {
-    "enabled": true,
-    "ttl_minutes": 60,
-    "max_entries": 5000
   },
   "gateway": {
     "host": "0.0.0.0",
@@ -146,19 +163,14 @@
   },
   "reliability": {
     "provider_retries": 2,
-    "provider_backoff_ms": 500,
-    "rollout_mode": "off",
-    "circuit_breaker_failures": 5,
-    "circuit_breaker_cooldown_ms": 30000,
-    "shadow_hybrid_percent": 0,
-    "canary_hybrid_percent": 0,
-    "fallback_policy": "degrade"
+    "provider_backoff_ms": 500
   },
-  "summarizer": {
-    "enabled": true,
-    "window_size_tokens": 4000,
-    "summary_max_tokens": 500,
-    "auto_extract_semantic": true
+  "a2a": {
+    "enabled": false,
+    "name": "NullClaw",
+    "description": "AI assistant",
+    "url": "https://agent.example.com",
+    "version": "1.0.0"
   },
   "security": {
     "sandbox": {
