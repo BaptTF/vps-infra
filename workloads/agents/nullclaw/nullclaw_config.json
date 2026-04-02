@@ -145,7 +145,7 @@
   "autonomy": {
     "level": "full",
     "workspace_only": true,
-    "max_actions_per_hour": "unlimited",
+    "max_actions_per_hour": 1000,
     "allowed_commands": ["*"],
     "allowed_paths": ["*"],
     "require_approval_for_medium_risk": false,
