@@ -155,7 +155,7 @@
   "http_request": {
     "enabled": true,
     "max_response_size": 1000000,
-    "timeout_secs": 30,
+    "timeout_secs": 120,
     "allowed_domains": [],
     "search_base_url": null,
     "search_provider": "jina",
