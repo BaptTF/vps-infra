@@ -34,6 +34,11 @@ spec:
                 secretKeyRef:
                   name: nullclaw-secret
                   key: TELEGRAM_BOT_TOKEN
+            - name: JINA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-secret
+                  key: JINA_API_KEY
           volumeMounts:
             - name: config-template
               mountPath: /config-template

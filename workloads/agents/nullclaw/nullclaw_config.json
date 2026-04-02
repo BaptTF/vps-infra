@@ -158,7 +158,7 @@
     "timeout_secs": 30,
     "allowed_domains": [],
     "search_base_url": null,
-    "search_provider": "duckduckgo",
+    "search_provider": "jina",
     "search_fallback_providers": ["jina", "duckduckgo"]
   },
   "reliability": {
