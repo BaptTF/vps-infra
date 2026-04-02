@@ -57,7 +57,7 @@
     "citations": "auto",
     "search": {
       "enabled": true,
-      "provider": "bifrost",
+      "provider": "custom:http://bifrost.openclaw.svc.cluster.local:8080/v1",
       "model": "bedrock/amazon.titan-embed-text-v2:0",
       "store": {
         "kind": "ann"
