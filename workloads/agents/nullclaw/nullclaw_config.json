@@ -30,7 +30,7 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "moonshotai/Kimi-K2.5-TEE",
+      "model": "openai/moonshotai/Kimi-K2.5-TEE",
       "cost_class": "standard"
     },
     {
