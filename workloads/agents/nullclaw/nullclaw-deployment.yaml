@@ -34,11 +34,6 @@ spec:
                 secretKeyRef:
                   name: nullclaw-secret
                   key: TELEGRAM_BOT_TOKEN
-            - name: JINA_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: nullclaw-secret
-                  key: JINA_API_KEY
           volumeMounts:
             - name: config-template
               mountPath: /config-template
@@ -48,6 +43,12 @@ spec:
         - name: nullclaw
           image: ghcr.io/nullclaw/nullclaw:latest
           args: ["gateway"]
+          env:
+            - name: JINA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-secret
+                  key: JINA_API_KEY
           ports:
             - containerPort: 3000
               name: http
