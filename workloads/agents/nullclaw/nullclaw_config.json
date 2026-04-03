@@ -55,10 +55,30 @@
         "main": {
           "token": "${DISCORD_BOT_TOKEN}",
           "intents": 37377,
-          "allow_from": ["227853248818708480", "425682359963222017", "356839626133995520", "473960537173131275"],
+          "allow_from": [
+            "227853248818708480",
+            "425682359963222017",
+            "356839626133995520",
+            "473960537173131275"
+          ],
           "require_mention": true,
           "allow_bots": false
         }
+      }
+    }
+  },
+  "tools": {
+    "media": {
+      "audio": {
+        "enabled": true,
+        "language": "fr",
+        "models": [
+          {
+            "provider": "bifrost",
+            "model": "whisper-large-v3",
+            "base_url": "http://bifrost.openclaw.svc.cluster.local:8080/v1/audio/transcriptions"
+          }
+        ]
       }
     }
   },
@@ -69,7 +89,7 @@
     "search": {
       "enabled": true,
       "provider": "custom:http://bifrost.openclaw.svc.cluster.local:8080/v1",
-      "model": "bedrock/amazon.titan-embed-text-v2:0",
+      "model": "chutes-embeddings/Qwen/Qwen3-Embedding-8B",
       "store": {
         "kind": "ann"
       },
