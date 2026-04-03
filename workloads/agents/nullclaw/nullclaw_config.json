@@ -75,7 +75,7 @@
         "models": [
           {
             "provider": "bifrost",
-            "model": "whisper-large-v3",
+            "model": "groq/whisper-large-v3",
             "base_url": "http://bifrost.openclaw.svc.cluster.local:8080/v1/audio/transcriptions"
           }
         ]
