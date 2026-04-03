@@ -46,16 +46,52 @@
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
       }
-    }, 
+    },
+    "chutes-embeddings": {
+      "keys": [
+        {
+          "name": "chutes-embedding-key",
+          "value": "env.CHUTES_API_TOKEN",
+          "models": ["Qwen/Qwen3-Embedding-8B"],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://chutes-qwen-qwen3-embedding-8b.chutes.ai",
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "embedding": true
+        }
+      }
+    },
     "gemini": {
       "keys": [
         {
           "name": "gemini-key-1",
           "value": "env.GOOGLE_API_KEY",
-          "models": [
-            "gemini-flash-latest",
-            "gemini-3.1-flash-lite-preview"
-          ],
+          "models": ["gemini-flash-latest", "gemini-3.1-flash-lite-preview"],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    },
+    "groq": {
+      "keys": [
+        {
+          "name": "groq-key-1",
+          "value": "env.GROQ_API_KEY",
+          "models": ["whisper-large-v3"],
           "weight": 1.0
         }
       ],
