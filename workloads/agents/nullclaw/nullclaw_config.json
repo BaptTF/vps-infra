@@ -55,7 +55,7 @@
         "main": {
           "token": "${DISCORD_BOT_TOKEN}",
           "intents": 37377,
-          "allow_from": ["bapttf"],
+          "allow_from": ["227853248818708480"],
           "require_mention": true,
           "allow_bots": false
         }
