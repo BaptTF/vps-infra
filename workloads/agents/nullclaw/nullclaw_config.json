@@ -181,7 +181,7 @@
   },
   "autonomy": {
     "level": "full",
-    "workspace_only": true,
+    "workspace_only": false,
     "max_actions_per_hour": 1000,
     "allowed_commands": ["*"],
     "allowed_paths": ["*"],
