@@ -45,7 +45,7 @@
       "accounts": {
         "main": {
           "bot_token": "${TELEGRAM_BOT_TOKEN}",
-          "allow_from": ["974020023", "8348834293"],
+          "allow_from": ["974020023", "8348834293", "8576519469"],
           "require_mention": true
         }
       }
