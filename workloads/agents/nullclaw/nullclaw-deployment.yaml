@@ -27,13 +27,18 @@ spec:
           image: busybox:1.36
           command: ["/bin/sh", "-c"]
           args:
-            - sed 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' /config-template/config.json > /config/config.json
+            - sed -e 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' -e 's/\${DISCORD_BOT_TOKEN}/'"$DISCORD_BOT_TOKEN"'/g' /config-template/config.json > /config/config.json
           env:
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: nullclaw-secret
                   key: TELEGRAM_BOT_TOKEN
+            - name: DISCORD_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-secret
+                  key: DISCORD_BOT_TOKEN
           volumeMounts:
             - name: config-template
               mountPath: /config-template

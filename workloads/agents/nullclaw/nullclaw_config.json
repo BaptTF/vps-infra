@@ -49,6 +49,17 @@
           "require_mention": true
         }
       }
+    },
+    "discord": {
+      "accounts": {
+        "main": {
+          "token": "${DISCORD_BOT_TOKEN}",
+          "intents": 37377,
+          "allow_from": ["bapttf"],
+          "require_mention": true,
+          "allow_bots": false
+        }
+      }
     }
   },
   "memory": {
