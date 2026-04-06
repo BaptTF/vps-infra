@@ -80,8 +80,6 @@ spec:
             - containerPort: 3000
               name: http
               protocol: TCP
-          securityContext:
-            fsGroup: 65534
           volumeMounts:
             - name: config
               mountPath: /nullclaw-data/config.json
