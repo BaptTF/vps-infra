@@ -92,7 +92,8 @@ spec:
             - name: data
               mountPath: /nullclaw-data
             - name: lea-memory
-              mountPath: /lea-memory
+              mountPath: /nullclaw-data/workspace/lea-memory
+              subPath: node/.openclaw/lea/workspace/memory
               readOnly: true
           livenessProbe:
             httpGet:
