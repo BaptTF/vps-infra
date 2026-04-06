@@ -10,3 +10,6 @@ configMapGenerator:
   - name: nullclaw-config
     files:
       - config.json=nullclaw_config.json
+  - name: lou-ssh-config        # ← nouveau
+    files:
+      - config=ssh_config
