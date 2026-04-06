@@ -46,7 +46,7 @@ spec:
               mountPath: /config
       containers:
         - name: nullclaw
-          image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-733f252
+          image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-b321c93
           args: ["gateway"]
           env:
             - name: JINA_API_KEY
@@ -54,6 +54,11 @@ spec:
                 secretKeyRef:
                   name: nullclaw-secret
                   key: JINA_API_KEY
+            - name: GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-secret
+                  key: GH_TOKEN
           ports:
             - containerPort: 3000
               name: http
@@ -62,6 +67,14 @@ spec:
             - name: config
               mountPath: /nullclaw-data/config.json
               subPath: config.json
+              readOnly: true
+            - name: ssh-config
+              mountPath: /nullclaw-data/.ssh/config
+              subPath: config
+              readOnly: true
+            - name: ssh-key
+              mountPath: /nullclaw-data/.ssh/id_ed25519_lou
+              subPath: id_ed25519_lou
               readOnly: true
             - name: data
               mountPath: /nullclaw-data
@@ -101,6 +114,14 @@ spec:
             name: nullclaw-config
         - name: config
           emptyDir: {}
+        - name: ssh-config
+          configMap:
+            name: lou-ssh-config
+            defaultMode: 0600
+        - name: ssh-key
+          secret:
+            secretName: nullclaw-secret  # ← à créer dans Infisical
+            defaultMode: 0600
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-data
