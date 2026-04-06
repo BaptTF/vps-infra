@@ -75,7 +75,11 @@
         {
           "name": "gemini-key-1",
           "value": "env.GOOGLE_API_KEY",
-          "models": ["gemini-flash-latest", "gemini-3.1-flash-lite-preview"],
+          "models": [
+            "gemini-flash-latest",
+            "gemini-3.1-flash-lite-preview",
+            "gemma-4-31b-it"
+          ],
           "weight": 1.0
         }
       ],
