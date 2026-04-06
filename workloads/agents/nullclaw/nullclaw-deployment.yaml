@@ -91,6 +91,10 @@ spec:
               readOnly: true
             - name: data
               mountPath: /nullclaw-data
+            - name: lea-memory
+              mountPath: /nullclaw-data/workspace/lea-memory
+              subPath: node/.openclaw/lea/workspace/memory
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /health
@@ -136,3 +140,7 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-data
+        - name: lea-memory
+          persistentVolumeClaim:
+            claimName: openclaw-home-pvc
+            readOnly: true
