@@ -30,7 +30,7 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "zai-org/GLM-5-Turbo",
+      "model": "openai/zai-org/GLM-5-Turbo",
       "cost_class": "standard"
     },
     {
