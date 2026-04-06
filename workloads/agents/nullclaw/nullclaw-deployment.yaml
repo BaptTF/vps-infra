@@ -27,7 +27,14 @@ spec:
           image: busybox:1.36
           command: ["/bin/sh", "-c"]
           args:
-            - sed -e 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' -e 's/\${DISCORD_BOT_TOKEN}/'"$DISCORD_BOT_TOKEN"'/g' /config-template/config.json > /config/config.json
+            - |
+              sed -e 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' -e 's/\${DISCORD_BOT_TOKEN}/'"$DISCORD_BOT_TOKEN"'/g' /config-template/config.json > /config/config.json
+              mkdir -p /nullclaw-data/.ssh
+              cp /ssh-in/config /nullclaw-data/.ssh/config
+              cp /ssh-in/key /nullclaw-data/.ssh/id_ed25519_lou
+              chown -R 65534:65534 /nullclaw-data/.ssh
+              chmod 600 /nullclaw-data/.ssh/id_ed25519_lou
+              chmod 644 /nullclaw-data/.ssh/config
           env:
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
@@ -44,6 +51,16 @@ spec:
               mountPath: /config-template
             - name: config
               mountPath: /config
+            - name: ssh-config
+              mountPath: /ssh-in/config
+              subPath: config
+              readOnly: true
+            - name: ssh-key
+              mountPath: /ssh-in/key
+              subPath: id_ed25519_lou
+              readOnly: true
+            - name: data
+              mountPath: /nullclaw-data
       containers:
         - name: nullclaw
           image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-b321c93
@@ -69,14 +86,6 @@ spec:
             - name: config
               mountPath: /nullclaw-data/config.json
               subPath: config.json
-              readOnly: true
-            - name: ssh-config
-              mountPath: /nullclaw-data/.ssh/config
-              subPath: config
-              readOnly: true
-            - name: ssh-key
-              mountPath: /nullclaw-data/.ssh/id_ed25519_lou
-              subPath: id_ed25519_lou
               readOnly: true
             - name: data
               mountPath: /nullclaw-data
@@ -119,11 +128,9 @@ spec:
         - name: ssh-config
           configMap:
             name: lou-ssh-config
-            defaultMode: 0440
         - name: ssh-key
           secret:
-            secretName: nullclaw-secret  # ← à créer dans Infisical
-            defaultMode: 0440
+            secretName: nullclaw-secret
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-data
