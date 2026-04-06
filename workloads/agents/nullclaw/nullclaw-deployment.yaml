@@ -80,11 +80,6 @@ spec:
                 secretKeyRef:
                   name: nullclaw-secret
                   key: JINA_API_KEY
-            - name: GH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: nullclaw-secret
-                  key: GH_TOKEN
           ports:
             - containerPort: 3000
               name: http
