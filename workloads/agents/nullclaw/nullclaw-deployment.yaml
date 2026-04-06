@@ -119,11 +119,11 @@ spec:
         - name: ssh-config
           configMap:
             name: lou-ssh-config
-            defaultMode: 0600
+            defaultMode: 0440
         - name: ssh-key
           secret:
             secretName: nullclaw-secret  # ← à créer dans Infisical
-            defaultMode: 0600
+            defaultMode: 0440
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-data
