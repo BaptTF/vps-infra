@@ -18,7 +18,7 @@
     {
       "hint": "fast",
       "provider": "bifrost",
-      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "model": "gemini/gemma-4-31b-it",
       "cost_class": "free"
     },
     {
