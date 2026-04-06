@@ -35,7 +35,16 @@ spec:
               chown -R 65534:65534 /nullclaw-data/.ssh
               chmod 600 /nullclaw-data/.ssh/id_ed25519_lou
               chmod 644 /nullclaw-data/.ssh/config
+              mkdir -p /nullclaw-data/.config/gh
+              echo -e "github.com:\n  oauth_token: $GH_TOKEN\n  user: Louclaw\n  git_protocol: https" > /nullclaw-data/.config/gh/hosts.yml
+              chown -R 65534:65534 /nullclaw-data/.config/gh
+              chmod 600 /nullclaw-data/.config/gh/hosts.yml
           env:
+            - name: GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-secret
+                  key: GH_TOKEN
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -71,11 +80,6 @@ spec:
                 secretKeyRef:
                   name: nullclaw-secret
                   key: JINA_API_KEY
-            - name: GH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: nullclaw-secret
-                  key: GH_TOKEN
           ports:
             - containerPort: 3000
               name: http
