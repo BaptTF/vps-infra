@@ -30,7 +30,7 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "chutes/zai-org/GLM-5-TEE",
+      "model": "chutes-no-stream/zai-org/GLM-5-TEE",
       "cost_class": "standard"
     },
     {
