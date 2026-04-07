@@ -227,6 +227,13 @@
         ]
       },
       {
+        "model": "openai/moonshotai/Kimi-K2.5-TEE",
+        "fallbacks": [
+          "bifrost/openai/Qwen/Qwen3.5-397B-A17B-TEE",
+          "bifrost/openai/MiniMaxAI/MiniMax-M2.5-TEE"
+        ]
+      },
+      {
         "model": "bifrost/openai/Qwen/Qwen3.5-397B-A17B-TEE",
         "fallbacks": [
           "bifrost/openai/MiniMaxAI/MiniMax-M2.5-TEE",
