@@ -3,6 +3,12 @@ kind: Application
 metadata:
   name: voyage
   namespace: argocd
+  annotations:
+    # ArgoCD Image Updater — auto-update voyage-app image on new push
+    argocd-image-updater.argoproj.io/image-list: voyage-app=ghcr.io/rjullien/voyage-app
+    argocd-image-updater.argoproj.io/voyage-app.update-strategy: digest
+    argocd-image-updater.argoproj.io/voyage-app.allow-tags: regexp:^(latest|sha-.+)$
+    argocd-image-updater.argoproj.io/write-back-method: argocd
 spec:
   project: default
   source:
