@@ -244,7 +244,7 @@
         "model": "bifrost/gemini/gemini-flash-latest",
         "fallbacks": [
           "bifrost/gemini/gemma-4-31b-it",
-          "bifrost/gemini-3.1-flash-lite-preview"
+          "bifrost/gemini/gemini-3.1-flash-lite-preview"
         ]
       }
     ]
