@@ -25,7 +25,7 @@
         "retry_backoff_max_ms": 30000
       }
     },
-    "openai": {
+    "chutes": {
       "keys": [
         {
           "name": "chutes-api-key",
@@ -45,6 +45,13 @@
         "max_retries": 3,
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "chat_completion": true,
+          "chat_completion_stream": true
+        }
       }
     },
     "chutes-embeddings": {
