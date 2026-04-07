@@ -202,7 +202,7 @@
   "reliability": {
     "provider_retries": 2,
     "provider_backoff_ms": 500,
-      "model_fallbacks": [
+    "model_fallbacks": [
       {
         "model": "bifrost/chutes/zai-org/GLM-5-TEE",
         "fallbacks": [
