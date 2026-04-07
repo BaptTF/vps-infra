@@ -10,7 +10,7 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "bifrost/openai/MiniMaxAI/MiniMax-M2.5-TEE"
+        "primary": "bifrost/openai/moonshotai/Kimi-K2.5-TEE"
       }
     }
   },
@@ -202,42 +202,42 @@
   "reliability": {
     "provider_retries": 2,
     "provider_backoff_ms": 500,
-    "model_fallbacks": [
+      "model_fallbacks": [
       {
-        "model": "openai/zai-org/GLM-5-TEE",
+        "model": "bifrost/openai/zai-org/GLM-5-TEE",
         "fallbacks": [
-          "openai/zai-org/GLM-5-Turbo",
-          "openai/moonshotai/Kimi-K2.5-TEE",
-          "openai/Qwen/Qwen3.5-397B-A17B-TEE"
+          "bifrost/openai/zai-org/GLM-5-Turbo",
+          "bifrost/openai/moonshotai/Kimi-K2.5-TEE",
+          "bifrost/openai/Qwen/Qwen3.5-397B-A17B-TEE"
         ]
       },
       {
-        "model": "openai/zai-org/GLM-5-Turbo",
+        "model": "bifrost/openai/zai-org/GLM-5-Turbo",
         "fallbacks": [
-          "openai/moonshotai/Kimi-K2.5-TEE",
-          "openai/Qwen/Qwen3.5-397B-A17B-TEE",
-          "openai/MiniMaxAI/MiniMax-M2.5-TEE"
+          "bifrost/openai/moonshotai/Kimi-K2.5-TEE",
+          "bifrost/openai/Qwen/Qwen3.5-397B-A17B-TEE",
+          "bifrost/openai/MiniMaxAI/MiniMax-M2.5-TEE"
         ]
       },
       {
-        "model": "openai/moonshotai/Kimi-K2.5-TEE",
+        "model": "bifrost/openai/moonshotai/Kimi-K2.5-TEE",
         "fallbacks": [
-          "openai/Qwen/Qwen3.5-397B-A17B-TEE",
-          "openai/MiniMaxAI/MiniMax-M2.5-TEE"
+          "bifrost/openai/Qwen/Qwen3.5-397B-A17B-TEE",
+          "bifrost/openai/MiniMaxAI/MiniMax-M2.5-TEE"
         ]
       },
       {
-        "model": "openai/Qwen/Qwen3.5-397B-A17B-TEE",
+        "model": "bifrost/openai/Qwen/Qwen3.5-397B-A17B-TEE",
         "fallbacks": [
-          "openai/MiniMaxAI/MiniMax-M2.5-TEE",
-          "gemini/gemma-4-31b-it"
+          "bifrost/openai/MiniMaxAI/MiniMax-M2.5-TEE",
+          "bifrost/gemini/gemma-4-31b-it"
         ]
       },
       {
-        "model": "gemini/gemini-flash-latest",
+        "model": "bifrost/gemini/gemini-flash-latest",
         "fallbacks": [
-          "gemini/gemma-4-31b-it",
-          "gemini-3.1-flash-lite-preview"
+          "bifrost/gemini/gemma-4-31b-it",
+          "bifrost/gemini-3.1-flash-lite-preview"
         ]
       }
     ]
