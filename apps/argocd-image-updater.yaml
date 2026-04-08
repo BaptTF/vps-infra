@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: agents
+  name: argocd-image-updater
   namespace: argocd
   annotations:
       argocd.argoproj.io/manifest-generate-paths: .
@@ -10,15 +10,13 @@ spec:
   source:
     repoURL: 'https://github.com/BaptTF/vps-infra.git'
     targetRevision: HEAD
-    path: workloads/agents
+    path: system/argocd-image-updater
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: openclaw
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-  ignoreDifferences:
-    - group: 
+      - ServerSideApply=true
