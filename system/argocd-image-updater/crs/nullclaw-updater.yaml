@@ -6,12 +6,12 @@ metadata:
 spec:
   applicationRefs:
     - namePattern: agents
+      images:
+        - alias: nullclaw
+          imageName: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom
+          commonUpdateSettings:
+            updateStrategy: latest
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
       branch: main
-  images:
-    - alias: nullclaw
-      imageName: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom
-      commonUpdateSettings:
-        updateStrategy: latest
