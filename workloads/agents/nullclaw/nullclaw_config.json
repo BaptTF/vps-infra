@@ -30,7 +30,7 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "chutes-no-stream/zai-org/GLM-5-TEE",
+      "model": "chutes/zai-org/GLM-5-TEE",
       "cost_class": "standard"
     },
     {
@@ -45,6 +45,7 @@
       "accounts": {
         "main": {
           "bot_token": "${TELEGRAM_BOT_TOKEN}",
+          "streaming": false,
           "allow_from": [
             "974020023",
             "8348834293",
@@ -204,15 +205,15 @@
     "provider_backoff_ms": 500,
     "model_fallbacks": [
       {
-        "model": "bifrost/chutes-no-stream/zai-org/GLM-5-TEE",
+        "model": "bifrost/chutes/zai-org/GLM-5-TEE",
         "fallbacks": [
-          "bifrost/chutes-no-stream/zai-org/GLM-5-Turbo",
+          "bifrost/chutes/zai-org/GLM-5-Turbo",
           "bifrost/chutes/moonshotai/Kimi-K2.5-TEE",
           "bifrost/chutes/Qwen/Qwen3.5-397B-A17B-TEE"
         ]
       },
       {
-        "model": "bifrost/chutes-no-stream/zai-org/GLM-5-Turbo",
+        "model": "bifrost/chutes/zai-org/GLM-5-Turbo",
         "fallbacks": [
           "bifrost/chutes/moonshotai/Kimi-K2.5-TEE",
           "bifrost/chutes/Qwen/Qwen3.5-397B-A17B-TEE",
