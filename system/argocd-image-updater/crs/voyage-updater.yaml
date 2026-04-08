@@ -1,0 +1,17 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: voyage-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: voyage
+      images:
+        - alias: voyage-app
+          imageName: ghcr.io/rjullien/voyage-app
+          commonUpdateSettings:
+            updateStrategy: latest
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main
