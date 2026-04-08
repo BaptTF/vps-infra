@@ -1,0 +1,10 @@
+# system/argocd-image-updater/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+
+resources:
+  # Install ArgoCD Image Updater from official manifests
+  - https://github.com/argoproj-labs/argocd-image-updater/manifests/install.yaml?ref=v0.12.2
+  # Git credentials for write-back
+  - infisical-secret.yaml

@@ -5,11 +5,12 @@ resources:
   - infisical-secret.yaml
   - nullclaw-pvc.yaml
   - nullclaw-deployment.yaml
+  - imageupdater.yaml
 
 configMapGenerator:
   - name: nullclaw-config
     files:
       - config.json=nullclaw_config.json
-  - name: lou-ssh-config        # ← nouveau
+  - name: lou-ssh-config
     files:
       - config=ssh_config

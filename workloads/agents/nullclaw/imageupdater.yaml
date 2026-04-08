@@ -1,0 +1,9 @@
+# ImageUpdater CR for nullclaw - auto-update to main
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: nullclaw-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: 
