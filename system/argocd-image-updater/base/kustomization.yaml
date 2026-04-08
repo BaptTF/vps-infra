@@ -1,0 +1,11 @@
+# system/argocd-image-updater/base/kustomization.yaml
+# ArgoCD Image Updater controller and infrastructure
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+
+resources:
+  # Install ArgoCD Image Updater from official manifests (stable version)
+  - https://github.com/argoproj-labs/argocd-image-updater/manifests/install.yaml?ref=stable
+  # Git credentials for write-back
+  - infisical-secret.yaml

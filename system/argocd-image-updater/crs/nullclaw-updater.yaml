@@ -1,0 +1,18 @@
+# ImageUpdater CR for nullclaw - auto-update to main
+# NOTE: This CR must be in the argocd namespace where the controller runs
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: nullclaw-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: agents
+  writeBackConfig:
+    method: git:secret:argocd/argocd-image-updater-git-creds
+    git:
+      branch: main
+  imageList:
+    - image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom
+      alias: nullclaw
+      updateStrategy: latest
