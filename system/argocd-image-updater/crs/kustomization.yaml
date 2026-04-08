@@ -1,0 +1,8 @@
+# system/argocd-image-updater/crs/kustomization.yaml
+# ImageUpdater CRs for applications (must be in argocd namespace)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+
+resources:
+  - nullclaw-updater.yaml
