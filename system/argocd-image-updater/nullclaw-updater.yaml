@@ -1,4 +1,5 @@
 # ImageUpdater CR for nullclaw - auto-update to main
+# NOTE: This CR must be in the argocd namespace where the controller runs
 apiVersion: argocd-image-updater.argoproj.io/v1alpha1
 kind: ImageUpdater
 metadata:
