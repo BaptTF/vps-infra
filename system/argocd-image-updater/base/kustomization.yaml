@@ -6,6 +6,6 @@ namespace: argocd
 
 resources:
   # Install ArgoCD Image Updater from official manifests (stable version)
-  - https://github.com/argoproj-labs/argocd-image-updater/manifests/install.yaml?ref=stable
+  - https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/config/install.yaml
   # Git credentials for write-back
   - infisical-secret.yaml
