@@ -8,3 +8,5 @@ resources:
   - https://github.com/argoproj-labs/argocd-image-updater/manifests/install.yaml?ref=stable
   # Git credentials for write-back
   - infisical-secret.yaml
+  # ImageUpdater CRs for applications (must be in argocd namespace)
+  - nullclaw-updater.yaml
