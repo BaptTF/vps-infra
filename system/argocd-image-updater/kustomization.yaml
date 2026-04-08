@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: argocd
 
 resources:
-  # Install ArgoCD Image Updater from official manifests
-  - https://github.com/argoproj-labs/argocd-image-updater/manifests/install.yaml?ref=v0.12.2
+  # Install ArgoCD Image Updater from official manifests (stable version)
+  - https://github.com/argoproj-labs/argocd-image-updater/manifests/install.yaml?ref=stable
   # Git credentials for write-back
   - infisical-secret.yaml
