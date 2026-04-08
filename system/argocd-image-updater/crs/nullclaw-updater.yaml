@@ -8,17 +8,10 @@ metadata:
 spec:
   applicationRefs:
     - namePattern: agents
-  updateStrategy:
-    type: semver
-    semver:
-      allowTags: "latest"
-  writeBack:
-    method: git
+  writeBackConfig:
+    method: git:secret:argocd/argocd-image-updater-git-creds
     git:
-      repoURL: https://github.com/BaptTF/vps-infra.git
       branch: main
-      filePath: workloads/agents/nullclaw/deployment.yaml
-      targetRevision: main
   imageList:
     - image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom
       alias: nullclaw
