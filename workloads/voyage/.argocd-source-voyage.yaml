@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/rjullien/voyage-app:sha-ab03603
