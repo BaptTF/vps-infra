@@ -10,7 +10,7 @@ spec:
         - alias: nullclaw
           imageName: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom
           commonUpdateSettings:
-            updateStrategy: latest
+            updateStrategy: newest-build
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
