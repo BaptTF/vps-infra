@@ -10,10 +10,34 @@ spec:
         - alias: voyage-app
           imageName: ghcr.io/rjullien/voyage-app
           commonUpdateSettings:
-            pullSecret: pullsecret:voyage/ghcr-login-secret
+            pullSecret: pullsecret:argocd/voyage-ghcr-login-secret
             updateStrategy: newest-build
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
       branch: main
       writeBackTarget: "kustomization:./workloads/voyage"
+---
+apiVersion: secrets.infisical.com/v1alpha1
+kind: InfisicalSecret
+metadata:
+  name: voyage-github-secrets
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # On crée les secrets avant le déploiement
+spec:
+  hostAPI: https://app.infisical.com/api
+  authentication:
+    universalAuth:
+      secretsScope:
+        projectSlug: infrastructure
+        envSlug: prod
+        secretsPath: /github
+      credentialsRef:
+        secretName: infisical-universal-auth
+        secretNamespace: infisical
+  managedKubeSecretReferences:
+    - secretName: voyage-ghcr-login-secret
+      secretNamespace: voyage
+      secretType: kubernetes.io/dockerconfigjson
+      creationPolicy: Owner
