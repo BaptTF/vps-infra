@@ -10,6 +10,7 @@ spec:
         - alias: voyage-app
           imageName: ghcr.io/rjullien/voyage-app
           commonUpdateSettings:
+            pullSecret: pullsecret:voyage/ghcr-login-secret
             updateStrategy: newest-build
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
