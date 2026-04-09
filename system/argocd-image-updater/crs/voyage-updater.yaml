@@ -38,6 +38,6 @@ spec:
         secretNamespace: infisical
   managedKubeSecretReferences:
     - secretName: voyage-ghcr-login-secret
-      secretNamespace: voyage
+      secretNamespace: argocd
       secretType: kubernetes.io/dockerconfigjson
       creationPolicy: Owner
