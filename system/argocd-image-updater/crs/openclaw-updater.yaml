@@ -1,0 +1,17 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: openclaw-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: agents
+      images:
+        - alias: openclaw
+          imageName: ghcr.io/bapttf/openclaw-lea-config
+          commonUpdateSettings:
+            updateStrategy: newest-build
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main
