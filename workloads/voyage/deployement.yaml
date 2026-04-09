@@ -22,7 +22,7 @@ spec:
       containers:
         # Conteneur 1: Ton application (PWA)
         - name: voyage-app
-          image: ghcr.io/rjullien/voyage-app:sha-41838d2
+          image: ghcr.io/rjullien/voyage-app
           imagePullPolicy: Always
           ports:
             - containerPort: 80
