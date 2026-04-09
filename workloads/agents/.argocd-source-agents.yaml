@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/bapttf/openclaw-lea-config:sha-542de477e0735a3f308fd6515a2ef0c2881d23d5
+  - ghcr.io/bapttf/openclaw-lea-config:sha-2011ebc1d9af2326a941611dad2a00e16ec65715
