@@ -16,7 +16,6 @@ spec:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
       branch: main
-      writeBackTarget: "kustomization:./workloads/voyage"
 ---
 apiVersion: secrets.infisical.com/v1alpha1
 kind: InfisicalSecret
