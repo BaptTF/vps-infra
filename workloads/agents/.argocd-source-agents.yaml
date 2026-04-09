@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/bapttf/openclaw-lea-config:sha-542de477e0735a3f308fd6515a2ef0c2881d23d5
