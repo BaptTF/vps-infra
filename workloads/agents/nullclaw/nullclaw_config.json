@@ -251,10 +251,10 @@
     ]
   },
   "a2a": {
-    "enabled": false,
-    "name": "NullClaw",
-    "description": "AI assistant",
-    "url": "https://agent.example.com",
+    "enabled": true,
+    "name": "NullClaw-Lou",
+    "description": "Lou — AI assistant",
+    "url": "http://nullclaw.openclaw.svc.cluster.local:3000",
     "version": "1.0.0"
   },
   "security": {
