@@ -53,7 +53,7 @@ spec:
                   key: cookie-secret
           args:
             - --provider=github
-            - --github-user=rjullien,NicoleJ06,BaptTF,laurine-rol,apej06,jlncamille,dinahdfrsn
+            - --github-user=rjullien,NicoleJ06,BaptTF,laurine-rol,apej06,jlncamille,dinahdfrsn,EmmaTF
             - --email-domain=*
             - --upstream=http://127.0.0.1:80/ # Tape sur le Nginx local au pod
             - --http-address=0.0.0.0:4180
