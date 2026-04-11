@@ -34,9 +34,11 @@ spec:
               cpu: "1000m"
           env:
           - name: DOMAIN
-            value: "steel-api:3000"
+            value: "steel-api.tail4c7c90.ts.net"
+          - name: USE_SSL
+            value: "true"
           - name: CDP_DOMAIN
-            value: "steel-api:9223"
+            value: "steel-cdp.tail4c7c90.ts.net"
           - name: KILL_TIMEOUT
             value: "3600000"   # 1 heure en ms
           # Steel needs /dev/shm for Chrome shared memory
