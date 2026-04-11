@@ -40,7 +40,7 @@ spec:
           - name: CDP_DOMAIN
             value: "steel-cdp.tail4c7c90.ts.net"
           - name: CHROME_ARGS
-            value: "--remote-allow-origins=*"
+            value: "--remote-allow-origins=https://steel-cdp.tail4c7c90.ts.net"
           - name: KILL_TIMEOUT
             value: "3600000"   # 1 heure en ms
           # Steel needs /dev/shm for Chrome shared memory
