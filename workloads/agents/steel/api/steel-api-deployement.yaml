@@ -37,6 +37,8 @@ spec:
             value: "steel-api:3000"
           - name: CDP_DOMAIN
             value: "steel-api:9223"
+          - name: KILL_TIMEOUT
+            value: "3600000"   # 1 heure en ms
           # Steel needs /dev/shm for Chrome shared memory
           volumeMounts:
             - name: dshm
