@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: steel-ui-ingress
+  namespace: openclaw
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - steel
+  defaultBackend:
+    service:
+      name: steel-ui-service
+      port:
+        number: 80

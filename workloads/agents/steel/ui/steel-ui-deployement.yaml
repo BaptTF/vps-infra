@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steel-ui
+  namespace: openclaw
+  labels:
+    app: steel-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: steel-ui
+  template:
+    metadata:
+      labels:
+        app: steel-ui
+    spec:
+      containers:
+        - name: ui
+          image: ghcr.io/steel-dev/steel-browser-ui:latest
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: API_URL
+              value: "http://steel-api.openclaw.svc.cluster.local:3000"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
