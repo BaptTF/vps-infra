@@ -10,6 +10,6 @@ spec:
         - steel-api
   defaultBackend:
     service:
-      name: steel-api-service
+      name: steel-api
       port:
         number: 3000
