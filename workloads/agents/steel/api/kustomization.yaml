@@ -5,3 +5,4 @@ resources:
   - steel-api-deployement.yaml
   - steel-api-service.yaml
   - ingress-tailscale.yaml
+  - ingress-tailscale-cdp.yaml
