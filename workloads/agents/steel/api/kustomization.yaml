@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - steel-api-deployement.yaml
   - steel-api-service.yaml
+  - ingress-tailscale.yaml
