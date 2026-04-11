@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steel-browser
+  namespace: openclaw
+  labels:
+    app: steel-browser
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: steel-browser
+  template:
+    metadata:
+      labels:
+        app: steel-browser
+    spec:
+      containers:
+        - name: steel
+          image: ghcr.io/steel-dev/steel-browser:latest
+          ports:
+            - containerPort: 3000
+              name: api
+            - containerPort: 9223
+              name: debug
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          # Steel needs /dev/shm for Chrome shared memory
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
