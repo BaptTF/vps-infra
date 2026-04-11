@@ -28,6 +28,8 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              # Ensure PVC is writable by nobody (65534)
+              chown -R 65534:65534 /nullclaw-data
               # Inject secrets into config.json
               sed -e 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' \
                   -e 's/\${WHATSMEOW_BRIDGE_TOKEN}/'"$WHATSMEOW_BRIDGE_TOKEN"'/g' \
