@@ -23,7 +23,7 @@ spec:
               name: http
           env:
             - name: API_URL
-              value: "https://steel-api.tail4c7c90.ts.net"
+              value: "http://steel-api:3000"
           resources:
             requests:
               memory: "64Mi"
