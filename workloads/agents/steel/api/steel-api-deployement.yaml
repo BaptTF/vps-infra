@@ -47,6 +47,9 @@ spec:
           volumeMounts:
             - name: dshm
               mountPath: /dev/shm
+            - name: cdp-nginx
+              mountPath: /app/api/nginx.conf
+              subPath: nginx.conf
           readinessProbe:
             httpGet:
               path: /
@@ -64,3 +67,6 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 256Mi
+        - name: cdp-nginx
+          configMap:
+            name: steel-cdp-nginx

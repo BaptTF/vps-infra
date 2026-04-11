@@ -6,3 +6,8 @@ resources:
   - steel-api-service.yaml
   - ingress-tailscale.yaml
   - ingress-tailscale-cdp.yaml
+
+configMapGenerator:
+  - name: steel-cdp-nginx
+    files:
+      - nginx.conf
