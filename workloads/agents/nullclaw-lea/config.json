@@ -1,0 +1,222 @@
+{
+  "a2a": {
+    "enabled": true,
+    "name": "NullClaw-Lea",
+    "description": "Agents GenAI, assistante cloud H24",
+    "url": "http://nullclaw-lea.openclaw.svc.cluster.local:3000",
+    "version": "1.0.0"
+  },
+  "agents": {
+    "defaults": {
+      "model": { "primary": "bifrost/bedrock/us.anthropic.claude-opus-4-6-v1" }
+    }
+  },
+  "autonomy": { "level": "yolo" },
+  "channels": {
+    "telegram": {
+      "accounts": {
+        "main": {
+          "allow_from": [
+            "974020023",
+            "8726326688",
+            "1156623391",
+            "8761164341",
+            "8348834293"
+          ],
+          "bot_token": "${TELEGRAM_BOT_TOKEN}",
+          "require_mention": false,
+          "streaming": false
+        }
+      }
+    },
+    "external": {
+      "accounts": {
+        "wa-web": {
+          "runtime_name": "whatsapp_web",
+          "transport": {
+            "command": "/usr/local/bin/nullclaw-plugin-whatsapp-web",
+            "timeout_ms": 10000
+          },
+          "config": {
+            "bridge_url": "http://whatsmeow-bridge.openclaw.svc.cluster.local:3301",
+            "api_key": "${WHATSMEOW_BRIDGE_TOKEN}",
+            "allow_from": [
+              "33616162068",
+              "33612632156",
+              "33664962096",
+              "33662809538",
+              "33606662021",
+              "33782959522",
+              "33612981284",
+              "33617960945",
+              "33671196182",
+              "33616849570",
+              "33627023292",
+              "33699639284",
+              "33673434245",
+              "33608705389",
+              "33642385842",
+              "33680902986"
+            ],
+            "group_policy": "allowlist"
+          }
+        }
+      }
+    }
+  },
+  "gateway": { "host": "0.0.0.0", "port": 3000, "require_pairing": false },
+  "http_request": {
+    "allowed_domains": [],
+    "enabled": true,
+    "max_response_size": 1000000,
+    "search_base_url": null,
+    "search_fallback_providers": ["brave"],
+    "search_provider": "perplexity",
+    "timeout_secs": 120
+  },
+  "memory": {
+    "auto_save": true,
+    "backend": "sqlite",
+    "citations": "auto",
+    "lifecycle": {
+      "archive_after_days": 7,
+      "auto_hydrate": true,
+      "conversation_retention_days": 30,
+      "hygiene_enabled": true,
+      "preserve_before_purge": true,
+      "purge_after_days": 30,
+      "snapshot_enabled": false,
+      "snapshot_on_hygiene": false
+    },
+    "qmd": {
+      "command": "qmd",
+      "enabled": false,
+      "include_default_memory": true,
+      "search_mode": "search"
+    },
+    "reliability": {
+      "canary_hybrid_percent": 0,
+      "circuit_breaker_cooldown_ms": 30000,
+      "circuit_breaker_failures": 5,
+      "fallback_policy": "degrade",
+      "rollout_mode": "off",
+      "shadow_hybrid_percent": 0
+    },
+    "response_cache": {
+      "enabled": true,
+      "max_entries": 5000,
+      "ttl_minutes": 60
+    },
+    "retrieval_stages": {
+      "adaptive_keyword_max_tokens": 3,
+      "adaptive_retrieval_enabled": true,
+      "adaptive_vector_min_tokens": 6,
+      "llm_reranker_enabled": true,
+      "llm_reranker_max_candidates": 10,
+      "llm_reranker_timeout_ms": 5000,
+      "query_expansion_enabled": true
+    },
+    "search": {
+      "cache": { "enabled": true, "max_entries": 10000 },
+      "chunking": { "max_tokens": 512, "overlap": 64 },
+      "enabled": true,
+      "model": "bedrock/amazon.titan-embed-text-v2:0",
+      "provider": "custom:http://bifrost.openclaw.svc.cluster.local:8080/v1",
+      "query": {
+        "hybrid": {
+          "candidate_multiplier": 4,
+          "enabled": true,
+          "mmr": { "enabled": true, "lambda": 0.7 },
+          "temporal_decay": { "enabled": true, "half_life_days": 30 },
+          "text_weight": 0.3,
+          "vector_weight": 0.7
+        },
+        "max_results": 6,
+        "merge_strategy": "rrf",
+        "min_score": 0.0,
+        "rrf_k": 60
+      },
+      "store": { "kind": "ann" },
+      "sync": {
+        "embed_max_retries": 2,
+        "embed_timeout_ms": 15000,
+        "mode": "best_effort",
+        "vector_max_retries": 2,
+        "vector_timeout_ms": 5000
+      }
+    },
+    "summarizer": {
+      "auto_extract_semantic": true,
+      "enabled": true,
+      "summary_max_tokens": 500,
+      "window_size_tokens": 4000
+    }
+  },
+  "model_routes": [
+    {
+      "cost_class": "standard",
+      "hint": "deep",
+      "model": "bedrock/us.anthropic.claude-opus-4-6-v1",
+      "provider": "bifrost"
+    },
+    {
+      "cost_class": "cheap",
+      "hint": "balanced",
+      "model": "bedrock/us.anthropic.claude-sonnet-4-6",
+      "provider": "bifrost"
+    },
+    {
+      "cost_class": "free",
+      "hint": "fast",
+      "model": "bedrock/us.anthropic.claude-sonnet-4-6",
+      "provider": "bifrost"
+    },
+    {
+      "cost_class": "free",
+      "hint": "vision",
+      "model": "bedrock/us.anthropic.claude-sonnet-4-6",
+      "provider": "bifrost"
+    }
+  ],
+  "models": {
+    "providers": {
+      "bifrost": {
+        "api_key": "dummy",
+        "base_url": "http://bifrost.openclaw.svc.cluster.local:8080/v1"
+      }
+    }
+  },
+  "reliability": {
+    "model_fallbacks": [
+      {
+        "model": "bifrost/bedrock/us.anthropic.claude-opus-4-6-v1",
+        "fallbacks": ["bifrost/bedrock/us.anthropic.claude-sonnet-4-6"]
+      },
+      {
+        "model": "bifrost/bedrock/us.anthropic.claude-sonnet-4-6",
+        "fallbacks": ["bifrost/bedrock/us.anthropic.claude-opus-4-6-v1"]
+      }
+    ],
+    "provider_backoff_ms": 500,
+    "provider_retries": 2
+  },
+  "security": {
+    "audit": { "enabled": true },
+    "sandbox": { "backend": "auto" }
+  },
+  "tools": {
+    "media": {
+      "audio": {
+        "enabled": true,
+        "language": "fr",
+        "models": [
+          {
+            "base_url": "http://bifrost.openclaw.svc.cluster.local:8080/v1/audio/transcriptions",
+            "model": "groq/whisper-large-v3",
+            "provider": "bifrost"
+          }
+        ]
+      }
+    }
+  }
+}

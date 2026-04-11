@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whatsmeow-bridge
+  namespace: openclaw
+  labels:
+    app: whatsmeow-bridge
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: whatsmeow-bridge
+  template:
+    metadata:
+      labels:
+        app: whatsmeow-bridge
+    spec:
+      containers:
+        - name: whatsmeow-bridge
+          image: ghcr.io/rjullien/nullclaw-lea-config/whatsmeow-bridge:latest
+          env:
+            - name: NULLCLAW_WHATSMEOW_BRIDGE_LISTEN
+              value: "0.0.0.0:3301"
+            - name: NULLCLAW_WHATSMEOW_BRIDGE_STATE_DIR
+              value: "/bridge-state"
+            - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-lea-secret
+                  key: WHATSMEOW_BRIDGE_TOKEN
+                  optional: true
+          ports:
+            - containerPort: 3301
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: state
+              mountPath: /bridge-state
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: nullclaw-lea-bridge

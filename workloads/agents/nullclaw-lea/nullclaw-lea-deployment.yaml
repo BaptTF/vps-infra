@@ -1,0 +1,156 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nullclaw-lea
+  namespace: openclaw
+  labels:
+    app: nullclaw-lea
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: nullclaw-lea
+  template:
+    metadata:
+      labels:
+        app: nullclaw-lea
+    spec:
+      initContainers:
+        - name: init-config
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Inject secrets into config.json
+              sed -e 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' \
+                  -e 's/\${WHATSMEOW_BRIDGE_TOKEN}/'"$WHATSMEOW_BRIDGE_TOKEN"'/g' \
+                /config-template/config.json > /config/config.json
+
+              # Setup GitHub CLI auth (HTTPS, no SSH needed)
+              mkdir -p /nullclaw-data/.config/gh
+              echo -e "github.com:\n  oauth_token: $GH_TOKEN\n  user: rjullien\n  git_protocol: https" \
+                > /nullclaw-data/.config/gh/hosts.yml
+              chown -R 65534:65534 /nullclaw-data/.config/gh
+              chmod 600 /nullclaw-data/.config/gh/hosts.yml
+
+              # Copy skills into workspace (one SKILL.md per directory)
+              mkdir -p /nullclaw-data/workspace/skills
+              cd /skills-in
+              for skill in *; do
+                mkdir -p "/nullclaw-data/workspace/skills/$skill"
+                cp "/skills-in/$skill" "/nullclaw-data/workspace/skills/$skill/SKILL.md"
+              done
+              chown -R 65534:65534 /nullclaw-data/workspace/skills
+          env:
+            - name: GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-lea-secret
+                  key: GH_TOKEN
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-lea-secret
+                  key: TELEGRAM_BOT_TOKEN
+            - name: WHATSMEOW_BRIDGE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-lea-secret
+                  key: WHATSMEOW_BRIDGE_TOKEN
+                  optional: true
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: config
+              mountPath: /config
+            - name: skills
+              mountPath: /skills-in
+              readOnly: true
+            - name: data
+              mountPath: /nullclaw-data
+      containers:
+        - name: nullclaw-lea
+          image: ghcr.io/rjullien/nullclaw-lea-config/nullclaw-custom:latest
+          args: ["gateway"]
+          env:
+            - name: JINA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-lea-secret
+                  key: JINA_API_KEY
+                  optional: true
+            - name: BRAVE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-lea-secret
+                  key: BRAVE_API_KEY
+                  optional: true
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /nullclaw-data/config.json
+              subPath: config.json
+              readOnly: true
+            - name: data
+              mountPath: /nullclaw-data
+            # Mount existing OpenClaw memory as read-only for migration
+            - name: openclaw-memory
+              mountPath: /nullclaw-data/workspace/openclaw-memory
+              subPath: node/.openclaw/lea/
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+      volumes:
+        - name: config-template
+          configMap:
+            name: nullclaw-lea-config
+        - name: config
+          emptyDir: {}
+        - name: skills
+          configMap:
+            name: nullclaw-lea-skills
+        - name: data
+          persistentVolumeClaim:
+            claimName: nullclaw-lea-data
+        - name: openclaw-memory
+          persistentVolumeClaim:
+            claimName: openclaw-home-pvc
+            readOnly: true
