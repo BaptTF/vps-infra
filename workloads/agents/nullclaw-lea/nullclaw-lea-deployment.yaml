@@ -92,6 +92,8 @@ spec:
                   name: nullclaw-lea-secret
                   key: BRAVE_API_KEY
                   optional: true
+            - name: NULLCLAW_ALLOW_YOLO
+              value: 1
           ports:
             - containerPort: 3000
               name: http
