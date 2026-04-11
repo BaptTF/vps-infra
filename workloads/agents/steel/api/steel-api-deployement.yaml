@@ -32,6 +32,11 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "1000m"
+          env:
+          - name: DOMAIN
+            value: "steel-api:3000"
+          - name: CDP_DOMAIN
+            value: "steel-api:9223"
           # Steel needs /dev/shm for Chrome shared memory
           volumeMounts:
             - name: dshm
