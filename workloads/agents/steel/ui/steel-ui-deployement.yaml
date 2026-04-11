@@ -23,7 +23,7 @@ spec:
               name: http
           env:
             - name: API_URL
-              value: "http://steel-api.openclaw.svc.cluster.local:3000"
+              value: "https://steel-api.tail4c7c90.ts.net"
           resources:
             requests:
               memory: "64Mi"
