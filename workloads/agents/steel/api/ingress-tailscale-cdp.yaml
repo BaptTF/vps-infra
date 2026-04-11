@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: steel-cdp-ingress
+  namespace: openclaw
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - steel-cdp
+  defaultBackend:
+    service:
+      name: steel-api
+      port:
+        number: 9223
