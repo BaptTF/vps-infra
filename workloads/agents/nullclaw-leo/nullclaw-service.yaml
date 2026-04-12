@@ -4,10 +4,10 @@ metadata:
   name: nullclaw-leo
   namespace: openclaw
   labels:
-    app: nullclaw
+    app: nullclaw-leo
 spec:
   selector:
-    app: nullclaw
+    app: nullclaw-leo
   ports:
     - protocol: TCP
       port: 3000
