@@ -8,6 +8,7 @@ metadata:
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
+  revisionHistoryLimit: 3
   replicas: 1
   strategy:
     type: RollingUpdate
