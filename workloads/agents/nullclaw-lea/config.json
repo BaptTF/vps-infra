@@ -25,7 +25,7 @@
           ],
           "bot_token": "${TELEGRAM_BOT_TOKEN}",
           "require_mention": false,
-          "streaming": false
+          "streaming": true
         }
       }
     },
