@@ -7,8 +7,12 @@ spec:
   applicationRefs:
     - namePattern: agents
       images:
-        - alias: nullclaw
+        - alias: nullclaw-lou
           imageName: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom
+          commonUpdateSettings:
+            updateStrategy: newest-build
+        - alias: nullclaw-lea
+          imageName: ghcr.io/rjullien/nullclaw-lea-config/nullclaw-custom
           commonUpdateSettings:
             updateStrategy: newest-build
   writeBackConfig:
