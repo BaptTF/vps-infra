@@ -6,6 +6,7 @@ metadata:
   labels:
     app: whatsmeow-bridge
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   strategy:
     type: Recreate
@@ -17,7 +18,6 @@ spec:
       labels:
         app: whatsmeow-bridge
     spec:
-      revisionHistoryLimit: 3
       containers:
         - name: whatsmeow-bridge
           image: ghcr.io/rjullien/nullclaw-lea-config/whatsmeow-bridge:latest
