@@ -22,7 +22,7 @@ spec:
       labels:
         app: nullclaw-leo
     spec:
-      revisionHistoryLimit: 3
+      revisionHistoryLimit: 2
       initContainers:
         - name: init-config
           image: busybox:1.36

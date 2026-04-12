@@ -17,6 +17,7 @@ spec:
       labels:
         app: steel-browser
     spec:
+      revisionHistoryLimit: 2
       containers:
         - name: steel
           image: ghcr.io/steel-dev/steel-browser:latest
