@@ -99,6 +99,9 @@ spec:
               readOnly: true
             - name: data
               mountPath: /nullclaw-data
+            - name: agent-secrets
+              mountPath: /nullclaw-data/.config/secrets
+              readOnly: true
             # Mount existing OpenClaw memory as read-only for migration
             - name: openclaw-memory
               mountPath: /nullclaw-data/workspace/lea
@@ -146,6 +149,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-leo-data
+        - name: agent-secrets
+          secret:
+            secretName: nullclaw-leo-secret-inside
         - name: openclaw-memory
           persistentVolumeClaim:
             claimName: openclaw-home-pvc
