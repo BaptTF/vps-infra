@@ -3,7 +3,7 @@
     "enabled": true,
     "name": "NullClaw-Léo",
     "description": "Agents GenAI, assistante cloud H24",
-    "url": "http://nullclaw-lea.openclaw.svc.cluster.local:3000",
+    "url": "http://nullclaw-leo.openclaw.svc.cluster.local:3000",
     "version": "1.0.0"
   },
   "agents": {
