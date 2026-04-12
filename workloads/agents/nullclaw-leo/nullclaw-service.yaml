@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nullclaw-leo-service
+  name: nullclaw-leo
   namespace: openclaw
   labels:
     app: nullclaw
