@@ -146,9 +146,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-leo-data
-        - name: bridge-data
-          persistentVolumeClaim:
-            claimName: nullclaw-lea-bridge
         - name: openclaw-memory
           persistentVolumeClaim:
             claimName: openclaw-home-pvc
