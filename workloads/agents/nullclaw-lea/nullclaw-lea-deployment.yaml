@@ -111,6 +111,8 @@ spec:
             - name: openclaw-memory
               mountPath: /nullclaw-data/workspace/openclaw-memory
               readOnly: true
+            - name: bridge-data
+              mountPath: /nullclaw-data/workspace/bridge-data
           livenessProbe:
             httpGet:
               path: /health
@@ -153,6 +155,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-lea-data
+        - name: bridge-data
+          persistentVolumeClaim:
+            claimName: nullclaw-lea-bridge
         - name: openclaw-memory
           persistentVolumeClaim:
             claimName: openclaw-home-pvc
