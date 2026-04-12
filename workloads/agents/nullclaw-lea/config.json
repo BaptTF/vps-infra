@@ -202,7 +202,7 @@
   },
   "security": {
     "audit": { "enabled": true },
-    "sandbox": { "backend": "auto" }
+    "sandbox": { "backend": "none" }
   },
   "tools": {
     "media": {
