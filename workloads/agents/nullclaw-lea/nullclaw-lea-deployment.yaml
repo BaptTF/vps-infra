@@ -110,7 +110,6 @@ spec:
             # Mount existing OpenClaw memory as read-only for migration
             - name: openclaw-memory
               mountPath: /nullclaw-data/workspace/openclaw-memory
-              subPath: node/.openclaw/lea/
               readOnly: true
           livenessProbe:
             httpGet:
