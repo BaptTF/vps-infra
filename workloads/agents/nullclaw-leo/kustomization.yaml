@@ -12,10 +12,10 @@ resources:
   # steel-browser.yaml is a reference template — deployed separately in vps-infra
 
 configMapGenerator:
-  - name: nullclaw-lea-config
+  - name: nullclaw-leo-config
     files:
       - config.json=config.json
-  - name: nullclaw-lea-skills
+  - name: nullclaw-leo-skills
     files:
       - gws-calendar-agenda=skills/gws-calendar-agenda/SKILL.md
       - gws-calendar-insert=skills/gws-calendar-insert/SKILL.md
