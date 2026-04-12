@@ -58,7 +58,8 @@
               "33642385842",
               "33680902986"
             ],
-            "group_policy": "allowlist"
+            "group_policy": "allowlist",
+            "require_mention": "@lea"
           }
         }
       }
