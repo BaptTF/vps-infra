@@ -37,6 +37,8 @@ spec:
               name: ssh
             - containerPort: 18789
               name: gateway
+            - containerPort: 18800
+              name: a2a
           livenessProbe:
             httpGet:
               path: /health
