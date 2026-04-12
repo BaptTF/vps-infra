@@ -1,7 +1,7 @@
 {
   "a2a": {
     "enabled": true,
-    "name": "NullClaw-Lea",
+    "name": "NullClaw-Léo",
     "description": "Agents GenAI, assistante cloud H24",
     "url": "http://nullclaw-lea.openclaw.svc.cluster.local:3000",
     "version": "1.0.0"
@@ -24,7 +24,7 @@
             "8348834293"
           ],
           "bot_token": "${TELEGRAM_BOT_TOKEN}",
-          "require_mention": false,
+          "require_mention": true,
           "streaming": true
         }
       }
@@ -59,7 +59,7 @@
               "33680902986"
             ],
             "group_policy": "allowlist",
-            "require_mention": "@lea"
+            "require_mention": "@leo"
           }
         }
       }
@@ -77,7 +77,7 @@
   },
   "memory": {
     "auto_save": true,
-    "backend": "sqlite",
+    "backend": "hybrid",
     "citations": "auto",
     "lifecycle": {
       "archive_after_days": 7,
@@ -153,32 +153,6 @@
       "window_size_tokens": 4000
     }
   },
-  "model_routes": [
-    {
-      "cost_class": "standard",
-      "hint": "deep",
-      "model": "bedrock/us.anthropic.claude-opus-4-6-v1",
-      "provider": "bifrost"
-    },
-    {
-      "cost_class": "cheap",
-      "hint": "balanced",
-      "model": "bedrock/us.anthropic.claude-opus-4-6-v1",
-      "provider": "bifrost"
-    },
-    {
-      "cost_class": "free",
-      "hint": "fast",
-      "model": "bedrock/us.anthropic.claude-opus-4-6-v1",
-      "provider": "bifrost"
-    },
-    {
-      "cost_class": "free",
-      "hint": "vision",
-      "model": "bedrock/us.anthropic.claude-opus-4-6-v1",
-      "provider": "bifrost"
-    }
-  ],
   "models": {
     "providers": {
       "bifrost": {

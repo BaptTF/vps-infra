@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nullclaw-lea
+  name: nullclaw-leo
   namespace: openclaw
   labels:
-    app: nullclaw-lea
+    app: nullclaw-leo
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
@@ -16,11 +16,11 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: nullclaw-lea
+      app: nullclaw-leo
   template:
     metadata:
       labels:
-        app: nullclaw-lea
+        app: nullclaw-leo
     spec:
       initContainers:
         - name: init-config
@@ -78,7 +78,7 @@ spec:
             - name: data
               mountPath: /nullclaw-data
       containers:
-        - name: nullclaw-lea
+        - name: nullclaw-leo
           image: ghcr.io/rjullien/nullclaw-lea-config/nullclaw-custom:1.5.0
           args: ["gateway"]
           env:
@@ -109,7 +109,7 @@ spec:
               mountPath: /nullclaw-data
             # Mount existing OpenClaw memory as read-only for migration
             - name: openclaw-memory
-              mountPath: /nullclaw-data/workspace/openclaw-memory
+              mountPath: /nullclaw-data/workspace/lea
               readOnly: true
             - name: bridge-data
               mountPath: /nullclaw-data/workspace/bridge-data
@@ -146,15 +146,15 @@ spec:
       volumes:
         - name: config-template
           configMap:
-            name: nullclaw-lea-config
+            name: nullclaw-leo-config
         - name: config
           emptyDir: {}
         - name: skills
           configMap:
-            name: nullclaw-lea-skills
+            name: nullclaw-leo-skills
         - name: data
           persistentVolumeClaim:
-            claimName: nullclaw-lea-data
+            claimName: nullclaw-leo-data
         - name: bridge-data
           persistentVolumeClaim:
             claimName: nullclaw-lea-bridge

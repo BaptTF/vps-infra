@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nullclaw-lea-data
+  name: nullclaw-leo-data
   namespace: openclaw
 spec:
   accessModes:

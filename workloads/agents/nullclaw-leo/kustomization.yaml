@@ -3,9 +3,9 @@ kind: Kustomization
 
 resources:
   - infisical-secret.yaml
-  - nullclaw-lea-pvc.yaml
+  - nullclaw-leo-pvc.yaml
   - nullclaw-lea-bridge-pvc.yaml
-  - nullclaw-lea-deployment.yaml
+  - nullclaw-leo-deployment.yaml
   - nullclaw-service.yaml
   - whatsmeow-bridge-deployment.yaml
   - whatsmeow-bridge-service.yaml
