@@ -28,7 +28,7 @@ spec:
             - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-lea-secret
+                  name: nullclaw-leo-secret-bridge
                   key: WHATSMEOW_BRIDGE_TOKEN
                   optional: true
           ports:

@@ -54,17 +54,17 @@ spec:
             - name: GH_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-lea-secret
+                  name: nullclaw-leo-secret-init
                   key: GH_TOKEN
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-lea-secret
+                  name: nullclaw-leo-secret-init
                   key: TELEGRAM_BOT_TOKEN
             - name: WHATSMEOW_BRIDGE_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-lea-secret
+                  name: nullclaw-leo-secret-bridge
                   key: WHATSMEOW_BRIDGE_TOKEN
                   optional: true
           volumeMounts:
@@ -81,19 +81,10 @@ spec:
         - name: nullclaw-leo
           image: ghcr.io/rjullien/nullclaw-lea-config/nullclaw-custom:1.5.0
           args: ["gateway"]
+          envFrom:
+            - secretRef:
+                name: nullclaw-leo-secret
           env:
-            - name: JINA_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: nullclaw-lea-secret
-                  key: JINA_API_KEY
-                  optional: true
-            - name: BRAVE_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: nullclaw-lea-secret
-                  key: BRAVE_API_KEY
-                  optional: true
             - name: NULLCLAW_ALLOW_YOLO
               value: "1"
           ports:
@@ -110,9 +101,8 @@ spec:
             # Mount existing OpenClaw memory as read-only for migration
             - name: openclaw-memory
               mountPath: /nullclaw-data/workspace/lea
+              subPath: node/
               readOnly: true
-            - name: bridge-data
-              mountPath: /nullclaw-data/workspace/bridge-data
           livenessProbe:
             httpGet:
               path: /health
