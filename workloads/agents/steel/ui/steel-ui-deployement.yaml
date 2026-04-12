@@ -6,6 +6,7 @@ metadata:
   labels:
     app: steel-ui
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -15,7 +16,6 @@ spec:
       labels:
         app: steel-ui
     spec:
-      revisionHistoryLimit: 2
       containers:
         - name: ui
           image: ghcr.io/steel-dev/steel-browser-ui:latest

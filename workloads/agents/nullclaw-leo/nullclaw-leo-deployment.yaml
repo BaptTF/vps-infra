@@ -8,7 +8,8 @@ metadata:
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
-  replicas: 0
+  revisionHistoryLimit: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -22,7 +23,6 @@ spec:
       labels:
         app: nullclaw-leo
     spec:
-      revisionHistoryLimit: 2
       initContainers:
         - name: init-config
           image: busybox:1.36
