@@ -79,7 +79,7 @@ spec:
               mountPath: /nullclaw-data
       containers:
         - name: nullclaw-lea
-          image: ghcr.io/rjullien/nullclaw-lea-config/nullclaw-custom:1.2.0
+          image: ghcr.io/rjullien/nullclaw-lea-config/nullclaw-custom:1.3.0
           args: ["gateway"]
           env:
             - name: JINA_API_KEY
