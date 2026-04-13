@@ -40,6 +40,14 @@ spec:
               echo -e "github.com:\n  oauth_token: $GH_TOKEN\n  user: Louclaw\n  git_protocol: https" > /nullclaw-data/.config/gh/hosts.yml
               chown -R 65534:65534 /nullclaw-data/.config/gh
               chmod 600 /nullclaw-data/.config/gh/hosts.yml
+              # Copy skills into workspace (one SKILL.md per directory)
+              mkdir -p /nullclaw-data/workspace/skills
+              cd /skills-in
+              for skill in *; do
+                mkdir -p "/nullclaw-data/workspace/skills/$skill"
+                cp "/skills-in/$skill" "/nullclaw-data/workspace/skills/$skill/SKILL.md"
+              done
+              chown -R 65534:65534 /nullclaw-data/workspace/skills
           env:
             - name: GH_TOKEN
               valueFrom:
@@ -71,9 +79,11 @@ spec:
               readOnly: true
             - name: data
               mountPath: /nullclaw-data
+            - name: skills
+              mountPath: /skills-in
       containers:
         - name: nullclaw
-          image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-25b0df0
+          image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-a7ca9fc
           args: ["gateway"]
           env:
             - name: JINA_API_KEY
@@ -145,3 +155,6 @@ spec:
           persistentVolumeClaim:
             claimName: openclaw-home-pvc
             readOnly: true
+        - name: skills
+          configMap:
+            name: nullclaw-lou-skills

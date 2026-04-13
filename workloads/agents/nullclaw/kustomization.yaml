@@ -14,3 +14,56 @@ configMapGenerator:
   - name: lou-ssh-config
     files:
       - config=ssh_config
+  - name: nullclaw-lou-skills
+    files:
+      # gws skills
+      - gws-calendar-agenda=skills/gws-calendar-agenda/SKILL.md
+      - gws-calendar-insert=skills/gws-calendar-insert/SKILL.md
+      - gws-calendar=skills/gws-calendar/SKILL.md
+      - gws-docs-write=skills/gws-docs-write/SKILL.md
+      - gws-docs=skills/gws-docs/SKILL.md
+      - gws-drive-upload=skills/gws-drive-upload/SKILL.md
+      - gws-drive=skills/gws-drive/SKILL.md
+      - gws-gmail-forward=skills/gws-gmail-forward/SKILL.md
+      - gws-gmail-read=skills/gws-gmail-read/SKILL.md
+      - gws-gmail-reply-all=skills/gws-gmail-reply-all/SKILL.md
+      - gws-gmail-reply=skills/gws-gmail-reply/SKILL.md
+      - gws-gmail-send=skills/gws-gmail-send/SKILL.md
+      - gws-gmail-triage=skills/gws-gmail-triage/SKILL.md
+      - gws-gmail-watch=skills/gws-gmail-watch/SKILL.md
+      - gws-gmail=skills/gws-gmail/SKILL.md
+      - gws-keep=skills/gws-keep/SKILL.md
+      - gws-meet=skills/gws-meet/SKILL.md
+      - gws-people=skills/gws-people/SKILL.md
+      - gws-shared=skills/gws-shared/SKILL.md
+      - gws-sheets-append=skills/gws-sheets-append/SKILL.md
+      - gws-sheets-read=skills/gws-sheets-read/SKILL.md
+      - gws-sheets=skills/gws-sheets/SKILL.md
+      - gws-tasks=skills/gws-tasks/SKILL.md
+      - gws-workflow-email-to-task=skills/gws-workflow-email-to-task/SKILL.md
+      - gws-workflow-file-announce=skills/gws-workflow-file-announce/SKILL.md
+      - gws-workflow-meeting-prep=skills/gws-workflow-meeting-prep/SKILL.md
+      - gws-workflow-standup-report=skills/gws-workflow-standup-report/SKILL.md
+      - gws-workflow-weekly-digest=skills/gws-workflow-weekly-digest/SKILL.md
+      - gws-workflow=skills/gws-workflow/SKILL.md
+      - gws-slides=skills/gws-slides/SKILL.md
+      - recipe-block-focus-time=skills/recipe-block-focus-time/SKILL.md
+      - recipe-create-events-from-sheet=skills/recipe-create-events-from-sheet/SKILL.md
+      - recipe-create-gmail-filter=skills/recipe-create-gmail-filter/SKILL.md
+      - recipe-create-task-list=skills/recipe-create-task-list/SKILL.md
+      - recipe-create-vacation-responder=skills/recipe-create-vacation-responder/SKILL.md
+      - recipe-draft-email-from-doc=skills/recipe-draft-email-from-doc/SKILL.md
+      - recipe-email-drive-link=skills/recipe-email-drive-link/SKILL.md
+      - recipe-find-free-time=skills/recipe-find-free-time/SKILL.md
+      - recipe-generate-report-from-sheet=skills/recipe-generate-report-from-sheet/SKILL.md
+      - recipe-plan-weekly-schedule=skills/recipe-plan-weekly-schedule/SKILL.md
+      - recipe-reschedule-meeting=skills/recipe-reschedule-meeting/SKILL.md
+      - recipe-review-overdue-tasks=skills/recipe-review-overdue-tasks/SKILL.md
+      - recipe-save-email-attachments=skills/recipe-save-email-attachments/SKILL.md
+      - recipe-share-doc-and-notify=skills/recipe-share-doc-and-notify/SKILL.md
+      # Other skills
+      - context7=skills/context7/SKILL.md
+      - github=skills/github/SKILL.md
+      - skill-creator=skills/skill-creator/SKILL.md
+      - frontend-design=skills/frontend-design/SKILL.md
+      - steel-browser=skills/steel-browser/SKILL.md
