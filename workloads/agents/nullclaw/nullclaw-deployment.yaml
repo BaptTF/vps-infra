@@ -83,7 +83,7 @@ spec:
               mountPath: /skills-in
       containers:
         - name: nullclaw
-          image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-a7ca9fc
+          image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-0571d53
           args: ["gateway"]
           env:
             - name: JINA_API_KEY
