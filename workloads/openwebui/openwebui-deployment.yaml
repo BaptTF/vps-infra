@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui
+  namespace: openwebui
+  labels:
+    app: openwebui
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openwebui
+  template:
+    metadata:
+      labels:
+        app: openwebui
+    spec:
+      containers:
+        - name: openwebui
+          image: ghcr.io/open-webui/open-webui:v0.8.12
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: OPENAI_API_BASE_URL
+              value: "http://bifrost.openclaw.svc.cluster.local:8080/v1"
+            - name: OPENAI_API_KEY
+              value: "bifrost"
+            - name: WEBUI_AUTH
+              value: "true"
+            - name: ENABLE_OLLAMA_API
+              value: "false"
+            - name: DEFAULT_USER_ROLE
+              value: "pending"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-db-secret
+                  key: password
+            - name: DATABASE_URL
+              value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/openwebui"
+          envFrom:
+            - secretRef:
+                name: openwebui-secret
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
