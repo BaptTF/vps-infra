@@ -5,4 +5,4 @@ resources:
   - infisical-secret.yaml
   - openwebui-deployment.yaml
   - openwebui-service.yaml
-  - openwebui-ingress.yaml
+  - ingressroute.yaml
