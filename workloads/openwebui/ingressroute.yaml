@@ -12,4 +12,5 @@ spec:
       services:
         - name: openwebui
           port: 8080
-  tls: {}
+  tls:
+    secretName: tls-certificate
