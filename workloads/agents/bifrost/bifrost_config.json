@@ -20,7 +20,7 @@
       ],
       "network_config": {
         "default_request_timeout_in_seconds": 600,
-        "stream_idle_timeout_in_seconds": 120,
+        "stream_idle_timeout_in_seconds": 300,
         "max_retries": 3,
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
