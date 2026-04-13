@@ -6,3 +6,11 @@ resources:
   - openwebui-deployment.yaml
   - openwebui-service.yaml
   - openwebui-ingress.yaml
+
+configMapGenerator:
+  - name: openwebui-config
+    literals:
+      - DB_HOST=postgres-cluster-rw.cnpg-system.svc.cluster.local
+      - DB_PORT=5432
+      - DB_USER=openwebui
+      - DB_NAME=openwebui
