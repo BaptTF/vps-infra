@@ -31,7 +31,8 @@
         "base_provider_type": "openai",
         "allowed_requests": {
           "chat_completion": true,
-          "chat_completion_stream": true
+          "chat_completion_stream": true,
+          "list_models": true
         }
       },
       "keys": [
