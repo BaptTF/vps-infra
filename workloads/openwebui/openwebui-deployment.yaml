@@ -33,7 +33,11 @@ spec:
               value: "false"
             - name: DEFAULT_USER_ROLE
               value: "pending"
+            - name: DATABASE_URL
+              value: "postgresql://$(username):$(password)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
           envFrom:
+            - configMapRef:
+                name: openwebui-config
             - secretRef:
                 name: openwebui-secret
             - secretRef:

@@ -12,5 +12,4 @@ configMapGenerator:
     literals:
       - DB_HOST=postgres-cluster-rw.cnpg-system.svc.cluster.local
       - DB_PORT=5432
-      - DB_USER=openwebui
       - DB_NAME=openwebui
