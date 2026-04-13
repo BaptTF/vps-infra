@@ -33,15 +33,21 @@ spec:
               value: "false"
             - name: DEFAULT_USER_ROLE
               value: "pending"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-db-secret
+                  key: password
             - name: DATABASE_URL
-              value: "postgresql://$(username):$(password)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
+              value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/openwebui"
           envFrom:
-            - configMapRef:
-                name: openwebui-config
             - secretRef:
                 name: openwebui-secret
-            - secretRef:
-                name: openwebui-db-secret
           livenessProbe:
             httpGet:
               path: /health
