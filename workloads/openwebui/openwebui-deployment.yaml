@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: openwebui
+  namespace: openwebui
   labels:
     app: openwebui
 spec:
@@ -17,19 +18,36 @@ spec:
     spec:
       containers:
         - name: openwebui
-          image: ghcr.io/open-webui/open-webui:main
+          image: ghcr.io/open-webui/open-webui:v0.8.12
           ports:
             - containerPort: 8080
               name: http
           env:
             - name: OPENAI_API_BASE_URL
-              value: "http://bifrost:8080/v1"
+              value: "http://bifrost.openclaw.svc.cluster.local:8080/v1"
             - name: OPENAI_API_KEY
               value: "bifrost"
             - name: WEBUI_AUTH
               value: "true"
             - name: ENABLE_OLLAMA_API
               value: "false"
+            - name: DEFAULT_USER_ROLE
+              value: "pending"
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: WEBUI_SECRET_KEY
+            - name: WEBUI_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: WEBUI_ADMIN_EMAIL
+            - name: WEBUI_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: WEBUI_ADMIN_PASSWORD
           volumeMounts:
             - name: data
               mountPath: /app/backend/data
