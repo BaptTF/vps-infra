@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - infisical-secret.yaml
+  - certificate.yaml
   - openwebui-deployment.yaml
   - openwebui-service.yaml
   - ingressroute.yaml
