@@ -30,3 +30,10 @@ spec:
         login: true
         passwordSecret:
           name: lacoope-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: openwebui
+        login: true
+        passwordSecret:
+          name: openwebui-db-secret

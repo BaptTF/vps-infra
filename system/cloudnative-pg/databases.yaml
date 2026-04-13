@@ -30,3 +30,14 @@ spec:
   owner: lacoope
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: openwebui-db
+  namespace: cnpg-system
+spec:
+  name: openwebui
+  owner: openwebui
+  cluster:
+    name: postgres-cluster

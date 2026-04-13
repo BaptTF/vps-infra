@@ -33,24 +33,11 @@ spec:
               value: "false"
             - name: DEFAULT_USER_ROLE
               value: "pending"
-            - name: WEBUI_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: openwebui-secret
-                  key: WEBUI_SECRET_KEY
-            - name: WEBUI_ADMIN_EMAIL
-              valueFrom:
-                secretKeyRef:
-                  name: openwebui-secret
-                  key: WEBUI_ADMIN_EMAIL
-            - name: WEBUI_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: openwebui-secret
-                  key: WEBUI_ADMIN_PASSWORD
-          volumeMounts:
-            - name: data
-              mountPath: /app/backend/data
+          envFrom:
+            - secretRef:
+                name: openwebui-secret
+            - secretRef:
+                name: openwebui-db-secret
           livenessProbe:
             httpGet:
               path: /health
@@ -74,7 +61,3 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: openwebui-data
