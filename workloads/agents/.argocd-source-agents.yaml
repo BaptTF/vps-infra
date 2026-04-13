@@ -1,4 +1,4 @@
 kustomize:
   images:
   - ghcr.io/bapttf/openclaw-lea-config:sha-2011ebc1d9af2326a941611dad2a00e16ec65715
-  - ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-738f56d
+  - ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-a7ca9fc
