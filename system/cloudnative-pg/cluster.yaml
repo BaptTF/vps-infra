@@ -14,6 +14,23 @@ spec:
     limits:
       cpu: 100m
       memory: 128Mi
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://cnpg-backups/
+      endpointURL: https://e16df4d29f7d54d2f57456402bebd130.r2.cloudflarestorage.com
+      s3Credentials:
+        accessKeyId:
+          name: cnpg-r2-credentials
+          key: AWS_ACCESS_KEY_ID
+        secretAccessKey:
+          name: cnpg-r2-credentials
+          key: AWS_SECRET_ACCESS_KEY
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+    retentionPolicy: "30d"
+
   managed:
     roles:
       - connectionLimit: -1
