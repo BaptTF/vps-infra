@@ -9,6 +9,8 @@ victoria-metrics-operator:
   crds:
     # plain: false so CRDs are rendered as templates (required for Kustomize Helm inflation)
     plain: false
+    cleanup:
+      enabled: false
   operator:
     # Convert existing Prometheus ServiceMonitor/PrometheusRule CRDs to VM equivalents
     disable_prometheus_converter: false
@@ -68,7 +70,15 @@ grafana:
       cpu: 25m
       memory: 100Mi
     limits:
-      memory: 200Mi
+      memory: 300Mi
+
+  sidecar:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
 
   # Loki datasource for logs
   additionalDataSources:
