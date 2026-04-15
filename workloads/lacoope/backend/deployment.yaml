@@ -17,7 +17,7 @@ spec:
         - name: ghcr-login-secret
       containers:
         - name: backend
-          image: ghcr.io/bapttf/lacoopebackend:0.1.0
+          image: ghcr.io/bapttf/lacoopebackend:0.2.0
           imagePullPolicy: IfNotPresent
           resources:
             requests:
