@@ -24,11 +24,11 @@ configs:
 repoServer:
   resources:
     requests:
-      cpu: 500m
+      cpu: 200m
       memory: 512Mi
     limits:
       cpu: 1000m
-      memory: 512Mi
+      memory: 1Gi
   env:
     - name: ARGOCD_EXEC_TIMEOUT
       value: "5m"
