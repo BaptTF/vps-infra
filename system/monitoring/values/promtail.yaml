@@ -1,0 +1,12 @@
+# Promtail - ships container logs to Loki
+
+config:
+  clients:
+    - url: http://loki-gateway.monitoring.svc:80/loki/api/v1/push
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 48Mi
+  limits:
+    memory: 96Mi

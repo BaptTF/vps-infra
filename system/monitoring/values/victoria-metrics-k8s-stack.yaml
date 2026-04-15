@@ -1,0 +1,119 @@
+# VictoriaMetrics K8s Stack - lightweight monitoring for single-node k3s
+# Includes: VM Operator, VMSingle (TSDB), VMAgent (scraper), Grafana, node-exporter, kube-state-metrics
+
+# -- ArgoCD release name override for proper ServiceScrape selection
+argocdReleaseOverride: "vmstack"
+
+victoria-metrics-operator:
+  enabled: true
+  operator:
+    # Convert existing Prometheus ServiceMonitor/PrometheusRule CRDs to VM equivalents
+    disable_prometheus_converter: false
+
+# ---------- VMSingle (metrics storage) ----------
+vmsingle:
+  enabled: true
+  spec:
+    retentionPeriod: "90d"
+    storage:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+# ---------- VMAgent (metrics scraper) ----------
+vmagent:
+  enabled: true
+  spec:
+    scrapeInterval: 30s
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        memory: 192Mi
+
+# ---------- VMAlert + Alertmanager (disabled to save RAM) ----------
+vmalert:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+# ---------- Grafana ----------
+grafana:
+  enabled: true
+
+  admin:
+    existingSecret: "grafana-auth"
+    userKey: "admin-user"
+    passwordKey: "admin-password"
+
+  # Ingress handled by separate Tailscale Ingress resource
+  ingress:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 25m
+      memory: 100Mi
+    limits:
+      memory: 200Mi
+
+  # Loki datasource for logs
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki-gateway.monitoring.svc:80
+      access: proxy
+      isDefault: false
+
+# ---------- Dashboards ----------
+defaultDashboards:
+  enabled: true
+
+defaultRules:
+  create: false
+
+# ---------- Kubernetes component scraping ----------
+# k3s doesn't expose these components on standard endpoints
+kubeControllerManager:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+# kubelet and API server work on k3s
+kubelet:
+  enabled: true
+kubeApiServer:
+  enabled: true
+
+# ---------- Sub-charts ----------
+prometheus-node-exporter:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 20Mi
+    limits:
+      memory: 40Mi
+
+kube-state-metrics:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi

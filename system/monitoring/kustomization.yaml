@@ -4,25 +4,26 @@ namespace: monitoring
 
 resources:
   - infisical-secret.yaml
+  - grafana-tailscale-ingress.yaml
 
 helmCharts:
-  - name: kube-prometheus-stack
-    repo: https://prometheus-community.github.io/helm-charts
-    releaseName: prometheus
-    version: 56.2.0 # Always pin versions in production!
-    valuesFile: values/kube-prometheus-stack.yaml
+  - name: victoria-metrics-k8s-stack
+    repo: https://victoriametrics.github.io/helm-charts
+    releaseName: vmstack
+    version: 0.73.0
+    valuesFile: values/victoria-metrics-k8s-stack.yaml
     namespace: monitoring
 
-  - name: loki-stack
+  - name: loki
     repo: https://grafana.github.io/helm-charts
     releaseName: loki
-    version: 2.10.2
-    valuesFile: values/loki-stack.yaml
+    version: 6.55.0
+    valuesFile: values/loki.yaml
     namespace: monitoring
 
-  - name: tempo
+  - name: promtail
     repo: https://grafana.github.io/helm-charts
-    releaseName: tempo
-    version: 1.8.0
-    valuesFile: values/tempo.yaml
+    releaseName: promtail
+    version: 6.17.1
+    valuesFile: values/promtail.yaml
     namespace: monitoring
