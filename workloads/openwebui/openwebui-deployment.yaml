@@ -27,8 +27,6 @@ spec:
           env:
             - name: OPENAI_API_BASE_URL
               value: "http://bifrost.openclaw.svc.cluster.local:8080/v1"
-            - name: OPENAI_API_KEY
-              value: "bifrost"
             - name: WEBUI_AUTH
               value: "true"
             - name: ENABLE_OLLAMA_API
