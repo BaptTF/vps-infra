@@ -91,6 +91,8 @@ spec:
                 secretKeyRef:
                   name: nullclaw-secret
                   key: JINA_API_KEY
+            - name: NULLCLAW_ALLOW_YOLO
+              value: "1"
           ports:
             - containerPort: 3000
               name: http
