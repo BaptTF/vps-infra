@@ -13,10 +13,12 @@ spec:
       labels:
         app: lacoope-frontend
     spec:
+      imagePullSecrets:
+        - name: ghcr-login-secret
       containers:
         - name: frontend
-          image: git.bapttf.com/bapttf/lacoopefrontend:latest
-          imagePullPolicy: Always
+          image: ghcr.io/bapttf/lacoopefrontend:0.1.0
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               cpu: 20m
@@ -39,31 +41,3 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 3
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: lacoope-frontend
-  namespace: lacoope
-spec:
-  selector:
-    app: lacoope-frontend
-  ports:
-    - port: 3000
-      targetPort: 3000
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: lacoope-frontend-ingress
-  namespace: lacoope
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`lacoope.bapttf.com`)
-      kind: Rule
-      services:
-        - name: lacoope-frontend
-          port: 3000
-  tls: {}

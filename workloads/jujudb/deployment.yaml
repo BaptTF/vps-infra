@@ -15,13 +15,12 @@ spec:
       labels:
         app: jujudb
     spec:
-      # Si ton registre git.bapttf.com est privé, décommente les lignes suivantes et ajoute le secret
-      # imagePullSecrets:
-      #   - name: regcred 
+      imagePullSecrets:
+        - name: ghcr-login-secret
       containers:
         - name: jujudb
-          image: git.bapttf.com/bapttf/jujudb:latest
-          imagePullPolicy: Always
+          image: ghcr.io/bapttf/jujudb:0.1.0
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               cpu: 20m

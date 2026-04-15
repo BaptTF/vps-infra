@@ -1,16 +1,16 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: jujudb
-  namespace: jujdb
+  name: lacoope-api-ingress
+  namespace: lacoope
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`jujudb.bapttf.com`)
+    - match: Host(`lacoope-api.bapttf.com`)
       kind: Rule
       services:
-        - name: jujudb
+        - name: lacoope-backend
           port: 8080
   tls:
-    secretName: tls-certificate
+    secretName: tls-certificate-backend
