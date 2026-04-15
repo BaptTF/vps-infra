@@ -1,0 +1,62 @@
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.13.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: velero-backups # TODO: replace with your R2 bucket name
+      default: true
+      accessMode: ReadWrite
+      config:
+        region: auto
+        s3ForcePathStyle: "true"
+        s3Url: https://e16df4d29f7d54d2f57456402bebd130.r2.cloudflarestorage.com
+        checksumAlgorithm: ""
+
+  volumeSnapshotLocation: []
+
+  defaultVolumesToFsBackup: true
+
+  extraEnvVars:
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: velero-r2-credentials
+          key: AWS_ACCESS_KEY_ID
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: velero-r2-credentials
+          key: AWS_SECRET_ACCESS_KEY
+
+snapshotsEnabled: false
+backupsEnabled: true
+
+credentials:
+  useSecret: false
+
+deployNodeAgent: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+schedules:
+  daily-backup:
+    disabled: false
+    schedule: "0 3 * * *"
+    useOwnerReferencesInBackup: false
+    template:
+      ttl: "720h"
+      storageLocation: default
+      defaultVolumesToFsBackup: true
