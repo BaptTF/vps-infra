@@ -182,7 +182,7 @@
     "require_pairing": false
   },
   "autonomy": {
-    "level": "full",
+    "level": "yolo",
     "workspace_only": false,
     "max_actions_per_hour": 1000,
     "allowed_commands": ["*"],
