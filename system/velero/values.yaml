@@ -60,3 +60,7 @@ schedules:
       ttl: "720h"
       storageLocation: default
       defaultVolumesToFsBackup: true
+      excludedNamespaces:
+        - cnpg-system
+        - minio
+        - meilisearch
