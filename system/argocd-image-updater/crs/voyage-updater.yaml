@@ -31,7 +31,7 @@ spec:
       secretsScope:
         projectSlug: infrastructure
         envSlug: prod
-        secretsPath: /github
+        secretsPath: /github/r
       credentialsRef:
         secretName: infisical-universal-auth
         secretNamespace: infisical
