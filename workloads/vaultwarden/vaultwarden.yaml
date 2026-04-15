@@ -37,6 +37,11 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /data
+        resources:
+          requests:
+            memory: 64Mi
+          limits:
+            memory: 128Mi
       volumes:
       - name: data
         persistentVolumeClaim:
