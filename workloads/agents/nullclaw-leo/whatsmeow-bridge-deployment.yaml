@@ -17,6 +17,8 @@ spec:
     metadata:
       labels:
         app: whatsmeow-bridge
+      annotations:
+        backup.velero.io/backup-volumes: state
     spec:
       containers:
         - name: whatsmeow-bridge

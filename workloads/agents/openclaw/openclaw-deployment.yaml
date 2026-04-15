@@ -21,6 +21,8 @@ spec:
     metadata:
       labels:
         app: openclaw
+      annotations:
+        backup.velero.io/backup-volumes: ""
     spec:
       containers:
         - name: openclaw

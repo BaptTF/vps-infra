@@ -22,6 +22,8 @@ spec:
     metadata:
       labels:
         app: nullclaw-leo
+      annotations:
+        backup.velero.io/backup-volumes: ""
     spec:
       initContainers:
         - name: init-config
