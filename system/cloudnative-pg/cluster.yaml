@@ -7,10 +7,17 @@ spec:
   instances: 1
   storage:
     size: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
   managed:
     roles:
-      - connectionLimit: -1	
-        ensure: present	
+      - connectionLimit: -1
+        ensure: present
         inherit: true
         name: forgejo
         login: true
