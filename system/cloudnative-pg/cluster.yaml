@@ -9,11 +9,11 @@ spec:
     size: 2Gi
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 10m
+      memory: 32Mi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 100m
+      memory: 128Mi
   managed:
     roles:
       - connectionLimit: -1

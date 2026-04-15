@@ -24,6 +24,13 @@ spec:
         - name: voyage-app
           image: ghcr.io/rjullien/voyage-app
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
           ports:
             - containerPort: 80
               name: http-web

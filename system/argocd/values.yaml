@@ -3,17 +3,9 @@
 redis-ha:
   enabled: false
 
-# Forcer l'utilisation du Redis standard
-redis:
-  enabled: true
-
 # S'assurer que les composants annexes standards sont activés
 dex:
   enabled: false
-applicationSet:
-  enabled: true
-notifications:
-  enabled: true
 
 configs:
   cm:
@@ -40,3 +32,51 @@ repoServer:
   env:
     - name: ARGOCD_EXEC_TIMEOUT
       value: "5m"
+
+server:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+controller:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+redis:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+applicationSet:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+notifications:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
