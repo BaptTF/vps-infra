@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: lacoope-frontend
   namespace: lacoope
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   selector:
