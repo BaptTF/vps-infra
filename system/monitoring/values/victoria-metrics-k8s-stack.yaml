@@ -6,6 +6,9 @@ argocdReleaseOverride: "vmstack"
 
 victoria-metrics-operator:
   enabled: true
+  crds:
+    # plain: false so CRDs are rendered as templates (required for Kustomize Helm inflation)
+    plain: false
   operator:
     # Convert existing Prometheus ServiceMonitor/PrometheusRule CRDs to VM equivalents
     disable_prometheus_converter: false
