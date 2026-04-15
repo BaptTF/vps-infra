@@ -14,6 +14,12 @@ victoria-metrics-operator:
   operator:
     # Convert existing Prometheus ServiceMonitor/PrometheusRule CRDs to VM equivalents
     disable_prometheus_converter: false
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 96Mi
 
 # ---------- VMSingle (metrics storage) ----------
 vmsingle:
@@ -29,9 +35,9 @@ vmsingle:
     resources:
       requests:
         cpu: 50m
-        memory: 256Mi
+        memory: 128Mi
       limits:
-        memory: 512Mi
+        memory: 384Mi
 
 # ---------- VMAgent (metrics scraper) ----------
 vmagent:
@@ -70,7 +76,7 @@ grafana:
       cpu: 25m
       memory: 100Mi
     limits:
-      memory: 300Mi
+      memory: 256Mi
 
   sidecar:
     resources:
@@ -118,15 +124,15 @@ prometheus-node-exporter:
   resources:
     requests:
       cpu: 10m
-      memory: 20Mi
+      memory: 16Mi
     limits:
-      memory: 40Mi
+      memory: 32Mi
 
 kube-state-metrics:
   enabled: true
   resources:
     requests:
       cpu: 10m
-      memory: 32Mi
+      memory: 24Mi
     limits:
-      memory: 64Mi
+      memory: 48Mi

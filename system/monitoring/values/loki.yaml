@@ -84,8 +84,10 @@ monitoring:
     enabled: false
     grafanaAgent:
       installOperator: false
-  lokiCanary:
-    enabled: false
+
+# Disable canary (DaemonSet that tests log ingestion -- not needed)
+lokiCanary:
+  enabled: false
 
 # Disable test
 test:
