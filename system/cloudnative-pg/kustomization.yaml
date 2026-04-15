@@ -21,3 +21,5 @@ resources:
   - cluster.yaml
   - databases.yaml
   - database-infisical-secrets.yaml
+  - backup-infisical-secret.yaml
+  - scheduled-backup.yaml
