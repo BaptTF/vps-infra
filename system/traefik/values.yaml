@@ -51,16 +51,9 @@ ingressClass:
   isDefaultClass: true
   name: traefik
 
-# Enable dashboard
+# Dashboard disabled - use Prometheus/Grafana metrics instead
 dashboard:
-  enabled: true
-  ingress:
-    enabled: true
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    hosts:
-      - traefik.bapttf.com
-    tls: []
+  enabled: false
 
 # Logs configuration
 logs:
