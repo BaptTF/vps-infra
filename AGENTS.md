@@ -1,6 +1,8 @@
 # AGENTS.md
 
-GitOps infrastructure for a single k3s VPS (domain: `bapttf.com`), managed by ArgoCD with the App of Apps pattern. No CI pipeline, no task runner -- pushing to `main` is the deploy mechanism.
+GitOps infrastructure for a multi-node k3s cluster (domain: `bapttf.com`), managed by ArgoCD with the App of Apps pattern. No CI pipeline, no task runner -- pushing to `main` is the deploy mechanism.
+
+Cluster nodes communicate over Tailscale (WireGuard). Flannel VXLAN is used for the pod overlay network, encapsulated inside the Tailscale tunnel.
 
 ## Repo layout
 
@@ -50,6 +52,7 @@ kubectl create secret generic infisical-universal-auth \
 - TLS certs use DNS-01 via Cloudflare (token from Infisical)
 - Public ingress: Traefik `IngressRoute` CRs. Private ingress: Tailscale `Ingress` with `ingressClassName: tailscale`
 - ArgoCD Image Updater handles automatic image tag bumps for some workloads (openclaw, nullclaw, voyage) by writing back to Git
+- Resource requests must be right-sized to actual usage -- the scheduler relies on them for multi-node placement. `system-reserved` and `kube-reserved` are configured on all nodes so allocatable reflects real available memory
 
 ## Gotchas
 
@@ -57,4 +60,4 @@ kubectl create secret generic infisical-universal-auth \
 - `pub-cert.pem` is the SealedSecrets public cert. Committed intentionally -- it is not a secret
 - Some workloads under `workloads/` are plain YAML directories (e.g., `vaultwarden/`, `whoami/`) with no `kustomization.yaml` -- ArgoCD handles them as raw manifests
 - `workloads/agents/` is a Kustomize aggregator with subdirectories per agent (openclaw, nullclaw, bifrost, steel, etc.)
-- Monitoring stack (Prometheus, Loki, Tempo) is currently disabled -- its Application CRs are in `disable-apps/`
+- Monitoring stack (VictoriaMetrics, Grafana, Loki, Promtail) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)

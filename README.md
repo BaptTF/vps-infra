@@ -25,17 +25,18 @@ sudo sysctl -p /etc/sysctl.d/99-inotify.conf
 
 ## Setup Guide
 
-### Step 1: Install k3s (without Traefik)
+### Step 1: Install k3s server (without Traefik)
 
 ```bash
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh 
-# 1. On récupère l'IP de Tailscale dans une variable
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh
+
+# 1. Get the Tailscale IP
 TS_IP=$(tailscale ip -4)
 
-# 2. On s'assure que le dossier de configuration existe
+# 2. Create the config directory
 sudo mkdir -p /etc/rancher/k3s
 
-# 3. On écrit la configuration avec tee en injectant la variable
+# 3. Write the k3s server config
 cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml > /dev/null
 bind-address: "$TS_IP"
 node-ip: "$TS_IP"
@@ -43,8 +44,16 @@ advertise-address: "$TS_IP"
 tls-san:
   - "$TS_IP"
 flannel-iface: "tailscale0"
+kubelet-arg:
+  - "system-reserved=memory=1800Mi"
+  - "kube-reserved=memory=256Mi"
 EOF
+
+# 4. Restart k3s to apply the config
+sudo systemctl restart k3s
 ```
+
+> **Note on system-reserved:** By default k3s sets allocatable = capacity, so the scheduler thinks ALL RAM is available for pods. The `system-reserved` and `kube-reserved` kubelet args reserve memory for the k3s server process (~1.6Gi) and OS, giving the scheduler a realistic view. Adjust values based on observed `k3s server` RSS (`ps aux --sort=-rss | grep k3s`).
 
 ### Step 2: Configure kubectl access
 
@@ -117,26 +126,111 @@ kubectl create secret generic infisical-universal-auth \
 
 ---
 
+## Adding a Worker Node
+
+Worker nodes run k3s in agent mode and join the existing cluster over Tailscale. The inter-node traffic (Flannel VXLAN) is encapsulated inside the Tailscale WireGuard tunnel.
+
+### Prerequisites
+
+- Debian/Ubuntu VM with Tailscale installed and connected to the same tailnet
+- SSH access as root (Tailscale SSH or standard SSH)
+- The k3s server node-token (on the master at `/var/lib/rancher/k3s/server/node-token`)
+
+### Step 1: Create the agent config
+
+```bash
+# On the worker node
+MASTER_TS_IP="<tailscale IP of the master node>"
+WORKER_TS_IP=$(tailscale ip -4)
+K3S_TOKEN="<contents of /var/lib/rancher/k3s/server/node-token on master>"
+
+sudo mkdir -p /etc/rancher/k3s /var/lib/rancher/k3s/agent
+
+# Write token to a file (not in config.yaml, to avoid leaking it)
+echo "$K3S_TOKEN" | sudo tee /var/lib/rancher/k3s/agent/token > /dev/null
+sudo chmod 600 /var/lib/rancher/k3s/agent/token
+
+# Write agent config
+cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml > /dev/null
+server: "https://${MASTER_TS_IP}:6443"
+token-file: "/var/lib/rancher/k3s/agent/token"
+node-ip: "${WORKER_TS_IP}"
+flannel-iface: "tailscale0"
+kubelet-arg:
+  - "system-reserved=memory=512Mi"
+  - "kube-reserved=memory=256Mi"
+EOF
+```
+
+> **Note:** Worker agent uses lower system-reserved (512Mi vs 1800Mi for server) because the k3s agent binary is much lighter than the server.
+
+### Step 2: Install k3s agent
+
+```bash
+curl -sfL https://get.k3s.io | sh -s - agent
+```
+
+K3s reads `/etc/rancher/k3s/config.yaml` automatically. The agent will connect to the master over Tailscale and join the cluster.
+
+### Step 3: Label the node
+
+From any machine with kubectl access:
+
+```bash
+# Label for scheduling purposes
+kubectl label nodes <worker-node-name> node-role=worker
+
+# Verify
+kubectl get nodes -o wide
+```
+
+### Removing a worker node
+
+```bash
+# On the worker
+sudo /usr/local/bin/k3s-agent-uninstall.sh
+
+# From kubectl
+kubectl delete node <worker-node-name>
+```
+
+---
+
+## Scheduling Strategy
+
+The cluster uses the default Kubernetes scheduler with correctly-sized resource requests to achieve automatic load balancing:
+
+- **Resource requests must match real usage.** The scheduler uses requests (not limits) to decide pod placement. Over-provisioned requests waste allocatable capacity; under-provisioned requests cause the scheduler to overcommit nodes. Use `kubectl top pods -A` to compare actual usage vs requests.
+- **system-reserved is configured** on all nodes so that allocatable reflects real available memory (excludes k3s binary, OS, kernel buffers).
+- **Services with PVCs are naturally pinned** to the node where the PV was provisioned by `local-path-provisioner`. They won't migrate automatically.
+- **Stateless workloads float freely** between nodes based on available resources.
+- **If a worker node goes down**, stateless pods will reschedule on the master only if the master has enough allocatable headroom (based on requests). If not, they stay in `Pending` until the worker recovers.
+
+### Current node layout (for reference)
+
+| Node | Role | RAM | Allocatable | Typical workloads |
+|------|------|-----|-------------|-------------------|
+| `vmi2735515` (Contabo VPS) | control-plane | 8Gi | ~5.9Gi | ArgoCD, CNPG, Traefik, cert-manager, agents, stateful services (MinIO, CouchDB, Meilisearch) |
+| `bapt-debian` (worker) | worker | 8Gi | ~7.2Gi | Monitoring stack, OpenWebUI, overflow from master |
+
+---
+
 ## Services
 
-| Service | URL |
-|---------|-----|
-| ArgoCD | https://argocd.bapttf.com |
-| Grafana | https://grafana.bapttf.com |
-| Prometheus | https://prometheus.bapttf.com |
-| Infisical | https://infisical.bapttf.com |
-| Vaultwarden | https://vault.bapttf.com |
-| Forgejo | https://git.bapttf.com |
-| CouchDB | https://obsidian-livesync.bapttf.com |
-| Garage S3 | https://s3.garage.bapttf.com |
-| Garage UI | https://garage-ui.bapttf.com |
-| Meilisearch | https://meilisearch.bapttf.com |
-| JujuDB | https://jujudb.bapttf.com |
-| LaCoope | https://lacoope.bapttf.com |
-| LaCoope API | https://lacoope-api.bapttf.com |
-| OpenCLAW | https://openclaw.bapttf.com |
-| LiteLLM | https://litellm.bapttf.com |
-| Tailscale | VPN (connect via Tailscale client) |
+| Service | URL | Access |
+|---------|-----|--------|
+| ArgoCD | https://argocd.bapttf.com | Public |
+| Grafana | https://grafana (Tailscale) | Tailscale VPN |
+| Vaultwarden | https://vault.bapttf.com | Public |
+| CouchDB (Obsidian LiveSync) | https://obsidian-livesync.bapttf.com | Public |
+| Meilisearch | https://meilisearch.bapttf.com | Public |
+| JujuDB | https://jujudb.bapttf.com | Public |
+| LaCoope | https://lacoope.bapttf.com | Public |
+| LaCoope API | https://lacoope-api.bapttf.com | Public |
+| OpenCLAW | https://openclaw.bapttf.com | Public |
+| OpenWebUI | https://openwebui.bapttf.com | Public |
+| MinIO | https://minio (Tailscale) | Tailscale VPN |
+| Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 
 ---
 
