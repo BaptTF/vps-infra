@@ -3,6 +3,8 @@ replicas: 1
 
 resources:
   requests:
+    memory: 160Mi
+  limits:
     memory: 512Mi
 
 persistence:

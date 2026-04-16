@@ -9,3 +9,18 @@ resources:
   - https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/config/install.yaml
   # Git credentials for write-back
   - infisical-secret.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: argocd-image-updater
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
