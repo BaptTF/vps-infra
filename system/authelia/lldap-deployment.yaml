@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lldap
+  namespace: authelia
+  labels:
+    app: lldap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lldap
+  template:
+    metadata:
+      labels:
+        app: lldap
+    spec:
+      containers:
+        - name: lldap
+          image: lldap/lldap:v0.6.2-rootless
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              export LLDAP_DATABASE_URL="postgres://lldap:${LLDAP_DB_PASSWORD}@postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/lldap"
+              exec /app/lldap run
+          ports:
+            - containerPort: 3890
+              name: ldap
+            - containerPort: 17170
+              name: web
+          env:
+            - name: LLDAP_LDAP_BASE_DN
+              value: dc=bapttf,dc=com
+            - name: LLDAP_HTTP_URL
+              value: https://lldap
+            - name: LLDAP_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: db-password
+            - name: LLDAP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: jwt-secret
+            - name: LLDAP_LDAP_USER_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: ldap-user-pass
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 10m
+            limits:
+              memory: 128Mi
+              cpu: 200m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 17170
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 17170
+            initialDelaySeconds: 5
+            periodSeconds: 10

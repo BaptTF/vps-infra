@@ -44,6 +44,8 @@ providers:
   kubernetesIngress:
     publishedService:
       enabled: true
+  kubernetesCRD:
+    allowCrossNamespace: true
 
 # IngressClass configuration
 ingressClass:

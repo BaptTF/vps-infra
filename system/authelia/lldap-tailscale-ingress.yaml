@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lldap
+  namespace: authelia
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - lldap
+  defaultBackend:
+    service:
+      name: lldap
+      port:
+        number: 17170

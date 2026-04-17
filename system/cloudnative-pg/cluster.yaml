@@ -61,3 +61,17 @@ spec:
         login: true
         passwordSecret:
           name: openwebui-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: authelia
+        login: true
+        passwordSecret:
+          name: authelia-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: lldap
+        login: true
+        passwordSecret:
+          name: lldap-db-secret
