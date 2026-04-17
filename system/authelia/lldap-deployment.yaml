@@ -36,8 +36,8 @@ spec:
             - name: LLDAP_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: lldap-secrets
-                  key: db-password
+                  name: lldap-db-secret
+                  key: password
             - name: LLDAP_JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -46,7 +46,7 @@ spec:
             - name: LLDAP_LDAP_USER_PASS
               valueFrom:
                 secretKeyRef:
-                  name: lldap-secrets
+                  name: lldap-auth-secret
                   key: ldap-user-pass
           resources:
             requests:

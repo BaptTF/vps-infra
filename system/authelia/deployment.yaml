@@ -39,13 +39,13 @@ spec:
             - name: AUTHELIA_STORAGE_POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: authelia-secrets
-                  key: postgres-password
+                  name: authelia-db-secret
+                  key: password
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: authelia-secrets
-                  key: ldap-password
+                  name: lldap-auth-secret
+                  key: ldap-user-pass
           volumeMounts:
             - name: config
               mountPath: /config
