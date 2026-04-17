@@ -75,3 +75,10 @@ spec:
         login: true
         passwordSecret:
           name: lldap-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: tripkit
+        login: true
+        passwordSecret:
+          name: tripkit-db-secret

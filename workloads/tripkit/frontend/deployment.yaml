@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripkit-frontend
+  namespace: tripkit
+  labels:
+    app: tripkit-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tripkit-frontend
+  template:
+    metadata:
+      labels:
+        app: tripkit-frontend
+    spec:
+      imagePullSecrets:
+        - name: ghcr-login-secret
+      containers:
+        - name: frontend
+          image: ghcr.io/rjullien/tripkit-frontend:0.1.0
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 16Mi
+              cpu: 5m
+            limits:
+              memory: 64Mi
+              cpu: 100m
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 30

@@ -63,3 +63,14 @@ spec:
   owner: lldap
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: tripkit-db
+  namespace: cnpg-system
+spec:
+  name: tripkit
+  owner: tripkit
+  cluster:
+    name: postgres-cluster

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripkit-frontend
+  namespace: tripkit
+spec:
+  selector:
+    app: tripkit-frontend
+  ports:
+    - port: 80
+      targetPort: 80
