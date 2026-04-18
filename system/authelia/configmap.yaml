@@ -21,7 +21,7 @@ data:
         implementation: lldap
         address: ldap://lldap.authelia.svc.cluster.local:3890
         base_dn: DC=bapttf,DC=com
-        user: UID=authelia,OU=people,DC=bapttf,DC=com
+        user: UID=admin,OU=people,DC=bapttf,DC=com
 
     session:
       name: authelia_session
