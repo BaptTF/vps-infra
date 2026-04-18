@@ -48,9 +48,6 @@ access_control:
     - domain: tripkit.bapttf.com
       policy: one_factor
       subject: "group:family"
-    - domain: "*.juju.bapttf.com"
-      policy: one_factor
-      subject: "group:family"
     - domain: "*.bapttf.com"
       policy: one_factor
       subject: "group:admin"
