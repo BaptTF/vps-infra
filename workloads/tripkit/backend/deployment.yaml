@@ -19,7 +19,7 @@ spec:
         - name: ghcr-login-secret
       containers:
         - name: backend
-          image: ghcr.io/rjullien/tripkit-backend:0.3.0
+          image: ghcr.io/rjullien/tripkit-backend:0.3.2
           ports:
             - containerPort: 3001
           env:
