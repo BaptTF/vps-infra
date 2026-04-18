@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`auth.juju.bapttf.com`)
+    - match: Host(`auth.bapttf.com`)
       kind: Rule
       services:
         - name: authelia
