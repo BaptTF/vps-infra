@@ -50,7 +50,7 @@ access_control:
       subject: "group:family"
     - domain: "*.bapttf.com"
       policy: one_factor
-      subject: "group:admin"
+      subject: "group:lldap_admin"
 
 totp:
   issuer: juju.bapttf.com
