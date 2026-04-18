@@ -23,6 +23,7 @@ spec:
           args:
             - |
               export LLDAP_DATABASE_URL="postgres://lldap:${LLDAP_DB_PASSWORD}@postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/lldap"
+              cd /data
               exec /app/lldap run
           ports:
             - containerPort: 3890
