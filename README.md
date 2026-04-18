@@ -9,6 +9,8 @@ GitOps infrastructure on k3s with ArgoCD.
 - Cloudflare account for DNS
 - Tailscale account (for VPN access)
 
+The following must be applied on **every** node (server and workers).
+
 ### NTP (required on every node)
 
 Every k3s node **must** have NTP enabled and running. Without NTP, the system clock drifts over time and breaks services that validate clock accuracy (e.g., Authelia checks clock sync on startup and refuses to start if the drift exceeds 3 seconds).
@@ -26,6 +28,8 @@ systemctl enable --now systemd-timesyncd
 apt-get install -y ntpsec-ntpdate
 ntpdate -b time.cloudflare.com
 ```
+
+### inotify limits (required on every node)
 
 ```bash
 # Apply immediately (no reboot needed)
