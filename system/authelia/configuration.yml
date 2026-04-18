@@ -7,7 +7,8 @@ log:
   level: info
 
 ntp:
-  disable_startup_check: true
+  address: udp://time.cloudflare.com:123
+  max_desync: 3s
 
 authentication_backend:
   password_reset:
