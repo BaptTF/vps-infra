@@ -61,3 +61,7 @@ kubectl create secret generic infisical-universal-auth \
 - Some workloads under `workloads/` are plain YAML directories (e.g., `vaultwarden/`, `whoami/`) with no `kustomization.yaml` -- ArgoCD handles them as raw manifests
 - `workloads/agents/` is a Kustomize aggregator with subdirectories per agent (openclaw, nullclaw, bifrost, steel, etc.)
 - Monitoring stack (VictoriaMetrics, Grafana, Loki, Promtail) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
+
+## Manual operations policy
+
+Any manual setup performed on the infrastructure (node configuration, package installs, DNS changes, Infisical secret creation, etc.) **must** be documented in the README. If you perform a manual operation, add it to the relevant section of the README before considering the task complete.
