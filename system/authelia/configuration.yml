@@ -8,7 +8,6 @@ log:
 
 ntp:
   address: udp://time.cloudflare.com:123
-  max_desync: 3s
 
 authentication_backend:
   password_reset:
