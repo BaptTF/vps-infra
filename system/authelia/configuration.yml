@@ -1,0 +1,61 @@
+theme: dark
+
+server:
+  address: tcp://0.0.0.0:9091/
+
+log:
+  level: info
+
+ntp:
+  disable_startup_check: true
+
+authentication_backend:
+  ldap:
+    implementation: lldap
+    address: ldap://lldap.lldap.svc.cluster.local:3890
+    base_dn: DC=bapttf,DC=com
+    user: UID=admin,OU=people,DC=bapttf,DC=com
+
+session:
+  name: authelia_session
+  same_site: lax
+  expiration: 7d
+  inactivity: 3d
+  remember_me: 1M
+  cookies:
+    - domain: bapttf.com
+      authelia_url: https://auth.juju.bapttf.com
+      default_redirection_url: https://tripkit.bapttf.com
+
+storage:
+  postgres:
+    address: tcp://postgres-cluster-rw.cnpg-system.svc.cluster.local:5432
+    database: authelia
+    schema: public
+    username: authelia
+    tls:
+      skip_verify: true
+
+notifier:
+  filesystem:
+    filename: /data/notification.txt
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: tripkit.bapttf.com
+      policy: one_factor
+      subject: "group:family"
+    - domain: "*.juju.bapttf.com"
+      policy: one_factor
+      subject: "group:family"
+    - domain: "*.bapttf.com"
+      policy: one_factor
+      subject: "group:admin"
+
+totp:
+  issuer: juju.bapttf.com
+  period: 30
+
+webauthn:
+  display_name: Famille Juju
