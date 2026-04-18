@@ -19,7 +19,7 @@ spec:
         - name: ghcr-login-secret
       containers:
         - name: backend
-          image: ghcr.io/rjullien/tripkit-backend:0.2.1
+          image: ghcr.io/rjullien/tripkit-backend:0.3.0
           ports:
             - containerPort: 3001
           env:
@@ -40,6 +40,8 @@ spec:
                 secretKeyRef:
                   name: tripkit-db-password
                   key: password
+            - name: BASE_PATH
+              value: "/api"
           resources:
             requests:
               memory: 32Mi

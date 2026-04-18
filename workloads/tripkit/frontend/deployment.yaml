@@ -19,9 +19,14 @@ spec:
         - name: ghcr-login-secret
       containers:
         - name: frontend
-          image: ghcr.io/rjullien/tripkit-frontend:0.1.0
+          image: ghcr.io/rjullien/tripkit-frontend:0.2.0
           ports:
             - containerPort: 80
+          env:
+            - name: API_URL
+              value: "https://tripkit.bapttf.com"
+            - name: API_PREFIX
+              value: "/api"
           resources:
             requests:
               memory: 16Mi

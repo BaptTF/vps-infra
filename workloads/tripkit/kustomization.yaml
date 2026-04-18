@@ -5,6 +5,5 @@ resources:
   - infisical-secret.yaml
   - certificate.yaml
   - ingressroute.yaml
-  - middleware.yaml
   - backend
   - frontend
