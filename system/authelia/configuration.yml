@@ -10,6 +10,8 @@ ntp:
   disable_startup_check: true
 
 authentication_backend:
+  password_reset:
+    disable: true
   ldap:
     implementation: lldap
     address: ldap://lldap.lldap.svc.cluster.local:3890
@@ -38,7 +40,7 @@ storage:
 
 notifier:
   filesystem:
-    filename: /data/notification.txt
+    filename: /tmp/notification.txt
 
 access_control:
   default_policy: deny

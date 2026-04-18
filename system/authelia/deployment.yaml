@@ -51,8 +51,6 @@ spec:
             - name: config
               mountPath: /config
               readOnly: true
-            - name: data
-              mountPath: /data
           resources:
             requests:
               memory: 32Mi
@@ -76,5 +74,3 @@ spec:
         - name: config
           configMap:
             name: authelia-config
-        - name: data
-          emptyDir: {}
