@@ -13,6 +13,9 @@ data:
     log:
       level: info
 
+    ntp:
+      disable_startup_check: true
+
     authentication_backend:
       ldap:
         implementation: lldap
