@@ -30,10 +30,10 @@ spec:
           resources:
             requests:
               cpu: "50m"
-              memory: "512Mi"
+              memory: "1.5Gi"
             limits:
               cpu: "2000m"         
-              memory: "1.5Gi"
+              memory: "2Gi"
           ports:
             - containerPort: 22
               name: ssh
