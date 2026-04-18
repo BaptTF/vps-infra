@@ -12,6 +12,7 @@ spec:
       middlewares:
         - name: forwardauth-authelia
           namespace: authelia
+        - name: strip-api-prefix
       services:
         - name: tripkit-backend
           port: 3001
