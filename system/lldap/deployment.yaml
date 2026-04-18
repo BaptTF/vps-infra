@@ -54,9 +54,6 @@ spec:
                 secretKeyRef:
                   name: lldap-auth-secret
                   key: ldap-user-pass
-          volumeMounts:
-            - name: data
-              mountPath: /data
           resources:
             requests:
               memory: 32Mi
@@ -76,6 +73,3 @@ spec:
               port: 17170
             initialDelaySeconds: 5
             periodSeconds: 10
-      volumes:
-        - name: data
-          emptyDir: {}
