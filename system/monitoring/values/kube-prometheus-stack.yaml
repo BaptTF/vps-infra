@@ -1,0 +1,96 @@
+# kube-prometheus-stack - metrics monitoring for multi-node k3s
+# Includes: Prometheus Operator, Prometheus (TSDB), Grafana, node-exporter, kube-state-metrics
+
+# -- Prometheus Operator
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 96Mi
+
+# -- Prometheus (TSDB)
+prometheus:
+  prometheusSpec:
+    retention: 90d
+    scrapeInterval: 30s
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 768Mi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+
+# -- Grafana
+grafana:
+  enabled: true
+  admin:
+    existingSecret: "grafana-auth"
+    userKey: "admin-user"
+    passwordKey: "admin-password"
+  ingress:
+    enabled: false
+  resources:
+    requests:
+      cpu: 25m
+      memory: 100Mi
+    limits:
+      memory: 256Mi
+  sidecar:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 48Mi
+      limits:
+        memory: 128Mi
+
+# -- Alertmanager (disabled to save RAM)
+alertmanager:
+  enabled: false
+
+# -- Default rules (recording rules for dashboards)
+defaultRules:
+  create: true
+
+# -- node-exporter (DaemonSet for host metrics)
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      memory: 32Mi
+
+# -- kube-state-metrics
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 24Mi
+    limits:
+      memory: 48Mi
+
+# -- k3s compatibility: disable scrape targets that don't exist
+kubeControllerManager:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+# -- Enabled scrape targets
+kubelet:
+  enabled: true
+kubeApiServer:
+  enabled: true

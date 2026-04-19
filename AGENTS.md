@@ -45,6 +45,22 @@ kubectl create secret generic infisical-universal-auth \
 3. If the service needs secrets, add an `infisical-secret.yaml` using `universalAuth` pointed at `infisical-universal-auth` in the `infisical` namespace
 4. If publicly exposed, add a `certificate.yaml` (cert-manager `Certificate` with `letsencrypt-prod` ClusterIssuer) and a Traefik `IngressRoute`
 
+## Commit conventions
+
+This repo uses **Conventional Commits**: `type(scope): description`
+
+- **type**: `feat` (new feature), `fix` (bug fix), `docs` (documentation), `build` (automated image bumps), `chore` (maintenance/cleanup), `refactor`
+- **scope**: the service or component name (e.g., `monitoring`, `traefik`, `tripkit`, `openclaw`). Omit scope for cross-cutting changes
+- **description**: lowercase, imperative mood, concise
+
+Examples:
+```
+feat(monitoring): replace victoria-metrics with kube-prometheus-stack
+fix(authelia): use Cloudflare NTP server instead of disabling check
+docs: document all node prerequisites
+build: automatic update of voyage
+```
+
 ## Key conventions
 
 - System Helm charts are inflated via Kustomize (`helmCharts:` block), **not** Helm releases -- ArgoCD must have `--enable-helm` in its Kustomize config
@@ -60,7 +76,7 @@ kubectl create secret generic infisical-universal-auth \
 - `pub-cert.pem` is the SealedSecrets public cert. Committed intentionally -- it is not a secret
 - Some workloads under `workloads/` are plain YAML directories (e.g., `vaultwarden/`, `whoami/`) with no `kustomization.yaml` -- ArgoCD handles them as raw manifests
 - `workloads/agents/` is a Kustomize aggregator with subdirectories per agent (openclaw, nullclaw, bifrost, steel, etc.)
-- Monitoring stack (VictoriaMetrics, Grafana, Loki, Promtail) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
+- Monitoring stack (kube-prometheus-stack: Prometheus, Grafana, node-exporter, kube-state-metrics) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
 
 ## Manual operations policy
 

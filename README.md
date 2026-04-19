@@ -143,7 +143,6 @@ kubectl create secret generic infisical-universal-auth \
 ./scripts/migrate-garage.sh
 ./scripts/migrate-meilisearch.sh
 ./scripts/migrate-openclaw.sh
-./scripts/migrate-monitoring.sh
 ```
 
 ---

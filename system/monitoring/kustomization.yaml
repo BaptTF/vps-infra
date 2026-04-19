@@ -7,23 +7,9 @@ resources:
   - grafana-tailscale-ingress.yaml
 
 helmCharts:
-  - name: victoria-metrics-k8s-stack
-    repo: https://victoriametrics.github.io/helm-charts
-    releaseName: vmstack
-    version: 0.73.0
-    valuesFile: values/victoria-metrics-k8s-stack.yaml
-    namespace: monitoring
-
-  - name: loki
-    repo: https://grafana.github.io/helm-charts
-    releaseName: loki
-    version: 6.55.0
-    valuesFile: values/loki.yaml
-    namespace: monitoring
-
-  - name: promtail
-    repo: https://grafana.github.io/helm-charts
-    releaseName: promtail
-    version: 6.17.1
-    valuesFile: values/promtail.yaml
+  - name: kube-prometheus-stack
+    repo: https://prometheus-community.github.io/helm-charts
+    releaseName: kps
+    version: 83.6.0
+    valuesFile: values/kube-prometheus-stack.yaml
     namespace: monitoring
