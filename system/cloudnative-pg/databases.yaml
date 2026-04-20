@@ -74,3 +74,14 @@ spec:
   owner: tripkit
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: sickgnal-db
+  namespace: cnpg-system
+spec:
+  name: sickgnal
+  owner: sickgnal
+  cluster:
+    name: postgres-cluster

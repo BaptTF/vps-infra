@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sickgnal-server
+  namespace: sickgnal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sickgnal-server
+  template:
+    metadata:
+      labels:
+        app: sickgnal-server
+    spec:
+      containers:
+        - name: sickgnal-server
+          image: ghcr.io/bapttf/sickgnal-server:1.0.0
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sickgnal-db-password
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: sickgnal-config
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
