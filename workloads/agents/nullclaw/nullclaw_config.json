@@ -55,6 +55,23 @@
           ],
           "require_mention": false
         }
+      },
+      "external": {
+        "accounts": {
+          "sickgnal-main": {
+            "runtime_name": "sickgnal",
+            "transport": {
+              "command": "/nullclaw-data/sickgnal-external",
+              "args": ["--stdio"],
+              "timeout_ms": 30000,
+              "env": {
+                "SICKGNAL_USERNAME": "Lou",
+                "SICKGNAL_SERVER_ADDR": "sickgnal.bapttf.com:443"
+              }
+            },
+            "config": {}
+          }
+        }
       }
     },
     "discord": {
