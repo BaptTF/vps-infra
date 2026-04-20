@@ -82,3 +82,10 @@ spec:
         login: true
         passwordSecret:
           name: tripkit-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: sickgnal
+        login: true
+        passwordSecret:
+          name: sickgnal-db-secret
