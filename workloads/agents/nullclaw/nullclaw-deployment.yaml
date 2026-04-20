@@ -95,11 +95,6 @@ spec:
                   key: JINA_API_KEY
             - name: NULLCLAW_ALLOW_YOLO
               value: "1"
-            - name: SICKGNAL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: nullclaw-secret
-                  key: SICKGNAL_PASSWORD
           ports:
             - containerPort: 3000
               name: http

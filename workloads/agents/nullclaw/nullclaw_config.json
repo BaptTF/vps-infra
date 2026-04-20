@@ -84,6 +84,7 @@
             "timeout_ms": 30000,
             "env": {
               "SICKGNAL_USERNAME": "Lou",
+              "SICKGNAL_PASSWORD": "dummy",
               "SICKGNAL_SERVER_ADDR": "sickgnal.bapttf.com:443"
             }
           },
