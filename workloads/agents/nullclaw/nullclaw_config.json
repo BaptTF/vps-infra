@@ -30,7 +30,7 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "chutes/zai-org/GLM-5.1-TEE",
+      "model": "chutes/moonshotai/Kimi-K2.6-TEE",
       "cost_class": "standard"
     },
     {
@@ -71,24 +71,6 @@
           ],
           "require_mention": true,
           "allow_bots": false
-        }
-      }
-    },
-    "external": {
-      "accounts": {
-        "sickgnal-main": {
-          "runtime_name": "sickgnal",
-          "transport": {
-            "command": "/nullclaw-data/sickgnal-external",
-            "args": ["--stdio"],
-            "timeout_ms": 30000,
-            "env": {
-              "SICKGNAL_USERNAME": "Lou",
-              "SICKGNAL_PASSWORD": "dummy",
-              "SICKGNAL_SERVER_ADDR": "sickgnal.bapttf.com:443"
-            }
-          },
-          "config": {}
         }
       }
     }
@@ -223,7 +205,15 @@
     "provider_backoff_ms": 500,
     "model_fallbacks": [
       {
-        "model": "bifrost/chutes/zai-org/zai-org/GLM-5.1-TEE",
+        "model": "bifrost/chutes/moonshotai/Kimi-K2.6-TEE",
+        "fallbacks": [
+          "bifrost/chutes/zai-org/GLM-5.1-TEE",
+          "bifrost/chutes/zai-org/GLM-5-TEE",
+          "bifrost/chutes/moonshotai/Kimi-K2.5-TEE"
+        ]
+      },
+      {
+        "model": "bifrost/chutes/zai-org/GLM-5.1-TEE",
         "fallbacks": [
           "bifrost/chutes/zai-org/GLM-5-TEE",
           "bifrost/chutes/moonshotai/Kimi-K2.5-TEE",
