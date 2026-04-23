@@ -18,7 +18,7 @@ helmCharts:
           memory: 128Mi
 
 resources:
-  - cluster.yaml
+  - cnpg-cluster.yaml
   - databases.yaml
   - database-infisical-secrets.yaml
   - backup-infisical-secret.yaml
