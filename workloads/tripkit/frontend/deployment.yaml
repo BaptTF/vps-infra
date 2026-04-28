@@ -19,7 +19,8 @@ spec:
         - name: ghcr-login-secret
       containers:
         - name: frontend
-          image: ghcr.io/rjullien/tripkit-frontend:0.2.0
+          image: ghcr.io/rjullien/tripkit-frontend
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           env:
