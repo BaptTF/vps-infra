@@ -1,0 +1,47 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: tripkit-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: tripkit
+      images:
+        - alias: tripkit-frontend
+          imageName: ghcr.io/rjullien/tripkit-frontend
+          commonUpdateSettings:
+            pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
+            updateStrategy: newest-build
+        - alias: tripkit-backend
+          imageName: ghcr.io/rjullien/tripkit-backend
+          commonUpdateSettings:
+            pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
+            updateStrategy: newest-build
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main
+---
+apiVersion: secrets.infisical.com/v1alpha1
+kind: InfisicalSecret
+metadata:
+  name: tripkit-github-secrets
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  hostAPI: https://app.infisical.com/api
+  authentication:
+    universalAuth:
+      secretsScope:
+        projectSlug: infrastructure
+        envSlug: prod
+        secretsPath: /github/r
+      credentialsRef:
+        secretName: infisical-universal-auth
+        secretNamespace: infisical
+  managedKubeSecretReferences:
+    - secretName: tripkit-ghcr-login-secret
+      secretNamespace: argocd
+      secretType: kubernetes.io/dockerconfigjson
+      creationPolicy: Owner
