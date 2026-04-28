@@ -23,7 +23,6 @@ spec:
         # Conteneur 1: Ton application (PWA)
         - name: voyage-app
           image: ghcr.io/rjullien/voyage-app
-          imagePullPolicy: Always
           resources:
             requests:
               cpu: 20m
