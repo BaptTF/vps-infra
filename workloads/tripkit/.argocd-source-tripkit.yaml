@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/rjullien/tripkit-frontend:sha-8e59c66
