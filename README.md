@@ -2,6 +2,13 @@
 
 GitOps infrastructure on k3s with ArgoCD.
 
+## Manual Security Patch for Copy fail
+
+```bash
+echo "install algif_aead /bin/false" > /etc/modprobe.d/disable-algif.conf
+rmmod algif_aead
+```
+
 ## Prerequisites
 
 - Fresh VPS with Ubuntu/Debian
