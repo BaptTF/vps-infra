@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/rjullien/voyage-app:sha-0b3965b
+  - ghcr.io/rjullien/voyage-app:sha-b12ee12
