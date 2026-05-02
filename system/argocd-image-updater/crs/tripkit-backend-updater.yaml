@@ -1,0 +1,18 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: tripkit-backend-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: tripkit-backend
+      images:
+        - alias: tripkit-backend
+          imageName: ghcr.io/rjullien/tripkit-backend
+          commonUpdateSettings:
+            pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
+            updateStrategy: newest-build
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

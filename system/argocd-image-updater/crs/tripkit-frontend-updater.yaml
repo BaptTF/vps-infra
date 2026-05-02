@@ -1,19 +1,14 @@
 apiVersion: argocd-image-updater.argoproj.io/v1alpha1
 kind: ImageUpdater
 metadata:
-  name: tripkit-updater
+  name: tripkit-frontend-updater
   namespace: argocd
 spec:
   applicationRefs:
-    - namePattern: tripkit
+    - namePattern: tripkit-frontend
       images:
         - alias: tripkit-frontend
           imageName: ghcr.io/rjullien/tripkit-frontend
-          commonUpdateSettings:
-            pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
-            updateStrategy: newest-build
-        - alias: tripkit-backend
-          imageName: ghcr.io/rjullien/tripkit-backend
           commonUpdateSettings:
             pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
             updateStrategy: newest-build
