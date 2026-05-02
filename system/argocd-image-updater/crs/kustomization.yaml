@@ -7,4 +7,5 @@ namespace: argocd
 resources:
   - nullclaw-updater.yaml
   - openclaw-updater.yaml
+  - tripkit-updater.yaml
   - voyage-updater.yaml
