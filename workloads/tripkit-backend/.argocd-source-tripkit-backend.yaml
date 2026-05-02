@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/rjullien/tripkit-backend:sha-f4a66e5
