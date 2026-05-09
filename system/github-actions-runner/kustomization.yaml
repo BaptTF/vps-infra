@@ -1,26 +1,11 @@
-# GitHub Actions Runner Controller (ARC) v0.14.1
-# Self-hosted runners for rjullien GitHub repos
-# Docs: https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller
+# GitHub Actions Runner - Kustomize manifests
+# Controller: deployed via ArgoCD Helm source (apps/arc-controller.yaml)
+# Runner Set: pure YAML AutoscalingRunnerSet (no Helm needed)
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: arc-runners
 
 resources:
   - namespace.yaml
   - infisical-secret.yaml
-
-helmCharts:
-  # 1. ARC Controller - manages runner pod lifecycle
-  - name: gha-runner-scale-set-controller
-    repo: oci://ghcr.io/actions/actions-runner-controller-charts
-    version: 0.14.1
-    releaseName: arc
-    namespace: arc-systems
-    valuesFile: values-controller.yaml
-
-  # 2. Runner Scale Set - ephemeral runners for rjullien repos
-  - name: gha-runner-scale-set
-    repo: oci://ghcr.io/actions/actions-runner-controller-charts
-    version: 0.14.1
-    releaseName: arc-runner-set
-    namespace: arc-runners
-    valuesFile: values-runner-set.yaml
+  - runner-set.yaml
