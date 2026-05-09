@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ce-agent
+  labels:
+    app: ce-agent
+spec:
+  selector:
+    app: ce-agent
+  ports:
+    - protocol: TCP
+      port: 8123
+      targetPort: 8123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ce-app
+  labels:
+    app: ce-app
+spec:
+  selector:
+    app: ce-app
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

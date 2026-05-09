@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ce-agent
+  labels:
+    app: ce-agent
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ce-agent
+  template:
+    metadata:
+      labels:
+        app: ce-agent
+    spec:
+      containers:
+        - name: ce-agent
+          image: ghcr.io/rjullien/ce-analytics-dashboard/agent
+          ports:
+            - containerPort: 8123
+              name: http
+          env:
+            - name: LLM_MODEL
+              value: "us.anthropic.claude-sonnet-4-6"
+            - name: OPENAI_BASE_URL
+              value: "http://bifrost.openclaw.svc.cluster.local:8080/v1"
+            - name: OPENAI_API_KEY
+              value: "sk-dummy"
+            - name: HA_URL
+              value: "http://homeassistant.tail4c7c90.ts.net:8123"
+            - name: HA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ce-analytics-secret
+                  key: HA_TOKEN
+            - name: PORT
+              value: "8123"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
