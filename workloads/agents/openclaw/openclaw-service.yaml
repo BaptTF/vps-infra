@@ -11,3 +11,8 @@ spec:
       port: 22
       targetPort: 22
       name: ssh
+    - protocol: TCP
+      port: 18800
+      targetPort: 18800
+      name: a2a
+   

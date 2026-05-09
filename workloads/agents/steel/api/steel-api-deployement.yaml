@@ -6,6 +6,7 @@ metadata:
   labels:
     app: steel-browser
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   strategy:
     type: Recreate

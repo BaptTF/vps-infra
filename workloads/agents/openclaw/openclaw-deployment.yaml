@@ -7,7 +7,8 @@ metadata:
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
-  replicas: 0
+  revisionHistoryLimit: 2
+  replicas: 1
   selector:
     matchLabels:
       app: openclaw
@@ -20,22 +21,26 @@ spec:
     metadata:
       labels:
         app: openclaw
+      annotations:
+        backup.velero.io/backup-volumes: ""
     spec:
       containers:
         - name: openclaw
-          image: ghcr.io/bapttf/openclaw-lea-config:sha-fc206971247864a58ed608d73a1ba2e4e638559a
+          image: ghcr.io/bapttf/openclaw-lea-config
           resources:
             requests:
               cpu: "50m"
-              memory: "512Mi"
+              memory: "1.5Gi"
             limits:
               cpu: "2000m"         
-              memory: "3Gi"
+              memory: "2Gi"
           ports:
             - containerPort: 22
               name: ssh
             - containerPort: 18789
               name: gateway
+            - containerPort: 18800
+              name: a2a
           livenessProbe:
             httpGet:
               path: /health

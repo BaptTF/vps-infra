@@ -28,15 +28,6 @@ ports:
     exposedPort: 22
     protocol: TCP 
 
-# Enable OpenTelemetry tracing
-tracing:
-  otlp:
-    grpc:
-      enabled: true
-      endpoint: "tempo.monitoring.svc.cluster.local:4317"
-    http:
-      enabled: false
-
 # Providers configuration
 # Instructs Traefik to publish its LoadBalancer IP to standard Ingress resources.
 # This ensures tools like ArgoCD can accurately read the Ingress health status.
@@ -44,6 +35,8 @@ providers:
   kubernetesIngress:
     publishedService:
       enabled: true
+  kubernetesCRD:
+    allowCrossNamespace: true
 
 # IngressClass configuration
 ingressClass:
@@ -51,16 +44,9 @@ ingressClass:
   isDefaultClass: true
   name: traefik
 
-# Enable dashboard
+# Dashboard disabled - use Prometheus/Grafana metrics instead
 dashboard:
-  enabled: true
-  ingress:
-    enabled: true
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    hosts:
-      - traefik.bapttf.com
-    tls: []
+  enabled: false
 
 # Logs configuration
 logs:

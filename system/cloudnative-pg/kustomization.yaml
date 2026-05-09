@@ -8,8 +8,18 @@ helmCharts:
     version: 0.27.0
     releaseName: cnpg
     namespace: cnpg-system
+    valuesInline:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
 
 resources:
-  - cluster.yaml
+  - cnpg-cluster.yaml
   - databases.yaml
   - database-infisical-secrets.yaml
+  - backup-infisical-secret.yaml
+  - scheduled-backup.yaml

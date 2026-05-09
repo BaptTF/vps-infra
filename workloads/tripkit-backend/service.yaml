@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripkit-backend
+  namespace: tripkit
+spec:
+  selector:
+    app: tripkit-backend
+  ports:
+    - port: 3001
+      targetPort: 3001

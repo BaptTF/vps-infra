@@ -28,3 +28,11 @@ persistentVolume:
   enabled: true
   size: 1Gi
   storageClass: "local-path"
+  
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "50m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"

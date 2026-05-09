@@ -1,0 +1,91 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cluster
+  namespace: cnpg-system
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://cnpg-backups/
+      endpointURL: https://e16df4d29f7d54d2f57456402bebd130.r2.cloudflarestorage.com
+      s3Credentials:
+        accessKeyId:
+          name: cnpg-r2-credentials
+          key: AWS_ACCESS_KEY_ID
+        secretAccessKey:
+          name: cnpg-r2-credentials
+          key: AWS_SECRET_ACCESS_KEY
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+    retentionPolicy: "30d"
+
+  managed:
+    roles:
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: forgejo
+        login: true
+        passwordSecret:
+          name: forgejo-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: jujudb
+        login: true
+        passwordSecret:
+          name: jujudb-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: lacoope
+        login: true
+        passwordSecret:
+          name: lacoope-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: openwebui
+        login: true
+        passwordSecret:
+          name: openwebui-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: authelia
+        login: true
+        passwordSecret:
+          name: authelia-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: lldap
+        login: true
+        passwordSecret:
+          name: lldap-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: tripkit
+        login: true
+        passwordSecret:
+          name: tripkit-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: sickgnal
+        login: true
+        passwordSecret:
+          name: sickgnal-db-secret
