@@ -1,4 +1,4 @@
 kustomize:
   images:
   - ghcr.io/rjullien/ce-analytics-dashboard/agent:sha-6f6cbb7
-  - ghcr.io/rjullien/ce-analytics-dashboard/app:sha-8d6527a
+  - ghcr.io/rjullien/ce-analytics-dashboard/app:sha-6f6cbb7
