@@ -1,3 +1,4 @@
+# GitHub Actions Runner - base resources + AutoscalingRunnerSet (Kustomize)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -13,7 +14,7 @@ spec:
     path: system/github-actions-runner
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: arc-systems
+    namespace: arc-runners
   syncPolicy:
     automated:
       prune: true
