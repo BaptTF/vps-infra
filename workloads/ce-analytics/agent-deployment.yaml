@@ -25,7 +25,7 @@ spec:
               name: http
           env:
             - name: LLM_MODEL
-              value: "us.anthropic.claude-sonnet-4-6"
+              value: "bedrock/us.anthropic.claude-sonnet-4-6"
             - name: OPENAI_BASE_URL
               value: "http://bifrost.openclaw.svc.cluster.local:8080/v1"
             - name: OPENAI_API_KEY
