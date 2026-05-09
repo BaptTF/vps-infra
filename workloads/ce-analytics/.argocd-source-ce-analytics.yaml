@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/rjullien/ce-analytics-dashboard/agent:sha-a173094
