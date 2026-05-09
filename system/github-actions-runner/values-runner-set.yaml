@@ -1,0 +1,47 @@
+# Runner Scale Set values
+# Registers runners at repository level
+# Workflow usage: runs-on: arc-runner-set
+#
+# NOTE: GitHub does not support user-level runners for personal accounts.
+# Options:
+#   A) Point to a specific repo (current config)
+#   B) Create a free GitHub organization and register at org level
+#
+# To share runners across multiple repos, option B is recommended.
+# Create an org (e.g. "rjullien-infra") and set githubConfigUrl to:
+#   https://github.com/rjullien-infra
+# Then the PAT needs 'admin:org' scope instead of just 'repo'.
+
+# CHANGE THIS to your target repo or org URL
+# For single repo: https://github.com/rjullien/REPO_NAME
+# For org-level:   https://github.com/YOUR_ORG
+# Current: org-level (rjullien user namespace acts as personal org on GitHub)
+githubConfigUrl: "https://github.com/rjullien"
+
+# Pre-defined secret with 'github_token' key (synced by Infisical)
+# PAT scopes needed:
+#   - repo-level: 'repo'
+#   - org-level: 'admin:org'
+githubConfigSecret: github-runner-pat
+
+# Autoscaling: 0 idle runners, scale up to 3 on demand
+maxRunners: 3
+minRunners: 0
+
+# Docker-in-Docker for full Docker/compose support in workflows
+containerMode:
+  type: "dind"
+
+# Runner pod resources
+template:
+  spec:
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
