@@ -5,6 +5,7 @@ kind: Kustomization
 namespace: argocd
 
 resources:
+  - ce-analytics-updater.yaml
   - nullclaw-updater.yaml
   - openclaw-updater.yaml
   - tripkit-frontend-updater.yaml
