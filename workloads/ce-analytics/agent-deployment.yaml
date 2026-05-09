@@ -7,6 +7,7 @@ metadata:
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -18,7 +19,7 @@ spec:
     spec:
       containers:
         - name: ce-agent
-          image: ghcr.io/rjullien/ce-analytics-dashboard/agent:latest
+          image: ghcr.io/rjullien/ce-analytics-dashboard/agent
           ports:
             - containerPort: 8123
               name: http
@@ -30,7 +31,7 @@ spec:
             - name: OPENAI_API_KEY
               value: "sk-dummy"
             - name: HA_URL
-              value: "http://homeassistant:8123"
+              value: "http://homeassistant.tail4c7c90.ts.net:8123"
             - name: HA_TOKEN
               valueFrom:
                 secretKeyRef:

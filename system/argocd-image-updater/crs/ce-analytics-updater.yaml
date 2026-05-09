@@ -1,0 +1,23 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: ce-analytics-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: ce-analytics
+      images:
+        - alias: ce-agent
+          imageName: ghcr.io/rjullien/ce-analytics-dashboard/agent
+          commonUpdateSettings:
+            pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
+            updateStrategy: newest-build
+        - alias: ce-app
+          imageName: ghcr.io/rjullien/ce-analytics-dashboard/app
+          commonUpdateSettings:
+            pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
+            updateStrategy: newest-build
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

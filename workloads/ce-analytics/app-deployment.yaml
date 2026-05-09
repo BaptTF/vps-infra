@@ -5,6 +5,7 @@ metadata:
   labels:
     app: ce-app
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
         - name: ce-app
-          image: ghcr.io/rjullien/ce-analytics-dashboard/app:latest
+          image: ghcr.io/rjullien/ce-analytics-dashboard/app
           ports:
             - containerPort: 3000
               name: http
