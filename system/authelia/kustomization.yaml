@@ -6,9 +6,6 @@ configMapGenerator:
     files:
       - configuration.yml
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 resources:
   - infisical-secret.yaml
   - deployment.yaml
