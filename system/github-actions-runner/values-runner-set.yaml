@@ -1,0 +1,32 @@
+# Runner Scale Set values
+# Repository-level runner for rjullien/ce-analytics-dashboard
+# Workflow usage: runs-on: arc-runner-set
+
+# Target repository
+githubConfigUrl: "https://github.com/rjullien/ce-analytics-dashboard"
+
+# Pre-defined secret with 'github_token' key (synced by Infisical)
+# PAT scope: 'repo' + 'workflow'
+githubConfigSecret: github-runner-pat
+
+# Autoscaling: 0 idle runners, scale up to 3 on demand
+maxRunners: 3
+minRunners: 0
+
+# Docker-in-Docker for docker build support (ce-analytics images)
+containerMode:
+  type: "dind"
+
+# Runner pod resources
+template:
+  spec:
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
