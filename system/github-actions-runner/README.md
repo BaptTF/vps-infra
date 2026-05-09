@@ -21,18 +21,15 @@ jobs:
 
 ## Setup requirements
 
-### 1. Choose runner scope
+### 1. Runner scope
 
-GitHub does **not** support user-level runners for personal accounts. Choose one:
+Currently configured for **repository-level** on `rjullien/ce-analytics-dashboard`.
 
-| Scope | `githubConfigUrl` | PAT scope | Covers |
-|-------|-------------------|-----------|--------|
-| Repository | `https://github.com/rjullien/REPO` | `repo` | Single repo only |
-| Organization | `https://github.com/YOUR_ORG` | `admin:org` | All repos in org |
+To add more repos, deploy additional runner scale sets (duplicate the helm chart entry with a different `releaseName` and `githubConfigUrl`).
 
-**Recommendation**: Create a free GitHub org (e.g. `rjullien-infra`) and register runners at org level to share across all repos.
-
-Update `values-runner-set.yaml` → `githubConfigUrl` accordingly.
+| Scope | `githubConfigUrl` | PAT scope |
+|-------|-------------------|----------|
+| Repository | `https://github.com/rjullien/ce-analytics-dashboard` | `repo` |
 
 ### 2. Infisical secret
 
