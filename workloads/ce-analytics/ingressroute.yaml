@@ -8,6 +8,9 @@ spec:
   routes:
     - match: Host(`ce-analytics.bapttf.com`)
       kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
       services:
         - name: ce-app
           port: 3000
