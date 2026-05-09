@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ce-analytics
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`ce-analytics.bapttf.com`)
+      kind: Rule
+      services:
+        - name: ce-app
+          port: 3000
+  tls: {}
