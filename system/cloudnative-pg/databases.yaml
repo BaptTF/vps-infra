@@ -30,3 +30,58 @@ spec:
   owner: lacoope
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: openwebui-db
+  namespace: cnpg-system
+spec:
+  name: openwebui
+  owner: openwebui
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: authelia-db
+  namespace: cnpg-system
+spec:
+  name: authelia
+  owner: authelia
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lldap-db
+  namespace: cnpg-system
+spec:
+  name: lldap
+  owner: lldap
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: tripkit-db
+  namespace: cnpg-system
+spec:
+  name: tripkit
+  owner: tripkit
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: sickgnal-db
+  namespace: cnpg-system
+spec:
+  name: sickgnal
+  owner: sickgnal
+  cluster:
+    name: postgres-cluster

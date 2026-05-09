@@ -5,6 +5,6 @@ namespace: openclaw
 resources:
   - openclaw
   - nullclaw
-  - nullclaw-lea
+  - nullclaw-leo
   - bifrost
   - steel

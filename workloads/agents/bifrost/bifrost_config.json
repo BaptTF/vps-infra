@@ -9,6 +9,7 @@
             "us.anthropic.claude-sonnet-4-6",
             "us.anthropic.claude-opus-4-5-20251101-v1:0",
             "us.anthropic.claude-opus-4-6-v1",
+            "us.anthropic.claude-opus-4-7",
             "us.anthropic.claude-3-5-haiku-20241022-v1:0",
             "amazon.titan-embed-text-v2:0"
           ],
@@ -20,7 +21,7 @@
       ],
       "network_config": {
         "default_request_timeout_in_seconds": 600,
-        "stream_idle_timeout_in_seconds": 120,
+        "stream_idle_timeout_in_seconds": 300,
         "max_retries": 3,
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
@@ -31,7 +32,8 @@
         "base_provider_type": "openai",
         "allowed_requests": {
           "chat_completion": true,
-          "chat_completion_stream": true
+          "chat_completion_stream": true,
+          "list_models": true
         }
       },
       "keys": [
@@ -41,6 +43,7 @@
           "models": [
             "MiniMaxAI/MiniMax-M2.5-TEE",
             "moonshotai/Kimi-K2.5-TEE",
+            "moonshotai/Kimi-K2.6-TEE",
             "deepseek-ai/DeepSeek-V3.2-TEE",
             "Qwen/Qwen3.5-397B-A17B-TEE",
             "zai-org/GLM-5-TEE",

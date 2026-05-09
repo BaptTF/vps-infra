@@ -1,0 +1,27 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tripkit
+  namespace: tripkit
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`tripkit.bapttf.com`) && PathPrefix(`/api`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: tripkit-backend
+          port: 3001
+    - match: Host(`tripkit.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: tripkit-frontend
+          port: 80
+  tls:
+    secretName: tls-certificate

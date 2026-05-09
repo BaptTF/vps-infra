@@ -13,4 +13,5 @@ spec:
       services:
         - name: minio
           port: 9000
-  tls: {}
+  tls:
+    secretName: tls-certificate

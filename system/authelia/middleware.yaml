@@ -1,0 +1,19 @@
+# Shared forwardAuth middleware — referenced cross-namespace by all protected apps.
+# To protect a new app, add to its IngressRoute:
+#   middlewares:
+#     - name: forwardauth-authelia
+#       namespace: authelia
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: forwardauth-authelia
+  namespace: authelia
+spec:
+  forwardAuth:
+    address: http://authelia.authelia.svc.cluster.local:9091/api/authz/forward-auth
+    trustForwardHeader: true
+    authResponseHeaders:
+      - Remote-User
+      - Remote-Groups
+      - Remote-Email
+      - Remote-Name

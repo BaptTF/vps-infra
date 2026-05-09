@@ -11,6 +11,7 @@ commonLabels:
 # La liste de tes manifestes
 resources:
   - infisical-secret.yaml
+  - certificate.yaml
   - deployment.yaml
   - service.yaml
   - ingressroute.yaml

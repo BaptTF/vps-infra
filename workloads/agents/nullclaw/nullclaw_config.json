@@ -30,7 +30,7 @@
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "chutes/zai-org/GLM-5.1-TEE",
+      "model": "chutes/moonshotai/Kimi-K2.6-TEE",
       "cost_class": "standard"
     },
     {
@@ -182,7 +182,7 @@
     "require_pairing": false
   },
   "autonomy": {
-    "level": "full",
+    "level": "yolo",
     "workspace_only": false,
     "max_actions_per_hour": 1000,
     "allowed_commands": ["*"],
@@ -205,7 +205,15 @@
     "provider_backoff_ms": 500,
     "model_fallbacks": [
       {
-        "model": "bifrost/chutes/zai-org/zai-org/GLM-5.1-TEE",
+        "model": "bifrost/chutes/moonshotai/Kimi-K2.6-TEE",
+        "fallbacks": [
+          "bifrost/chutes/zai-org/GLM-5.1-TEE",
+          "bifrost/chutes/zai-org/GLM-5-TEE",
+          "bifrost/chutes/moonshotai/Kimi-K2.5-TEE"
+        ]
+      },
+      {
+        "model": "bifrost/chutes/zai-org/GLM-5.1-TEE",
         "fallbacks": [
           "bifrost/chutes/zai-org/GLM-5-TEE",
           "bifrost/chutes/moonshotai/Kimi-K2.5-TEE",

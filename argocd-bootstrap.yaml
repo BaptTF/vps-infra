@@ -30588,21 +30588,6 @@ automountServiceAccountToken: true
 kind: ServiceAccount
 metadata:
   labels:
-    app.kubernetes.io/component: dex-server
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: argocd-dex-server
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.3.3
-    helm.sh/chart: argo-cd-9.4.10
-  name: argocd-dex-server
-  namespace: argocd
----
-apiVersion: v1
-automountServiceAccountToken: true
-kind: ServiceAccount
-metadata:
-  labels:
     app.kubernetes.io/component: notifications-controller
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/managed-by: Helm
@@ -30813,30 +30798,6 @@ rules:
   - get
   - update
   - create
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  labels:
-    app.kubernetes.io/component: dex-server
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: argocd-dex-server
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.3.3
-    helm.sh/chart: argo-cd-9.4.10
-  name: argocd-dex-server
-  namespace: argocd
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  - configmaps
-  verbs:
-  - get
-  - list
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -31163,28 +31124,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    app.kubernetes.io/component: dex-server
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: argocd-dex-server
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.3.3
-    helm.sh/chart: argo-cd-9.4.10
-  name: argocd-dex-server
-  namespace: argocd
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: argocd-dex-server
-subjects:
-- kind: ServiceAccount
-  name: argocd-dex-server
-  namespace: argocd
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  labels:
     app.kubernetes.io/component: notifications-controller
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/managed-by: Helm
@@ -31226,6 +31165,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-redis-secret-init
+  namespace: argocd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -31436,7 +31376,7 @@ data:
       - UpdateRequest
   statusbadge.enabled: "false"
   timeout.hard.reconciliation: 0s
-  timeout.reconciliation: 120s
+  timeout.reconciliation: 600s
   timeout.reconciliation.jitter: 60s
   url: https://argocd.example.com
 kind: ConfigMap
@@ -31461,20 +31401,22 @@ data:
   commitserver.log.level: info
   controller.log.format: text
   controller.log.level: info
+  controller.repo.server.timeout.seconds: "300"
   dexserver.log.format: text
   dexserver.log.level: info
   notificationscontroller.log.format: text
   notificationscontroller.log.level: info
   redis.server: argocd-redis:6379
   repo.server: argocd-repo-server:8081
+  reposerver.git.shallow.clone: "true"
   reposerver.log.format: text
   reposerver.log.level: info
-  server.dex.server: https://argocd-dex-server:5556
-  server.dex.server.strict.tls: "false"
+  reposerver.parallelism.limit: "5"
   server.insecure: "true"
   server.log.format: text
   server.log.level: info
   server.repo.server.strict.tls: "false"
+  server.repo.server.timeout.seconds: "300"
 kind: ConfigMap
 metadata:
   labels:
@@ -31637,21 +31579,6 @@ stringData: null
 type: Opaque
 ---
 apiVersion: v1
-kind: Secret
-metadata:
-  labels:
-    app.kubernetes.io/component: server
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: argocd-secret
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.3.3
-    helm.sh/chart: argo-cd-9.4.10
-  name: argocd-secret
-  namespace: argocd
-type: Opaque
----
-apiVersion: v1
 kind: Service
 metadata:
   labels:
@@ -31673,33 +31600,6 @@ spec:
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/name: argocd-applicationset-controller
   type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/component: dex-server
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: argocd-dex-server
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.3.3
-    helm.sh/chart: argo-cd-9.4.10
-  name: argocd-dex-server
-  namespace: argocd
-spec:
-  ports:
-  - name: http
-    port: 5556
-    protocol: TCP
-    targetPort: http
-  - name: grpc
-    port: 5557
-    protocol: TCP
-    targetPort: grpc
-  selector:
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/name: argocd-dex-server
 ---
 apiVersion: v1
 kind: Service
@@ -31798,7 +31698,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 348d0b39b78eace16d62a8744fa5197c97be62240b62417ab28795cf0826be0b
+        checksum/cmd-params: d818a59601fcbfdb88a3356aa64a24d60b08e63e2d2767f53ba33a203acdd121
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
@@ -32004,7 +31904,13 @@ spec:
         - containerPort: 7000
           name: webhook
           protocol: TCP
-        resources: {}
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -32071,157 +31977,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/component: dex-server
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: argocd-dex-server
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.3.3
-    helm.sh/chart: argo-cd-9.4.10
-  name: argocd-dex-server
-  namespace: argocd
-spec:
-  replicas: 1
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
-      app.kubernetes.io/instance: argocd
-      app.kubernetes.io/name: argocd-dex-server
-  template:
-    metadata:
-      annotations:
-        checksum/cmd-params: 348d0b39b78eace16d62a8744fa5197c97be62240b62417ab28795cf0826be0b
-      labels:
-        app.kubernetes.io/component: dex-server
-        app.kubernetes.io/instance: argocd
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: argocd-dex-server
-        app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.3.3
-        helm.sh/chart: argo-cd-9.4.10
-    spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: argocd-dex-server
-              topologyKey: kubernetes.io/hostname
-            weight: 100
-      automountServiceAccountToken: true
-      containers:
-      - args:
-        - rundex
-        command:
-        - /shared/argocd-dex
-        env:
-        - name: ARGOCD_DEX_SERVER_LOGFORMAT
-          valueFrom:
-            configMapKeyRef:
-              key: dexserver.log.format
-              name: argocd-cmd-params-cm
-              optional: true
-        - name: ARGOCD_DEX_SERVER_LOGLEVEL
-          valueFrom:
-            configMapKeyRef:
-              key: dexserver.log.level
-              name: argocd-cmd-params-cm
-              optional: true
-        - name: ARGOCD_LOG_FORMAT_TIMESTAMP
-          valueFrom:
-            configMapKeyRef:
-              key: log.format.timestamp
-              name: argocd-cmd-params-cm
-              optional: true
-        - name: ARGOCD_DEX_SERVER_DISABLE_TLS
-          valueFrom:
-            configMapKeyRef:
-              key: dexserver.disable.tls
-              name: argocd-cmd-params-cm
-              optional: true
-        image: ghcr.io/dexidp/dex:v2.45.1
-        imagePullPolicy: IfNotPresent
-        name: dex-server
-        ports:
-        - containerPort: 5556
-          name: http
-          protocol: TCP
-        - containerPort: 5557
-          name: grpc
-          protocol: TCP
-        - containerPort: 5558
-          name: metrics
-          protocol: TCP
-        resources: {}
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-          seccompProfile:
-            type: RuntimeDefault
-        volumeMounts:
-        - mountPath: /shared
-          name: static-files
-        - mountPath: /tmp
-          name: dexconfig
-        - mountPath: /tls
-          name: argocd-dex-server-tls
-      dnsPolicy: ClusterFirst
-      initContainers:
-      - command:
-        - /bin/cp
-        - -n
-        - /usr/local/bin/argocd
-        - /shared/argocd-dex
-        image: quay.io/argoproj/argocd:v3.3.3
-        imagePullPolicy: IfNotPresent
-        name: copyutil
-        resources: {}
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-          seccompProfile:
-            type: RuntimeDefault
-        volumeMounts:
-        - mountPath: /shared
-          name: static-files
-        - mountPath: /tmp
-          name: dexconfig
-      nodeSelector:
-        kubernetes.io/os: linux
-      serviceAccountName: argocd-dex-server
-      terminationGracePeriodSeconds: 30
-      volumes:
-      - emptyDir: {}
-        name: static-files
-      - emptyDir: {}
-        name: dexconfig
-      - name: argocd-dex-server-tls
-        secret:
-          items:
-          - key: tls.crt
-            path: tls.crt
-          - key: tls.key
-            path: tls.key
-          - key: ca.crt
-            path: ca.crt
-          optional: true
-          secretName: argocd-dex-server-tls
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
     app.kubernetes.io/component: notifications-controller
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/managed-by: Helm
@@ -32243,7 +31998,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 348d0b39b78eace16d62a8744fa5197c97be62240b62417ab28795cf0826be0b
+        checksum/cmd-params: d818a59601fcbfdb88a3356aa64a24d60b08e63e2d2767f53ba33a203acdd121
       labels:
         app.kubernetes.io/component: notifications-controller
         app.kubernetes.io/instance: argocd
@@ -32314,7 +32069,13 @@ spec:
         - containerPort: 9001
           name: metrics
           protocol: TCP
-        resources: {}
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -32411,7 +32172,13 @@ spec:
         - containerPort: 6379
           name: redis
           protocol: TCP
-        resources: {}
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -32460,8 +32227,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 03aa83e93a81f296e3041e8476ef900d6fab49f20da66b3f4e7cc8bb9caa3f11
-        checksum/cmd-params: 348d0b39b78eace16d62a8744fa5197c97be62240b62417ab28795cf0826be0b
+        checksum/cm: 6206671b754c9b9cf1674cf6d4587f608a87ac1e40f272dbbfbf96214831bbde
+        checksum/cmd-params: d818a59601fcbfdb88a3356aa64a24d60b08e63e2d2767f53ba33a203acdd121
       labels:
         app.kubernetes.io/component: repo-server
         app.kubernetes.io/instance: argocd
@@ -32487,6 +32254,8 @@ spec:
         - --port=8081
         - --metrics-port=8084
         env:
+        - name: ARGOCD_EXEC_TIMEOUT
+          value: 5m
         - name: ARGOCD_REPO_SERVER_NAME
           value: argocd-repo-server
         - name: ARGOCD_RECONCILIATION_TIMEOUT
@@ -32775,7 +32544,13 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        resources: {}
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -32813,7 +32588,13 @@ spec:
         image: quay.io/argoproj/argocd:v3.3.3
         imagePullPolicy: IfNotPresent
         name: copyutil
-        resources: {}
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -32885,8 +32666,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 03aa83e93a81f296e3041e8476ef900d6fab49f20da66b3f4e7cc8bb9caa3f11
-        checksum/cmd-params: 348d0b39b78eace16d62a8744fa5197c97be62240b62417ab28795cf0826be0b
+        checksum/cm: 6206671b754c9b9cf1674cf6d4587f608a87ac1e40f272dbbfbf96214831bbde
+        checksum/cmd-params: d818a59601fcbfdb88a3356aa64a24d60b08e63e2d2767f53ba33a203acdd121
       labels:
         app.kubernetes.io/component: server
         app.kubernetes.io/instance: argocd
@@ -33248,7 +33029,13 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        resources: {}
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -33347,8 +33134,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 03aa83e93a81f296e3041e8476ef900d6fab49f20da66b3f4e7cc8bb9caa3f11
-        checksum/cmd-params: 348d0b39b78eace16d62a8744fa5197c97be62240b62417ab28795cf0826be0b
+        checksum/cm: 6206671b754c9b9cf1674cf6d4587f608a87ac1e40f272dbbfbf96214831bbde
+        checksum/cmd-params: d818a59601fcbfdb88a3356aa64a24d60b08e63e2d2767f53ba33a203acdd121
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
@@ -33671,7 +33458,13 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        resources: {}
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -33781,6 +33574,19 @@ spec:
       serviceAccountName: argocd-redis-secret-init
   ttlSecondsAfterFinished: 60
 ---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-cert
+  namespace: argocd
+spec:
+  dnsNames:
+  - argocd.bapttf.com
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: tls-certificate
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -33802,3 +33608,42 @@ spec:
   tls:
   - hosts:
     - argocd
+---
+apiVersion: secrets.infisical.com/v1alpha1
+kind: InfisicalSecret
+metadata:
+  name: infisical-argocd-secret
+  namespace: argocd
+spec:
+  authentication:
+    universalAuth:
+      credentialsRef:
+        secretName: infisical-universal-auth
+        secretNamespace: infisical
+      secretsScope:
+        envSlug: prod
+        projectSlug: infrastructure
+        secretsPath: /argocd
+  hostAPI: https://app.infisical.com/api
+  managedKubeSecretReferences:
+  - creationPolicy: Owner
+    secretName: argocd-secret
+    secretNamespace: argocd
+    secretType: Opaque
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`argocd.bapttf.com`)
+    services:
+    - name: argocd-server
+      port: 80
+  tls:
+    secretName: tls-certificate
