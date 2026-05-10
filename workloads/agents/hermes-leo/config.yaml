@@ -1,0 +1,24 @@
+model:
+  provider: custom
+  default: bifrost/bedrock/us.anthropic.claude-opus-4-6-v1
+  base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+  api_key: "dummy"
+  api_mode: chat_completions
+
+approvals:
+  mode: off
+
+terminal:
+  backend: local
+  timeout: 180
+
+compression:
+  enabled: true
+  threshold: 0.50
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+
+telegram:
+  require_mention: true
