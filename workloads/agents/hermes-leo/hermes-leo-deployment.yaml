@@ -77,6 +77,12 @@ spec:
                 secretKeyRef:
                   name: nullclaw-leo-secret
                   key: API_SERVER_KEY
+            - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-leo-secret-bridge
+                  key: WHATSMEOW_BRIDGE_TOKEN
+                  optional: true
           ports:
             - containerPort: 8642
               name: http
