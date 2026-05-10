@@ -69,6 +69,12 @@ spec:
               value: "/home/node/.openclaw/lea/openclaw.json"
             - name: NODE_OPTIONS
               value: "--max-old-space-size=1280 --max-semi-space-size=16"
+            - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-leo-secret-bridge
+                  key: WHATSMEOW_BRIDGE_TOKEN
+                  optional: true
           volumeMounts:
             - name: openclaw-home
               mountPath: /home
