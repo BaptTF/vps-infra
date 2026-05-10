@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whatsmeow-bridge-ingress
+  namespace: openclaw
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - whatsmeow-bridge
+  defaultBackend:
+    service:
+      name: whatsmeow-bridge
+      port:
+        number: 3301
