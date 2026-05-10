@@ -9,6 +9,7 @@ resources:
   - hermes-leo-service.yaml
   - whatsmeow-bridge-deployment.yaml
   - whatsmeow-bridge-service.yaml
+  - whatsmeow-bridge-ingress-tailscale.yaml
 
 configMapGenerator:
   - name: hermes-leo-config
