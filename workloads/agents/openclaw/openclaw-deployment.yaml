@@ -78,9 +78,15 @@ spec:
           volumeMounts:
             - name: openclaw-home
               mountPath: /home
+            - name: state
+              mountPath: /home/node/bridge-data
+              
       securityContext:
         fsGroup: 1000
       volumes:
         - name: openclaw-home
           persistentVolumeClaim:
             claimName: openclaw-home-pvc
+        - name: state
+          persistentVolumeClaim:
+            claimName: nullclaw-lea-bridge
