@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["kustomize", "argocd"],
+  "argocd": {
+    "managerFilePatterns": ["/apps/.+\\.yaml$/"]
+  },
+  "ignorePaths": [
+    "argocd-bootstrap.yaml",
+    "disable-apps/**",
+    "**/.argocd-source-*"
+  ],
+  "packageRules": [
+    {
+      "description": "Label major updates for manual review",
+      "matchManagers": ["kustomize", "argocd"],
+      "matchUpdateTypes": ["major"],
+      "labels": ["major-update"]
+    }
+  ]
+}
