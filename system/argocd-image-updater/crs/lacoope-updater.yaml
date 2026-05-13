@@ -1,0 +1,23 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: lacoope-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: lacoope
+      images:
+        - alias: frontend
+          imageName: "ghcr.io/bapttf/lacoopefrontend"
+          commonUpdateSettings:
+            updateStrategy: semver
+            pullSecret: pullsecret:argocd/bapttf-ghcr-login-secret
+        - alias: backend
+          imageName: "ghcr.io/bapttf/lacoopebackend"
+          commonUpdateSettings:
+            updateStrategy: semver
+            pullSecret: pullsecret:argocd/bapttf-ghcr-login-secret
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

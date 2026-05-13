@@ -5,9 +5,15 @@ kind: Kustomization
 namespace: argocd
 
 resources:
+  - authelia-updater.yaml
+  - bifrost-updater.yaml
   - ce-analytics-updater.yaml
+  - jujudb-updater.yaml
+  - lacoope-updater.yaml
   - nullclaw-updater.yaml
   - openclaw-updater.yaml
+  - openwebui-updater.yaml
   - tripkit-frontend-updater.yaml
   - tripkit-backend-updater.yaml
+  - vaultwarden-updater.yaml
   - voyage-updater.yaml
