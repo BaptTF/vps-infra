@@ -1,0 +1,354 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-db
+  namespace: compreface
+  labels:
+    app: compreface
+    component: db
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: db
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "frs"
+            - name: POSTGRES_USER
+              value: "compreface"
+            - name: POSTGRES_PASSWORD
+              value: "compreface"
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - compreface
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - compreface
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: compreface-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compreface-db
+  namespace: compreface
+spec:
+  selector:
+    app: compreface
+    component: db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-core
+  namespace: compreface
+  labels:
+    app: compreface
+    component: core
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: core
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: core
+    spec:
+      containers:
+        - name: core
+          image: exadel/compreface-core:1.2.0
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: ML_PORT
+              value: "3000"
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "1536Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2560Mi"
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compreface-core
+  namespace: compreface
+spec:
+  selector:
+    app: compreface
+    component: core
+  ports:
+    - port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-api
+  namespace: compreface
+  labels:
+    app: compreface
+    component: api
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: api
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: api
+    spec:
+      containers:
+        - name: api
+          image: exadel/compreface-api:1.2.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: POSTGRES_URL
+              value: "jdbc:postgresql://compreface-db:5432/frs"
+            - name: POSTGRES_USER
+              value: "compreface"
+            - name: POSTGRES_PASSWORD
+              value: "compreface"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+            - name: API_JAVA_OPTS
+              value: "-Xmx512m"
+            - name: CONNECTION_TIMEOUT
+              value: "10000"
+            - name: READ_TIMEOUT
+              value: "60000"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "768Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compreface-api
+  namespace: compreface
+spec:
+  selector:
+    app: compreface
+    component: api
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-admin
+  namespace: compreface
+  labels:
+    app: compreface
+    component: admin
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: admin
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: admin
+    spec:
+      containers:
+        - name: admin
+          image: exadel/compreface-admin:1.2.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: POSTGRES_URL
+              value: "jdbc:postgresql://compreface-db:5432/frs"
+            - name: POSTGRES_USER
+              value: "compreface"
+            - name: POSTGRES_PASSWORD
+              value: "compreface"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+            - name: ADMIN_JAVA_OPTS
+              value: "-Xmx256m"
+            - name: EXTERNAL_API_HOST
+              value: "http://compreface-api:8080"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "384Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compreface-admin
+  namespace: compreface
+spec:
+  selector:
+    app: compreface
+    component: admin
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-ui
+  namespace: compreface
+  labels:
+    app: compreface
+    component: ui
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: ui
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: ui
+    spec:
+      containers:
+        - name: ui
+          image: exadel/compreface-fe:1.2.0
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: CLIENT_MAX_BODY_SIZE
+              value: "10M"
+            - name: PROXY_PASS
+              value: "http://compreface-admin:8080"
+            - name: STATIC_FOLDER
+              value: "/usr/share/nginx/html/static"
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compreface-ui
+  namespace: compreface
+spec:
+  selector:
+    app: compreface
+    component: ui
+  ports:
+    - port: 80
+      targetPort: 80
