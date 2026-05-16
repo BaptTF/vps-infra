@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-ui
+  namespace: compreface
+  labels:
+    app: compreface
+    component: ui
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: ui
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: ui
+    spec:
+      containers:
+        - name: ui
+          image: exadel/compreface-fe:1.2.0
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: CLIENT_MAX_BODY_SIZE
+              value: "10M"
+            - name: PROXY_PASS
+              value: "http://compreface-admin:8080"
+            - name: STATIC_FOLDER
+              value: "/usr/share/nginx/html/static"
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
