@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-api
+  namespace: compreface
+  labels:
+    app: compreface
+    component: api
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: api
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: api
+    spec:
+      containers:
+        - name: api
+          image: exadel/compreface-api:1.2.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: POSTGRES_URL
+              value: "jdbc:postgresql://postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/frs"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: compreface-db-credentials
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: compreface-db-credentials
+                  key: password
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+            - name: API_JAVA_OPTS
+              value: "-Xmx512m"
+            - name: CONNECTION_TIMEOUT
+              value: "10000"
+            - name: READ_TIMEOUT
+              value: "60000"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "768Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
