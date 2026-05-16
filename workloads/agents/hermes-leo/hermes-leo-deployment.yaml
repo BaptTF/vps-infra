@@ -23,6 +23,7 @@ spec:
       labels:
         app: hermes-leo
     spec:
+      serviceAccountName: hermes-leo
       initContainers:
         - name: init-config
           image: busybox:1.36
@@ -83,6 +84,8 @@ spec:
                   name: nullclaw-leo-secret-bridge
                   key: WHATSMEOW_BRIDGE_TOKEN
                   optional: true
+            - name: PATH
+              value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           ports:
             - containerPort: 8642
               name: http
