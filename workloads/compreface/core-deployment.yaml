@@ -19,6 +19,8 @@ spec:
         app: compreface
         component: core
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: vmi2735515.contaboserver.net
       containers:
         - name: core
           image: exadel/compreface-core:1.2.0
