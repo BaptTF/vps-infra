@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: compreface
+  name: compreface-admin
   namespace: compreface
 spec:
   ingressClassName: tailscale
   tls:
     - hosts:
-        - compreface
+        - compreface-admin
   defaultBackend:
     service:
-      name: compreface-ui
+      name: compreface-admin
       port:
-        number: 80
+        number: 8080
