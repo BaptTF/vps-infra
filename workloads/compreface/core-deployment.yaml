@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compreface-core
+  namespace: compreface
+  labels:
+    app: compreface
+    component: core
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compreface
+      component: core
+  template:
+    metadata:
+      labels:
+        app: compreface
+        component: core
+    spec:
+      containers:
+        - name: core
+          image: exadel/compreface-core:1.2.0
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: ML_PORT
+              value: "3000"
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "1536Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2560Mi"
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5

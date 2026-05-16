@@ -85,3 +85,14 @@ spec:
   owner: sickgnal
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: compreface-db
+  namespace: cnpg-system
+spec:
+  name: frs
+  owner: compreface
+  cluster:
+    name: postgres-cluster

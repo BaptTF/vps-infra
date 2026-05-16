@@ -4,6 +4,13 @@ kind: Kustomization
 namespace: compreface
 
 resources:
-  - deployment.yaml
-  - ingressroute.yaml
-  - pvc.yaml
+  - core-deployment.yaml
+  - core-service.yaml
+  - api-deployment.yaml
+  - api-service.yaml
+  - admin-deployment.yaml
+  - admin-service.yaml
+  - ui-deployment.yaml
+  - ui-service.yaml
+  - ingress-tailscale.yaml
+  - infisical-secret.yaml
