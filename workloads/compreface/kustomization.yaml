@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: compreface
+
+resources:
+  - core-deployment.yaml
+  - core-service.yaml
+  - api-deployment.yaml
+  - api-service.yaml
+  - api-ingress-tailscale.yaml
+  - admin-deployment.yaml
+  - admin-service.yaml
+  - ui-deployment.yaml
+  - ui-service.yaml
+  - ui-ingress-tailscale.yaml
+  - infisical-secret.yaml
+  - infisical-secret-app.yaml

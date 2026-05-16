@@ -89,3 +89,10 @@ spec:
         login: true
         passwordSecret:
           name: sickgnal-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: compreface
+        login: true
+        passwordSecret:
+          name: compreface-db-secret
