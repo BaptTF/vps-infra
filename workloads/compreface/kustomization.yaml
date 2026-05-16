@@ -11,7 +11,6 @@ resources:
   - api-ingress-tailscale.yaml
   - admin-deployment.yaml
   - admin-service.yaml
-  - admin-ingress-tailscale.yaml
   - ui-deployment.yaml
   - ui-service.yaml
   - ui-ingress-tailscale.yaml
