@@ -32,6 +32,10 @@ spec:
               value: "http://compreface-admin:8080"
             - name: PROXY_READ_TIMEOUT
               value: "300s"
+            - name: PROXY_CONNECT_TIMEOUT
+              value: "300s"
+            - name: PROXY_SEND_TIMEOUT
+              value: "300s"
             - name: STATIC_FOLDER
               value: "/usr/share/nginx/html/static"
           resources:
