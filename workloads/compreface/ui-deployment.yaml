@@ -30,6 +30,8 @@ spec:
               value: "10M"
             - name: PROXY_PASS
               value: "http://compreface-admin:8080"
+            - name: PROXY_READ_TIMEOUT
+              value: "300s"
             - name: STATIC_FOLDER
               value: "/usr/share/nginx/html/static"
           resources:
