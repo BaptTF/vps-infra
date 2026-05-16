@@ -15,3 +15,4 @@ resources:
   - ui-service.yaml
   - ui-ingress-tailscale.yaml
   - infisical-secret.yaml
+  - infisical-secret-app.yaml
