@@ -25,6 +25,7 @@ spec:
       annotations:
         backup.velero.io/backup-volumes: ""
     spec:
+      serviceAccountName: nullclaw-leo
       initContainers:
         - name: init-config
           image: busybox:1.36
@@ -90,6 +91,8 @@ spec:
           env:
             - name: NULLCLAW_ALLOW_YOLO
               value: "1"
+            - name: PATH
+              value: "/nullclaw-data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           ports:
             - containerPort: 3000
               name: http
