@@ -74,7 +74,7 @@ tls-san:
   - "$TS_IP"
 flannel-iface: "tailscale0"
 kubelet-arg:
-  - "system-reserved=memory=1800Mi"
+  - "system-reserved=memory=800Mi"
   - "kube-reserved=memory=256Mi"
 EOF
 
