@@ -11,5 +11,6 @@ spec:
       services:
         - name: ha-eyg
           port: 8123
+          passHostHeader: false
   tls:
     secretName: tls-certificate
