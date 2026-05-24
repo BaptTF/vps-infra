@@ -1,0 +1,12 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-proxy-headers
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-For: ""
+      X-Forwarded-Host: ""
+      X-Forwarded-Proto: ""
+      X-Forwarded-Server: ""
+      X-Real-Ip: ""

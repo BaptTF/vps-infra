@@ -4,5 +4,6 @@ namespace: ha-eyg
 
 resources:
    - service.yaml
+   - middleware.yaml
    - ingressroute.yaml
    - certificate.yaml
