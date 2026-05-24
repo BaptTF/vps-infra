@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ha-eyg
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`eyguians.bapttf.com`)
+      kind: Rule
+      services:
+        - name: ha-eyg
+          port: 8123
+  tls:
+    secretName: tls-certificate
