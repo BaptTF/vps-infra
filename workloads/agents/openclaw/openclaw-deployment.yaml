@@ -22,7 +22,7 @@ spec:
       labels:
         app: openclaw
       annotations:
-        backup.velero.io/backup-volumes: ""
+        backup.velero.io/backup-volumes: "openclaw-home,state"
     spec:
       containers:
         - name: openclaw
