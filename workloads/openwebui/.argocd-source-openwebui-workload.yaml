@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/open-webui/open-webui:v0.9.6
