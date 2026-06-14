@@ -19,6 +19,7 @@ helmCharts:
 
 resources:
   - cnpg-cluster.yaml
+  - immich-cluster.yaml
   - databases.yaml
   - database-infisical-secrets.yaml
   - backup-infisical-secret.yaml
