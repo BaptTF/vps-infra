@@ -19,7 +19,11 @@ helmCharts:
 
 resources:
   - cnpg-cluster.yaml
+  - immich-postgres-cluster.yaml
+  - immich-database.yaml
   - databases.yaml
   - database-infisical-secrets.yaml
+  - immich-db-infisical-secret.yaml
   - backup-infisical-secret.yaml
   - scheduled-backup.yaml
+  - immich-scheduled-backup.yaml

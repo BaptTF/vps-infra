@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-server
+  namespace: immich
+  labels:
+    app: immich
+    component: server
+spec:
+  selector:
+    app: immich
+    component: server
+  ports:
+    - name: http
+      port: 2283
+      targetPort: http
