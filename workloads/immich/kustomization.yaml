@@ -4,9 +4,12 @@ namespace: immich
 
 resources:
   - infisical-secret.yaml
-  - persistent-volume-claims.yaml
-  - valkey.yaml
-  - machine-learning.yaml
+  - library-pvc.yaml
+  - machine-learning-cache-pvc.yaml
+  - valkey-deployment.yaml
+  - valkey-service.yaml
+  - machine-learning-deployment.yaml
+  - machine-learning-service.yaml
   - server.yaml
   - service.yaml
   - certificate.yaml
