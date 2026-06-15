@@ -16,11 +16,20 @@ ports:
     expose:
       default: true
     exposedPort: 80
+    transport:
+      respondingTimeouts:
+        readTimeout: 300s
+        idleTimeout: 300s
   websecure:
     port: 443
     expose:
       default: true
     exposedPort: 443
+    # Default readTimeout is 60s; raise for slow/large uploads (e.g. Immich).
+    transport:
+      respondingTimeouts:
+        readTimeout: 300s
+        idleTimeout: 300s
   ssh:
     port: 22
     expose:
