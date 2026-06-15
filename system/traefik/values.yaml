@@ -21,6 +21,11 @@ ports:
     expose:
       default: true
     exposedPort: 443
+    # Immich uploads can take longer than Traefik's default 60s entrypoint read timeout.
+    transport:
+      respondingTimeouts:
+        readTimeout: 600s
+        idleTimeout: 600s
   ssh:
     port: 22
     expose:
