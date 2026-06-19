@@ -10,7 +10,7 @@ server:
       config:
         defaultEnabled: true
 auth:
-  adminUsername: admin
+  adminUsername: baptiste
   methods:
     proxy:
       enabled: true
