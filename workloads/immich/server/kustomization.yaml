@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - infisical-secret.yaml
+  - library-pvc.yaml
+  - machine-learning-cache-pvc.yaml
+  - valkey-deployment.yaml
+  - valkey-service.yaml
+  - machine-learning-deployment.yaml
+  - machine-learning-service.yaml
+  - server.yaml
+  - service.yaml
+  - certificate.yaml
+  - ingressroute.yaml
+
+configMapGenerator:
+  - name: immich-config
+    literals:
+      - TZ=Etc/UTC
+      - IMMICH_LOG_LEVEL=log
+      - DB_HOSTNAME=immich-postgres-rw.cnpg-system.svc.cluster.local
+      - DB_PORT=5432
+      - DB_DATABASE_NAME=immich
+      - REDIS_HOSTNAME=immich-valkey
+      - REDIS_PORT=6379

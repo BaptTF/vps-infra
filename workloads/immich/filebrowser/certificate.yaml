@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: filebrowser-cert
+  namespace: immich
+spec:
+  secretName: filebrowser-tls-certificate
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "drive.bapttf.com"
