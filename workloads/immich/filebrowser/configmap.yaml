@@ -17,12 +17,20 @@ data:
           config:
             defaultEnabled: true
     auth:
+      adminUsername: admin
       methods:
         proxy:
           enabled: true
           header: "Remote-User"
         password:
           enabled: false
+          minLength: 0
+    userDefaults:
+      permissions:
+        admin: false
+        modify: true
+        share: true
+        download: true
     http:
       trustedHeaders:
         - X-Forwarded-For
