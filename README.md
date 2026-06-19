@@ -324,7 +324,7 @@ Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`
 After the first ArgoCD sync, configure Immich to view sorted photos as an external library (one-time admin setup):
 
 1. Open Immich admin → **External Libraries** → **Create Library**
-2. Add import path: `/data/family/library`
+2. Add import path: `/external/family/library` (must be outside `/data` — Immich rejects paths under its media root)
 3. Run **Scan** (or enable periodic scan in settings)
 
 Do not sort files already indexed by Immich via FileBrowser — move photos in `inbox` before scanning. Immich native upload folders (`/data/upload`, `/data/library`) are not exposed in FileBrowser.
