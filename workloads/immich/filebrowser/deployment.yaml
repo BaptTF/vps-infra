@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebrowser
+  namespace: immich
+  labels:
+    app: filebrowser
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebrowser
+  template:
+    metadata:
+      labels:
+        app: filebrowser
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: init-family-dirs
+          image: busybox:1.37
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /data/family/inbox /data/family/library
+              chown -R 1000:1000 /data/family
+              chmod -R 775 /data/family
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: library
+              mountPath: /data
+      containers:
+        - name: filebrowser
+          image: ghcr.io/gtsteffaniak/filebrowser:1.2.4-stable
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - name: library
+              mountPath: /srv/inbox
+              subPath: family/inbox
+            - name: library
+              mountPath: /srv/library
+              subPath: family/library
+            - name: config
+              mountPath: /home/filebrowser/data
+            - name: filebrowser-config
+              mountPath: /home/filebrowser/data/config.yaml
+              subPath: config.yaml
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: library
+          persistentVolumeClaim:
+            claimName: immich-library
+        - name: config
+          persistentVolumeClaim:
+            claimName: filebrowser-data
+        - name: filebrowser-config
+          configMap:
+            name: filebrowser-config

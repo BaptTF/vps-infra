@@ -317,6 +317,18 @@ metadata:
 
 This can be added directly to your service definitions in Git.
 
+## FileBrowser drive (drive.bapttf.com)
+
+Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`, protected by Authelia (`group:family`). Uploads land in `/data/family/inbox` on the `immich-library` PVC; sorted files go in `/data/family/library`.
+
+After the first ArgoCD sync, configure Immich to view sorted photos as an external library (one-time admin setup):
+
+1. Open Immich admin → **External Libraries** → **Create Library**
+2. Add import path: `/data/family/library`
+3. Run **Scan** (or enable periodic scan in settings)
+
+Do not sort files already indexed by Immich via FileBrowser — move photos in `inbox` before scanning. Immich native upload folders (`/data/upload`, `/data/library`) are not exposed in FileBrowser.
+
 ## Note
 
 HTTPS certificates via Let's Encrypt will work after:
