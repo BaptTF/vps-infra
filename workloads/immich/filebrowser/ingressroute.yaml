@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: filebrowser
+  namespace: immich
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`drive.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: filebrowser
+          port: 80
+  tls:
+    secretName: filebrowser-tls-certificate

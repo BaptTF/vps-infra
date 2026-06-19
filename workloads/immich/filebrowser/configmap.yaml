@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebrowser-config
+  namespace: immich
+data:
+  config.yaml: |
+    server:
+      port: 80
+      cacheDir: /home/filebrowser/data/tmp
+      externalUrl: "https://drive.bapttf.com"
+      sources:
+        - path: /srv/inbox
+          config:
+            defaultEnabled: true
+        - path: /srv/library
+          config:
+            defaultEnabled: true
+    auth:
+      methods:
+        proxy:
+          enabled: true
+          header: "Remote-User"
+        password:
+          enabled: false
+    http:
+      trustedHeaders:
+        - X-Forwarded-For
+        - X-Real-IP
