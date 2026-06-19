@@ -17,8 +17,6 @@ spec:
     metadata:
       labels:
         app: filebrowser
-      annotations:
-        filebrowser.config/revision: account-schema-v1
     spec:
       securityContext:
         runAsUser: 1000
