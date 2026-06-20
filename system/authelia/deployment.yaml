@@ -22,6 +22,8 @@ spec:
           ports:
             - containerPort: 9091
           env:
+            - name: X_AUTHELIA_CONFIG_FILTERS
+              value: template
             - name: AUTHELIA_STORAGE_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
@@ -51,6 +53,9 @@ spec:
             - name: config
               mountPath: /config
               readOnly: true
+            - name: oidc-secrets
+              mountPath: /config/secrets
+              readOnly: true
           resources:
             requests:
               memory: 32Mi
@@ -74,3 +79,13 @@ spec:
         - name: config
           configMap:
             name: authelia-config
+        - name: oidc-secrets
+          secret:
+            secretName: authelia-secrets
+            items:
+              - key: oidc-hmac-secret
+                path: oidc-hmac-secret
+              - key: oidc-jwks-private-key
+                path: oidc-jwks-private-key
+              - key: immich-oidc-client-secret-hash
+                path: immich-oidc-client-secret-hash
