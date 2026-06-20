@@ -329,6 +329,55 @@ After the first ArgoCD sync, configure Immich to view sorted photos as an extern
 
 Do not sort files already indexed by Immich via FileBrowser — move photos in `inbox` before scanning. Immich native upload folders (`/data/upload`, `/data/library`) are not exposed in FileBrowser.
 
+## Authelia OIDC for Immich (immich.bapttf.com)
+
+Immich uses Authelia as an OIDC provider (SSO). Do **not** add the Authelia forwardAuth middleware on Immich — that would cause double authentication.
+
+### 1. Create OIDC secrets in Infisical
+
+In project `infrastructure`, environment `prod`, path `/authelia`, add:
+
+| Key | Description |
+|---|---|
+| `oidc-hmac-secret` | Random 64+ char string (`authelia crypto rand --length 64 --charset rfc3986`) |
+| `oidc-jwks-private-key` | RSA 2048 private key PEM (`openssl genrsa 2048`) |
+| `immich-oidc-client-secret` | Plaintext OAuth client secret (for Immich admin UI) |
+| `immich-oidc-client-secret-hash` | pbkdf2 hash of the client secret (for Authelia) |
+
+Generate the client secret pair:
+
+```bash
+CLIENT_SECRET="$(openssl rand -base64 32)"
+echo "Plaintext (Immich): $CLIENT_SECRET"
+authelia crypto hash generate pbkdf2 --password "$CLIENT_SECRET"
+# Store plaintext in immich-oidc-client-secret, hash output in immich-oidc-client-secret-hash
+```
+
+After ArgoCD syncs, Authelia reads these from the `authelia-secrets` Kubernetes secret via the template filter.
+
+### 2. Configure Immich OAuth (one-time admin setup)
+
+In Immich admin → **Administration → OAuth**:
+
+| Field | Value |
+|---|---|
+| Issuer URL | `https://auth.bapttf.com/.well-known/openid-configuration` |
+| Client ID | `immich` |
+| Client Secret | value from Infisical `immich-oidc-client-secret` |
+| Scope | `openid profile email` |
+| Auto Register | enabled |
+
+Only lldap users in group `family` can authenticate via OAuth. Auto Register creates an Immich account on first login.
+
+### 3. Verify
+
+```bash
+curl -s https://auth.bapttf.com/.well-known/openid-configuration | jq .
+kubectl -n authelia logs deploy/authelia --tail=50
+```
+
+Test web login via the OAuth button on Immich, then test the mobile app (redirect URI `app.immich:///oauth-callback`).
+
 ## Note
 
 HTTPS certificates via Let's Encrypt will work after:
