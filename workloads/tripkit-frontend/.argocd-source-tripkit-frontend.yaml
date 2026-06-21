@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/rjullien/tripkit-frontend:sha-f90020d
+  - ghcr.io/rjullien/tripkit-frontend:sha-416efe6
