@@ -2,3 +2,4 @@ kustomize:
   images:
   - ghcr.io/bapttf/openclaw-lea-config:sha-b576e24598385425dd03e691a44dc997481862fa
   - ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-0571d53
+  - maximhq/bifrost:v1.5.14
