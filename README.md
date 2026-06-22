@@ -50,6 +50,16 @@ fs.inotify.max_user_watches=524288
 EOF
 sudo sysctl -p /etc/sysctl.d/99-inotify.conf
 ```
+
+### CIFS utilities (required on nodes mounting SMB storage)
+
+Immich stores cold originals on a Hetzner Storage Box mounted over SMB via `csi-driver-smb`. Every node that can run Immich or FileBrowser must have the CIFS mount helper installed.
+
+```bash
+apt-get update
+apt-get install -y cifs-utils
+command -v mount.cifs
+```
 ---
 
 ## Setup Guide
@@ -319,7 +329,48 @@ This can be added directly to your service definitions in Git.
 
 ## FileBrowser drive (drive.bapttf.com)
 
-Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`, protected by Authelia (`group:family`). Uploads land in `/data/family/inbox` on the `immich-library` PVC; sorted files go in `/data/family/library`.
+Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`, protected by Authelia (`group:family`). Uploads land in `/data/family/inbox`; sorted files go in `/data/family/library`.
+
+Immich can keep generated data on the local VPS while storing cold originals on a Hetzner Storage Box over SMB:
+
+- Local PVC `immich-library`: `/data/thumbs`, `/data/encoded-video`, `/data/profile`, `/data/backups` and other generated data
+- Storage Box PVC `immich-storagebox`: `/data/upload`, `/data/library`, `/data/family` and `/external/family`
+
+Before enabling the Storage Box mounts in production:
+
+1. Create a dedicated Hetzner Storage Box sub-account for Immich.
+2. In Infisical project `infrastructure`, environment `prod`, path `/immich/storagebox`, add:
+
+| Key | Description |
+|---|---|
+| `username` | Storage Box sub-account, e.g. `u619007-sub1` |
+| `password` | Storage Box password |
+
+3. Replace the SMB source in `workloads/immich/server/storagebox-pv.yaml`:
+
+```yaml
+source: //u619007-sub1.your-storagebox.de/u619007-sub1
+```
+
+For the Immich sub-account, the Hetzner base directory is `/immich`, so the SMB source points at the sub-account share itself. The `source` value cannot be read from a Kubernetes Secret by `csi-driver-smb`, so it must be committed explicitly.
+
+4. Benchmark from the VPS before migration:
+
+```bash
+STORAGEBOX_HOST="u619007-sub1.your-storagebox.de" \
+STORAGEBOX_SHARE="u619007-sub1" \
+STORAGEBOX_USER="u619007-sub1" \
+STORAGEBOX_PASSWORD="..." \
+./scripts/immich-storagebox-benchmark.sh
+```
+
+5. Pause ArgoCD auto-sync for `immich-workload`, scale down Immich and FileBrowser, sync the Storage Box PV/PVC and run:
+
+```bash
+./scripts/immich-storagebox-migrate.sh
+```
+
+6. Re-enable the Immich manifests, verify the Immich storage integrity checks, test old assets, mobile upload, video playback and FileBrowser, then keep the old local PVC data intact for a few days before cleanup.
 
 After the first ArgoCD sync, configure Immich to view sorted photos as an external library (one-time admin setup):
 
