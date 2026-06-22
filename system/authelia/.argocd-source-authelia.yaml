@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - authelia/authelia:4.39.19
