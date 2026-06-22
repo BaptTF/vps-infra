@@ -429,6 +429,19 @@ kubectl -n authelia logs deploy/authelia --tail=50
 
 Test web login via the OAuth button on Immich, then test the mobile app (redirect URI `app.immich:///oauth-callback`).
 
+## Bifrost provider secrets
+
+Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in namespace `openclaw`, populated by the InfisicalSecret at path `/agents/bifrost` (project `infrastructure`, env `prod`). The deployment mounts all keys in this path via `envFrom`, so adding a new provider key only requires adding it to Infisical — no manifest change.
+
+| Key | Description |
+|---|---|
+| `CHUTES_API_TOKEN` | Chutes.ai API token (OpenAI-compatible provider `chutes` + `chutes-embeddings`) |
+| `GOOGLE_API_KEY` | Google AI Studio API key (Gemini provider `gemini`) |
+| `GROQ_API_KEY` | Groq API key (provider `groq`, whisper transcriptions) |
+| `OPENCODE_GO_API_KEY` | OpenCode Go subscription API key (https://opencode.ai/auth → Go). Backs two providers: `opencode-go` (OpenAI-compatible, models `glm-5.2`/`glm-5.1`/`glm-5`/`kimi-k2.7-code`/`kimi-k2.6`/`kimi-k2.5`/`deepseek-v4-pro`/`deepseek-v4-flash`/`mimo-v2.5`/`mimo-v2.5-pro`/`mimo-v2-pro`/`mimo-v2-omni`) and `opencode-go-anthropic` (Anthropic-compatible, models `minimax-m3`/`minimax-m2.7`/`minimax-m2.5`/`qwen3.7-max`/`qwen3.7-plus`/`qwen3.6-plus`/`qwen3.5-plus`). Same key used for both — Bifrost sends the right auth header per `base_provider_type`. |
+
+The Bedrock provider (`bedrock` in `bifrost_config.json`) does not reference a key `value` — Bifrost's Bedrock provider resolves AWS credentials via the standard SDK chain (env vars / IAM), so the AWS credentials for Bedrock are also stored in this Infisical path under the conventional `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names.
+
 ## Note
 
 HTTPS certificates via Let's Encrypt will work after:
