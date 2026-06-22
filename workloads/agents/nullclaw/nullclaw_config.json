@@ -10,7 +10,7 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "bifrost/chutes/moonshotai/Kimi-K2.5-TEE"
+        "primary": "bifrost/opencode-go/deepseek-v4-pro"
       }
     }
   },
@@ -18,19 +18,19 @@
     {
       "hint": "fast",
       "provider": "bifrost",
-      "model": "chutes/Qwen/Qwen3.5-397B-A17B-TEE",
+      "model": "opencode-go/deepseek-v4-flash",
       "cost_class": "free"
     },
     {
       "hint": "balanced",
       "provider": "bifrost",
-      "model": "chutes/moonshotai/Kimi-K2.5-TEE",
+      "model": "opencode-go/deepseek-v4-pro",
       "cost_class": "cheap"
     },
     {
       "hint": "deep",
       "provider": "bifrost",
-      "model": "chutes/moonshotai/Kimi-K2.6-TEE",
+      "model": "opencode-go/deepseek-v4-pro",
       "cost_class": "standard"
     },
     {
@@ -97,7 +97,7 @@
     "search": {
       "enabled": true,
       "provider": "custom:http://bifrost.openclaw.svc.cluster.local:8080/v1",
-      "model": "chutes-embeddings/Qwen/Qwen3-Embedding-8B",
+        "model": "bedrock/amazon.titan-embed-text-v2:0",
       "store": {
         "kind": "ann"
       },
@@ -205,48 +205,18 @@
     "provider_backoff_ms": 500,
     "model_fallbacks": [
       {
-        "model": "bifrost/chutes/moonshotai/Kimi-K2.6-TEE",
+        "model": "bifrost/opencode-go/deepseek-v4-pro",
         "fallbacks": [
-          "bifrost/chutes/zai-org/GLM-5.1-TEE",
-          "bifrost/chutes/zai-org/GLM-5-TEE",
-          "bifrost/chutes/moonshotai/Kimi-K2.5-TEE"
+          "bifrost/opencode-go/kimi-k2.7-code",
+          "bifrost/opencode-go/glm-5.2",
+          "bifrost/opencode-go-anthropic/qwen3.7-plus"
         ]
       },
       {
-        "model": "bifrost/chutes/zai-org/GLM-5.1-TEE",
+        "model": "bifrost/opencode-go/deepseek-v4-flash",
         "fallbacks": [
-          "bifrost/chutes/zai-org/GLM-5-TEE",
-          "bifrost/chutes/moonshotai/Kimi-K2.5-TEE",
-          "bifrost/chutes/Qwen/Qwen3.5-397B-A17B-TEE"
-        ]
-      },
-      {
-        "model": "bifrost/chutes/zai-org/GLM-5-TEE",
-        "fallbacks": [
-          "bifrost/chutes/moonshotai/Kimi-K2.5-TEE",
-          "bifrost/chutes/Qwen/Qwen3.5-397B-A17B-TEE",
-          "bifrost/chutes/MiniMaxAI/MiniMax-M2.5-TEE"
-        ]
-      },
-      {
-        "model": "bifrost/chutes/moonshotai/Kimi-K2.5-TEE",
-        "fallbacks": [
-          "bifrost/chutes/Qwen/Qwen3.5-397B-A17B-TEE",
-          "bifrost/chutes/MiniMaxAI/MiniMax-M2.5-TEE"
-        ]
-      },
-      {
-        "model": "chutes/moonshotai/Kimi-K2.5-TEE",
-        "fallbacks": [
-          "bifrost/chutes/Qwen/Qwen3.5-397B-A17B-TEE",
-          "bifrost/chutes/MiniMaxAI/MiniMax-M2.5-TEE"
-        ]
-      },
-      {
-        "model": "bifrost/chutes/Qwen/Qwen3.5-397B-A17B-TEE",
-        "fallbacks": [
-          "bifrost/chutes/MiniMaxAI/MiniMax-M2.5-TEE",
-          "bifrost/gemini/gemma-4-31b-it"
+          "bifrost/opencode-go/mimo-v2.5",
+          "bifrost/opencode-go-anthropic/minimax-m2.7"
         ]
       },
       {

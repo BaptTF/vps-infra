@@ -27,63 +27,6 @@
         "retry_backoff_max_ms": 30000
       }
     },
-    "chutes": {
-      "custom_provider_config": {
-        "base_provider_type": "openai",
-        "allowed_requests": {
-          "chat_completion": true,
-          "chat_completion_stream": true,
-          "list_models": true
-        }
-      },
-      "keys": [
-        {
-          "name": "chutes-api-key",
-          "value": "env.CHUTES_API_TOKEN",
-          "models": [
-            "MiniMaxAI/MiniMax-M2.5-TEE",
-            "moonshotai/Kimi-K2.5-TEE",
-            "moonshotai/Kimi-K2.6-TEE",
-            "deepseek-ai/DeepSeek-V3.2-TEE",
-            "Qwen/Qwen3.5-397B-A17B-TEE",
-            "zai-org/GLM-5-TEE",
-            "zai-org/GLM-5-Turbo",
-            "zai-org/GLM-5.1-TEE"
-          ],
-          "weight": 1.0
-        }
-      ],
-      "network_config": {
-        "base_url": "https://llm.chutes.ai",
-        "default_request_timeout_in_seconds": 600,
-        "max_retries": 3,
-        "retry_backoff_initial_ms": 1000,
-        "retry_backoff_max_ms": 30000
-      }
-    },
-    "chutes-embeddings": {
-      "keys": [
-        {
-          "name": "chutes-embedding-key",
-          "value": "env.CHUTES_API_TOKEN",
-          "models": ["Qwen/Qwen3-Embedding-8B"],
-          "weight": 1.0
-        }
-      ],
-      "network_config": {
-        "base_url": "https://chutes-qwen-qwen3-embedding-8b.chutes.ai",
-        "default_request_timeout_in_seconds": 600,
-        "max_retries": 3,
-        "retry_backoff_initial_ms": 1000,
-        "retry_backoff_max_ms": 30000
-      },
-      "custom_provider_config": {
-        "base_provider_type": "openai",
-        "allowed_requests": {
-          "embedding": true
-        }
-      }
-    },
     "gemini": {
       "keys": [
         {
