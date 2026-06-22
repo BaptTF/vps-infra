@@ -119,6 +119,76 @@
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
       }
+    },
+    "opencode-go": {
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "chat_completion": true,
+          "chat_completion_stream": true,
+          "list_models": true
+        }
+      },
+      "keys": [
+        {
+          "name": "opencode-go-key-1",
+          "value": "env.OPENCODE_GO_API_KEY",
+          "models": [
+            "glm-5.2",
+            "glm-5.1",
+            "glm-5",
+            "kimi-k2.7-code",
+            "kimi-k2.6",
+            "kimi-k2.5",
+            "deepseek-v4-pro",
+            "deepseek-v4-flash",
+            "mimo-v2.5",
+            "mimo-v2.5-pro",
+            "mimo-v2-pro",
+            "mimo-v2-omni"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://opencode.ai/zen/go",
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    },
+    "opencode-go-anthropic": {
+      "custom_provider_config": {
+        "base_provider_type": "anthropic",
+        "allowed_requests": {
+          "chat_completion": true,
+          "chat_completion_stream": true
+        }
+      },
+      "keys": [
+        {
+          "name": "opencode-go-anthropic-key-1",
+          "value": "env.OPENCODE_GO_API_KEY",
+          "models": [
+            "minimax-m3",
+            "minimax-m2.7",
+            "minimax-m2.5",
+            "qwen3.7-max",
+            "qwen3.7-plus",
+            "qwen3.6-plus",
+            "qwen3.5-plus"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://opencode.ai/zen/go",
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
     }
   }
 }
