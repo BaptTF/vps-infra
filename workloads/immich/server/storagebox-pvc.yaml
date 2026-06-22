@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-storagebox
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: immich-storagebox
+  volumeName: immich-storagebox
+  resources:
+    requests:
+      storage: 1Ti
