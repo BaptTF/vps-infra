@@ -46,7 +46,16 @@ spec:
           volumeMounts:
             - name: library
               mountPath: /data
-            - name: library
+            - name: storagebox
+              mountPath: /data/upload
+              subPath: upload
+            - name: storagebox
+              mountPath: /data/library
+              subPath: library
+            - name: storagebox
+              mountPath: /data/family
+              subPath: family
+            - name: storagebox
               mountPath: /external/family
               subPath: family
           startupProbe:
@@ -84,3 +93,6 @@ spec:
         - name: library
           persistentVolumeClaim:
             claimName: immich-library
+        - name: storagebox
+          persistentVolumeClaim:
+            claimName: immich-storagebox
