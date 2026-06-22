@@ -3,7 +3,10 @@ kind: Kustomization
 
 resources:
   - infisical-secret.yaml
+  - storagebox-infisical-secret.yaml
   - library-pvc.yaml
+  - storagebox-pv.yaml
+  - storagebox-pvc.yaml
   - machine-learning-cache-pvc.yaml
   - valkey-deployment.yaml
   - valkey-service.yaml
