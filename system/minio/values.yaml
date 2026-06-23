@@ -1,5 +1,5 @@
 mode: standalone
-replicas: 1
+replicas: 0
 
 resources:
   requests:
