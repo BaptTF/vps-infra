@@ -10,15 +10,6 @@ helmCharts:
     releaseName: minio
     valuesFile: values.yaml
 
-patches:
-  - target:
-      kind: Deployment
-      name: minio
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 0
-
 resources:
   - traefik-ingress.yaml
   - certificate.yaml
