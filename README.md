@@ -253,6 +253,26 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 ---
 
+## Manual scale-down during worker outage (2026-06-23)
+
+Worker node `bapt-debian` went `NotReady`, causing all its pods to reschedule onto the control-plane which only has ~6.9Gi allocatable. The control-plane hit 99% memory, leaving critical workloads (`bifrost`, `openclaw`) Pending/crash-looping. The following were scaled to 0 manually with `kubectl` to free RAM and unblock bifrost + openclaw:
+
+| Workload | Namespace | RAM freed | Notes |
+|----------|-----------|-----------|-------|
+| minio | minio | ~160Mi | Scaled via `kubectl scale deploy minio -n minio --replicas=0`. PVC `minio` (20Gi, local-path, reclaim `Delete`) left `Bound` — data intact. Do **not** move `apps/minio.yaml` to `disable-apps/` to pause it: the app has the cascade finalizer and the PVC carries the ArgoCD tracking-id, so pruning would delete the PVC and the data. |
+| argocd-image-updater | argocd | ~512Mi | `kubectl scale deploy argocd-image-updater-controller -n argocd --replicas=0` |
+| lacoope-backend | lacoope | ~64Mi | `kubectl scale deploy lacoope-backend -n lacoope --replicas=0` |
+| lacoope-frontend | lacoope | ~64Mi | `kubectl scale deploy lacoope-frontend -n lacoope --replicas=0` |
+| meilisearch | meilisearch | ~128Mi | `kubectl scale statefulset meilisearch -n meilisearch --replicas=0` (stateful, PVC safe) |
+
+Git state: `system/minio/values.yaml` has `replicas: 0` (committed), but the MinIO Helm chart ignores `replicas: 0` in standalone mode — the manual `kubectl scale` is what actually keeps the pod down. If ArgoCD does a full re-sync it may bring minio back to 1 replica; re-run the `kubectl scale` if that happens.
+
+When the worker `bapt-debian` comes back `Ready`:
+1. Revert `system/minio/values.yaml` to `replicas: 1` and push
+2. Scale the rest back up: `kubectl scale deploy argocd-image-updater-controller -n argocd --replicas=1`, `kubectl scale deploy lacoope-backend lacoope-frontend -n lacoope --replicas=1`, `kubectl scale statefulset meilisearch -n meilisearch --replicas=1`
+
+---
+
 ## Services
 
 | Service | URL | Access |
