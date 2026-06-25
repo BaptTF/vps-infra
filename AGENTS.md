@@ -80,4 +80,4 @@ build: automatic update of voyage
 
 ## Manual operations policy
 
-Any manual setup performed on the infrastructure (node configuration, package installs, DNS changes, Infisical secret creation, etc.) **must** be documented in the README. If you perform a manual operation, add it to the relevant section of the README before considering the task complete.
+Any manual setup performed directly on a node (SSH, package installs, kernel config, DNS changes, etc.) **must** be documented in the README for reproducibility. This does not apply to GitOps commits or kubectl cluster operations -- those are self-documenting via Git history and manifests.
