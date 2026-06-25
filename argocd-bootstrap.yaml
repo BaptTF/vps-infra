@@ -31165,7 +31165,6 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-redis-secret-init
-  namespace: argocd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -32546,11 +32545,11 @@ spec:
           timeoutSeconds: 1
         resources:
           limits:
-            cpu: 1000m
-            memory: 1Gi
-          requests:
-            cpu: 200m
+            cpu: 500m
             memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -32590,11 +32589,11 @@ spec:
         name: copyutil
         resources:
           limits:
-            cpu: 1000m
-            memory: 1Gi
-          requests:
-            cpu: 200m
+            cpu: 500m
             memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -33461,7 +33460,7 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 1Gi
+            memory: 1536Mi
           requests:
             cpu: 100m
             memory: 512Mi
