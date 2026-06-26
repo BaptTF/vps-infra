@@ -69,6 +69,11 @@ spec:
               value: "/home/node/.openclaw/lea/openclaw.json"
             - name: NODE_OPTIONS
               value: "--max-old-space-size=1280 --max-semi-space-size=16"
+            - name: LEO_HERMES_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-leo-secret
+                  key: API_SERVER_KEY
             - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
               valueFrom:
                 secretKeyRef:
