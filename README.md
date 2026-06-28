@@ -67,16 +67,15 @@ command -v mount.cifs
 ### Step 1: Install k3s server (without Traefik)
 
 ```bash
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh
-
 # 1. Get the Tailscale IP
 TS_IP=$(tailscale ip -4)
 
-# 2. Create the config directory
+# 2. Create the config directory and write the k3s server config
+#    (config must exist before install so k3s picks it up at first boot)
 sudo mkdir -p /etc/rancher/k3s
-
-# 3. Write the k3s server config
 cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml > /dev/null
+disable:
+  - traefik
 bind-address: "$TS_IP"
 node-ip: "$TS_IP"
 advertise-address: "$TS_IP"
@@ -88,8 +87,8 @@ kubelet-arg:
   - "kube-reserved=memory=256Mi"
 EOF
 
-# 4. Restart k3s to apply the config
-sudo systemctl restart k3s
+# 3. Install k3s (picks up config.yaml automatically at first boot)
+curl -sfL https://get.k3s.io | sh
 ```
 
 > **Note on system-reserved:** By default k3s sets allocatable = capacity, so the scheduler thinks ALL RAM is available for pods. The `system-reserved` and `kube-reserved` kubelet args reserve memory for the k3s server process (~1.6Gi) and OS, giving the scheduler a realistic view. Adjust values based on observed `k3s server` RSS (`ps aux --sort=-rss | grep k3s`).
