@@ -20,6 +20,8 @@ spec:
       annotations:
         backup.velero.io/backup-volumes: state
     spec:
+      imagePullSecrets:
+        - name: ghcr-login-secret
       containers:
         - name: whatsmeow-bridge
           image: ghcr.io/rjullien/nullclaw-lea-config/whatsmeow-bridge:latest
