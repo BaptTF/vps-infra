@@ -209,14 +209,14 @@
         "fallbacks": [
           "bifrost/opencode-go/kimi-k2.7-code",
           "bifrost/opencode-go/glm-5.2",
-          "bifrost/opencode-go-anthropic/qwen3.7-plus"
+          "bifrost/opencode-go/qwen3.7-plus"
         ]
       },
       {
         "model": "bifrost/opencode-go/deepseek-v4-flash",
         "fallbacks": [
           "bifrost/opencode-go/mimo-v2.5",
-          "bifrost/opencode-go-anthropic/minimax-m2.7"
+          "bifrost/opencode-go/minimax-m2.7"
         ]
       },
       {
