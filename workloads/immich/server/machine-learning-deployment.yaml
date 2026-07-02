@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v2
+          image: ghcr.io/immich-app/immich-machine-learning:v3
           ports:
             - containerPort: 3003
               name: http
