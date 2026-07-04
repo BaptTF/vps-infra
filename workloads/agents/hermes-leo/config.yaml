@@ -22,3 +22,11 @@ memory:
 
 telegram:
   require_mention: true
+
+auxiliary:
+  vision:
+    provider: custom
+    model: opencode-go/kimi-k2.6
+    base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+    api_key: "dummy"
+    api_mode: chat_completions
