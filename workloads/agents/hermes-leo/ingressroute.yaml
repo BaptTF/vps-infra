@@ -9,9 +9,6 @@ spec:
   routes:
     - match: Host(`hermes-leo.bapttf.com`)
       kind: Rule
-      middlewares:
-        - name: forwardauth-authelia
-          namespace: authelia
       services:
         - name: hermes-leo
           port: 9119

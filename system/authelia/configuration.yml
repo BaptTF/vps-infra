@@ -83,6 +83,44 @@ identity_providers:
           - policy: one_factor
             subject: "group:family"
     clients:
+      - client_id: hermes-leo-dashboard
+        client_name: Hermes Leo Dashboard
+        public: true
+        authorization_policy: family_only
+        require_pkce: true
+        pkce_challenge_method: S256
+        redirect_uris:
+          - https://hermes-leo.bapttf.com/auth/callback
+        scopes:
+          - openid
+          - profile
+          - email
+        response_types:
+          - code
+        grant_types:
+          - authorization_code
+        access_token_signed_response_alg: none
+        userinfo_signed_response_alg: none
+        token_endpoint_auth_method: none
+      - client_id: hermes-lya-dashboard
+        client_name: Hermes Lya Dashboard
+        public: true
+        authorization_policy: family_only
+        require_pkce: true
+        pkce_challenge_method: S256
+        redirect_uris:
+          - https://hermes-lya.bapttf.com/auth/callback
+        scopes:
+          - openid
+          - profile
+          - email
+        response_types:
+          - code
+        grant_types:
+          - authorization_code
+        access_token_signed_response_alg: none
+        userinfo_signed_response_alg: none
+        token_endpoint_auth_method: none
       - client_id: immich
         client_name: Immich
         client_secret: '{{ secret "/config/secrets/immich-oidc-client-secret-hash" }}'
