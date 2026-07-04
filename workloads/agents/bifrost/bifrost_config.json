@@ -1,1 +1,113 @@
-{"providers":{"bedrock":{"keys":[{"name":"bedrock-key-1","models":["us.anthropic.claude-sonnet-4-20250514-v1:0","us.anthropic.claude-sonnet-4-6","us.anthropic.claude-opus-4-5-20251101-v1:0","us.anthropic.claude-opus-4-6-v1","us.anthropic.claude-opus-4-7","us.anthropic.claude-opus-4-8","us.anthropic.claude-3-5-haiku-20241022-v1:0","amazon.titan-embed-text-v2:0"],"weight":1.0,"bedrock_key_config":{"region":"us-west-2"}}],"network_config":{"default_request_timeout_in_seconds":600,"stream_idle_timeout_in_seconds":300,"max_retries":3,"retry_backoff_initial_ms":1000,"retry_backoff_max_ms":30000}},"gemini":{"keys":[{"name":"gemini-key-1","value":"env.GOOGLE_API_KEY","models":["gemini-flash-latest","gemini-3.1-flash-lite-preview","gemma-4-31b-it"],"weight":1.0}],"network_config":{"default_request_timeout_in_seconds":600,"max_retries":3,"retry_backoff_initial_ms":1000,"retry_backoff_max_ms":30000}},"groq":{"keys":[{"name":"groq-key-1","value":"env.GROQ_API_KEY","models":["whisper-large-v3"],"weight":1.0}],"network_config":{"default_request_timeout_in_seconds":600,"max_retries":3,"retry_backoff_initial_ms":1000,"retry_backoff_max_ms":30000}},"opencode-go":{"keys":[{"name":"opencode-go-key-1","value":"env.OPENCODE_GO_API_KEY","models":["glm-5.2","glm-5.1","glm-5","kimi-k2.7-code","kimi-k2.6","kimi-k2.5","deepseek-v4-pro","deepseek-v4-flash","mimo-v2.5","mimo-v2.5-pro","mimo-v2-pro","mimo-v2-omni","minimax-m3","minimax-m2.7","minimax-m2.5","qwen3.7-max","qwen3.7-plus","qwen3.6-plus","qwen3.5-plus"],"weight":1.0},{"name":"opencode-go-key-2","value":"env.OPENCODE_GO_API_KEY_R","models":["glm-5.2","glm-5.1","glm-5","kimi-k2.7-code","kimi-k2.6","kimi-k2.5","deepseek-v4-pro","deepseek-v4-flash","mimo-v2.5","mimo-v2.5-pro","mimo-v2-pro","mimo-v2-omni","minimax-m3","minimax-m2.7","minimax-m2.5","qwen3.7-max","qwen3.7-plus","qwen3.6-plus","qwen3.5-plus"],"weight":1.0}],"network_config":{"base_url":"https://opencode.ai/zen/go","default_request_timeout_in_seconds":600,"max_retries":3,"retry_backoff_initial_ms":1000,"retry_backoff_max_ms":30000}}}}
+{
+  "providers": {
+    "bedrock": {
+      "keys": [
+        {
+          "name": "bedrock-key-1",
+          "models": [
+            "us.anthropic.claude-sonnet-4-20250514-v1:0",
+            "us.anthropic.claude-sonnet-4-6",
+            "us.anthropic.claude-opus-4-5-20251101-v1:0",
+            "us.anthropic.claude-opus-4-6-v1",
+            "us.anthropic.claude-opus-4-7",
+            "us.anthropic.claude-opus-4-8",
+            "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+            "amazon.titan-embed-text-v2:0"
+          ],
+          "weight": 1.0,
+          "bedrock_key_config": { "region": "us-west-2" }
+        }
+      ],
+      "network_config": {
+        "default_request_timeout_in_seconds": 600,
+        "stream_idle_timeout_in_seconds": 300,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    },
+    "gemini": {
+      "keys": [
+        {
+          "name": "gemini-key-1",
+          "value": "env.GOOGLE_API_KEY",
+          "models": [
+            "gemini-flash-latest",
+            "gemini-3.1-flash-lite-preview",
+            "gemma-4-31b-it"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    },
+    "groq": {
+      "keys": [
+        {
+          "name": "groq-key-1",
+          "value": "env.GROQ_API_KEY",
+          "models": ["whisper-large-v3"],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    },
+    "opencode-go": {
+      "keys": [
+        {
+          "name": "opencode-go-key-1",
+          "value": "env.OPENCODE_GO_API_KEY",
+          "models": ["*"],
+          "weight": 1.0
+        },
+        {
+          "name": "opencode-go-key-2",
+          "value": "env.OPENCODE_GO_API_KEY_R",
+          "models": ["*"],
+          "weight": 1.0
+        },
+        {
+          "name": "opencode-go-key-3",
+          "value": "env.OPENCODE_GO_API_KEY_A",
+          "models": ["*"],
+          "weight": 0.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://opencode.ai/zen/go",
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      }
+    }
+  },
+  "governance": {
+    "virtual_keys": [
+      {
+        "id": "hermes-lya",
+        "name": "hermes-lya",
+        "value": "env.BIFROST_API_KEY",
+        "is_active": true,
+        "provider_configs": [
+          {
+            "provider": "opencode-go",
+            "allowed_models": ["*"],
+            "key_ids": ["opencode-go-key-3"],
+            "weight": 1
+          }
+        ]
+      }
+    ]
+  }
+}

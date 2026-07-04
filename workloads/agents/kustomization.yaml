@@ -6,4 +6,5 @@ resources:
   - openclaw
   - nullclaw
   - hermes-leo
+  - hermes-lya
   - bifrost

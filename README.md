@@ -399,6 +399,58 @@ After the first ArgoCD sync, configure Immich to view sorted photos as an extern
 
 Do not sort files already indexed by Immich via FileBrowser — move photos in `inbox` before scanning. Immich native upload folders (`/data/upload`, `/data/library`) are not exposed in FileBrowser.
 
+## Manual Contabo backup before cleanup
+
+Before cleaning the old Contabo VPS, keep a restic backup of personal/application data on the Hetzner Storage Box sub-account `u619007-sub2`.
+
+This is intentionally not a full system backup: the system is reconstructible from GitOps manifests and this README. The backup focuses on data that may not be recoverable from Git:
+
+- `/var/lib/rancher/k3s/storage`: old k3s `local-path` PVC data
+- `/root`: old service folders, migration artifacts, dumps, SSH/config leftovers
+- `/opt/openclaw`: small legacy OpenCLAW data/config directory
+
+Install restic on Contabo:
+
+```bash
+ssh contabo
+apt update
+apt install -y restic
+```
+
+Initialize the encrypted restic repository on the Storage Box via SFTP:
+
+```bash
+restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo init
+```
+
+Run the backup:
+
+```bash
+restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo backup \
+  /root \
+  /var/lib/rancher/k3s/storage \
+  /opt/openclaw
+```
+
+Verify the backup before cleaning Contabo:
+
+```bash
+restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo snapshots
+restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo check
+```
+
+Test a partial restore if needed:
+
+```bash
+mkdir -p /tmp/restic-test-restore
+restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo restore latest \
+  --target /tmp/restic-test-restore \
+  --include /var/lib/rancher/k3s/storage \
+  --include /opt/openclaw
+```
+
+Restic will ask for the Storage Box SFTP password and for the restic repository password. Keep the restic password safe: without it, the backup cannot be decrypted.
+
 ## Authelia OIDC for Immich (immich.bapttf.com)
 
 Immich uses Authelia as an OIDC provider (SSO). Do **not** add the Authelia forwardAuth middleware on Immich — that would cause double authentication.

@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - infisical-secret.yaml
+  - hermes-lya-pvc.yaml
+  - hermes-lya-deployment.yaml
+  - hermes-lya-service.yaml
+
+configMapGenerator:
+  - name: hermes-lya-config
+    files:
+      - config.yaml=config.yaml

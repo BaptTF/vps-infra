@@ -59,6 +59,8 @@ spec:
           envFrom:
             - secretRef:
                 name: bifrost-secret
+            - secretRef:
+                name: hermes-lya-secret-bifrost
           volumeMounts:
             - name: config-volume
               mountPath: /app/data/config.json
