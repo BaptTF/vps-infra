@@ -123,6 +123,75 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
+        - name: hermes-leo-dashboard
+          image: nousresearch/hermes-agent:latest
+          args:
+            - dashboard
+            - --host
+            - 0.0.0.0
+            - --port
+            - "9119"
+            - --no-open
+            - --insecure
+          envFrom:
+            - secretRef:
+                name: nullclaw-leo-secret
+          env:
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-leo-secret-init
+                  key: TELEGRAM_BOT_TOKEN
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-leo-secret
+                  key: API_SERVER_KEY
+            - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nullclaw-leo-secret-bridge
+                  key: WHATSMEOW_BRIDGE_TOKEN
+                  optional: true
+            - name: PATH
+              value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          ports:
+            - containerPort: 9119
+              name: dashboard
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /opt/data
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: dashboard
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: dashboard
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /api/status
+              port: dashboard
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 12
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       volumes:
         - name: config-template
           configMap:

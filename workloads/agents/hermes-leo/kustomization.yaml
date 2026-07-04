@@ -10,6 +10,8 @@ resources:
   - hermes-lea-bridge-pvc.yaml
   - hermes-leo-deployment.yaml
   - hermes-leo-service.yaml
+  - certificate.yaml
+  - ingressroute.yaml
   - whatsmeow-bridge-deployment.yaml
   - whatsmeow-bridge-service.yaml
   - whatsmeow-bridge-ingress-tailscale.yaml

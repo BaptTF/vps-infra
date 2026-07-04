@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hermes-lya-dashboard
+  namespace: openclaw
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`hermes-lya.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: hermes-lya
+          port: 9119
+  tls:
+    secretName: hermes-lya-dashboard-tls-certificate

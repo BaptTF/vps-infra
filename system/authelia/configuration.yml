@@ -54,6 +54,9 @@ access_control:
     - domain: ce-analytics.bapttf.com
       policy: one_factor
       subject: "group:nice"
+    - domain: hermes-*.bapttf.com
+      policy: one_factor
+      subject: "group:family"
     - domain: "*.bapttf.com"
       policy: one_factor
       subject: "group:lldap_admin"

@@ -285,6 +285,8 @@ When the worker `bapt-debian` comes back `Ready`:
 | LaCoope | https://lacoope.bapttf.com | Public |
 | LaCoope API | https://lacoope-api.bapttf.com | Public |
 | OpenCLAW | https://openclaw.bapttf.com | Public |
+| Hermes Leo dashboard | https://hermes-leo.bapttf.com | Public (Authelia) |
+| Hermes Lya dashboard | https://hermes-lya.bapttf.com | Public (Authelia) |
 | OpenWebUI | https://openwebui.bapttf.com | Public |
 | MinIO | https://minio (Tailscale) | Tailscale VPN |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
