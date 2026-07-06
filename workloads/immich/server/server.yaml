@@ -56,6 +56,9 @@ spec:
               mountPath: /data/family
               subPath: family
             - name: storagebox
+              mountPath: /data/encoded-video
+              subPath: encoded-video
+            - name: storagebox
               mountPath: /external/family
               subPath: family
           startupProbe:
