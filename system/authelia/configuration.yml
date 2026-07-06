@@ -51,6 +51,9 @@ access_control:
     - domain: drive.bapttf.com
       policy: one_factor
       subject: "group:family"
+    - domain: lya-drive.bapttf.com
+      policy: one_factor
+      subject: "group:family"
     - domain: ce-analytics.bapttf.com
       policy: one_factor
       subject: "group:nice"

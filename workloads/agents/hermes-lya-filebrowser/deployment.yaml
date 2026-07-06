@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes-lya-filebrowser
+  namespace: openclaw
+  labels:
+    app: hermes-lya-filebrowser
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hermes-lya-filebrowser
+  template:
+    metadata:
+      labels:
+        app: hermes-lya-filebrowser
+    spec:
+      securityContext:
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+      containers:
+        - name: filebrowser
+          image: ghcr.io/gtsteffaniak/filebrowser:1.4.0-stable
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - name: data
+              mountPath: /srv/data
+            - name: filebrowser-home
+              mountPath: /home/filebrowser/data
+            - name: filebrowser-config
+              mountPath: /home/filebrowser/data/config.yaml
+              subPath: config.yaml
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 20m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hermes-lya-data
+        - name: filebrowser-home
+          emptyDir: {}
+        - name: filebrowser-config
+          configMap:
+            name: hermes-lya-filebrowser-config

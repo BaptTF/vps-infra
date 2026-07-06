@@ -7,4 +7,5 @@ resources:
   - nullclaw
   - hermes-leo
   - hermes-lya
+  - hermes-lya-filebrowser
   - bifrost

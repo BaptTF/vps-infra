@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hermes-lya-filebrowser
+  namespace: openclaw
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`lya-drive.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: authelia-forwardauth
+          namespace: authelia
+      services:
+        - name: hermes-lya-filebrowser
+          port: 80
+  tls:
+    secretName: lya-drive-cert

@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lya-drive-cert
+  namespace: openclaw
+spec:
+  secretName: lya-drive-cert
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - lya-drive.bapttf.com
