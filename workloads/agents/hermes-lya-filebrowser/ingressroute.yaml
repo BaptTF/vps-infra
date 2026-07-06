@@ -10,7 +10,7 @@ spec:
     - match: Host(`lya-drive.bapttf.com`)
       kind: Rule
       middlewares:
-        - name: authelia-forwardauth
+        - name: forwardauth-authelia
           namespace: authelia
       services:
         - name: hermes-lya-filebrowser
