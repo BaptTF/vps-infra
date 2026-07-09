@@ -23,6 +23,13 @@ memory:
 telegram:
   require_mention: true
 
+delegation:
+  provider: custom
+  model: opencode-go/glm-5.2
+  base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+  api_key: "dummy"
+  api_mode: chat_completions
+
 auxiliary:
   vision:
     provider: custom
