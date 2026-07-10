@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bapttf-front
+  namespace: bapttf-front
+  labels:
+    app: bapttf-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bapttf-front
+  template:
+    metadata:
+      labels:
+        app: bapttf-front
+    spec:
+      containers:
+        - name: bapttf-front
+          image: ghcr.io/bapttf/bapttf-front:sha-9ac38fd
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 16Mi
+              cpu: 5m
+            limits:
+              memory: 64Mi
+              cpu: 100m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 30

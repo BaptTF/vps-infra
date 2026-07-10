@@ -1,0 +1,17 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: bapttf-front-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: bapttf-front
+      images:
+        - alias: bapttf-front
+          imageName: ghcr.io/bapttf/bapttf-front
+          commonUpdateSettings:
+            updateStrategy: newest-build
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

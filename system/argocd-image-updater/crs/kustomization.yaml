@@ -6,6 +6,7 @@ namespace: argocd
 
 resources:
   - authelia-updater.yaml
+  - bapttf-front-updater.yaml
   - bifrost-updater.yaml
   - ce-analytics-updater.yaml
   - jujudb-updater.yaml
