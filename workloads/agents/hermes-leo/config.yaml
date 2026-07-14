@@ -25,7 +25,10 @@ telegram:
 
 delegation:
   provider: custom
-  model: opencode-go/glm-5.2
+  model: opencode-go/glm-5.2, opencode-go/kimi-k2.6
+  base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+  api_key: "dummy"
+  api_mode: chat_completions
 
 auxiliary:
   vision:
