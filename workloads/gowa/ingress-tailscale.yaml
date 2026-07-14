@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: whatsmeow-bridge-ingress
-  namespace: openclaw
+  name: gowa
+  namespace: gowa
 spec:
   ingressClassName: tailscale
   tls:
     - hosts:
-        - whatsmeow-bridge
+        - gowa
   defaultBackend:
     service:
-      name: whatsmeow-bridge
+      name: gowa
       port:
-        number: 3301
+        number: 3000

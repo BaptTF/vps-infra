@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gowa
+  namespace: gowa
+  labels:
+    app: gowa
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gowa
+  template:
+    metadata:
+      labels:
+        app: gowa
+    spec:
+      containers:
+        - name: gowa
+          image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:latest
+          command: ["rest"]
+          env:
+            - name: APP_PORT
+              value: "3000"
+            - name: APP_HOST
+              value: "0.0.0.0"
+            - name: APP_OS
+              value: "GOWA"
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storages
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "10m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: gowa-storage
