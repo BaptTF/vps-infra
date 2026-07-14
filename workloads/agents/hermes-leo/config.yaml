@@ -19,7 +19,7 @@ telegram:
   require_mention: true
 delegation:
   provider: custom
-  model: opencode-go/glm-5.2, opencode-go/kimi-k2.6, opencode-go/gemini-2.5-flash
+  model: opencode-go/glm-5.2, opencode-go/kimi-k2.6, google/gemini-2.5-flash
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
   api_key: dummy
   api_mode: chat_completions
