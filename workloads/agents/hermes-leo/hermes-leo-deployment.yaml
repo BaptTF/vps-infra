@@ -41,14 +41,23 @@ spec:
                 cp "/skills-in/$skill" "/opt/data/skills/$skill/SKILL.md"
               done
 
+              # Setup lazy-packages patch for Telegram httpx 0.28 compat
+              # (python-telegram-bot 22.6 + httpx 0.28 incompatibility)
+              mkdir -p /opt/data/lazy-packages
+              cp /scripts/patch_telegram.py /opt/data/lazy-packages/
+              cp /scripts/hermes-telegram-fix.pth /opt/data/lazy-packages/
+
               # Ensure correct ownership (Hermes runs as UID 10000)
-              chown -R 10000:10000 /opt/data/config.yaml /opt/data/skills
+              chown -R 10000:10000 /opt/data/config.yaml /opt/data/skills /opt/data/lazy-packages
           volumeMounts:
             - name: config-template
               mountPath: /config-template
               readOnly: true
             - name: skills
               mountPath: /skills-in
+              readOnly: true
+            - name: scripts
+              mountPath: /scripts
               readOnly: true
             - name: data
               mountPath: /opt/data
@@ -145,6 +154,9 @@ spec:
         - name: skills
           configMap:
             name: hermes-leo-skills
+        - name: scripts
+          configMap:
+            name: hermes-leo-scripts
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-leo-data

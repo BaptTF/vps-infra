@@ -85,3 +85,7 @@ configMapGenerator:
       - weather=skills/weather/SKILL.md
       - frontend-design=skills/frontend-design/SKILL.md
       - steel-browser=skills/steel-browser/SKILL.md
+  - name: hermes-leo-scripts
+    files:
+      - patch_telegram.py=scripts/patch_telegram.py
+      - hermes-telegram-fix.pth=scripts/hermes-telegram-fix.pth
