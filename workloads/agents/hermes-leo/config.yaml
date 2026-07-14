@@ -2,35 +2,41 @@ model:
   provider: custom
   default: opencode-go/deepseek-v4-pro
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
-  api_key: "dummy"
+  api_key: dummy
   api_mode: chat_completions
-
 approvals:
-  mode: off
-
+  mode: false
 terminal:
   backend: local
   timeout: 180
-
 compression:
   enabled: true
-  threshold: 0.50
-
+  threshold: 0.5
 memory:
   memory_enabled: true
   user_profile_enabled: true
-
 telegram:
   require_mention: true
-
 delegation:
   provider: custom
-  model: opencode-go/glm-5.2
-
+  model: opencode-go/glm-5.2, opencode-go/kimi-k2.6, opencode-go/gemini-2.5-flash
+  base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+  api_key: dummy
+  api_mode: chat_completions
 auxiliary:
   vision:
     provider: custom
     model: opencode-go/kimi-k2.6
     base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
-    api_key: "dummy"
+    api_key: dummy
     api_mode: chat_completions
+display:
+  tool_progress: all
+agent:
+  verify_on_stop: false
+plugins:
+  enabled: []
+_config_version: 33
+onboarding:
+  seen:
+    busy_input_prompt: true
