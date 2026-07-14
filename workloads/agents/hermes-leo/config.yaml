@@ -19,7 +19,7 @@ telegram:
   require_mention: true
 stt:
   enabled: true
-  provider: local
+  provider: groq
 tts:
   provider: edge
 delegation:
