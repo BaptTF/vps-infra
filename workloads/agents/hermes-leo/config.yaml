@@ -17,11 +17,6 @@ memory:
   user_profile_enabled: true
 telegram:
   require_mention: true
-stt:
-  enabled: true
-  provider: local
-tts:
-  provider: edge
 delegation:
   provider: custom
   model: opencode-go/glm-5.2, opencode-go/kimi-k2.6, google/gemini-2.5-flash
