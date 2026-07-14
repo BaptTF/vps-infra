@@ -21,7 +21,7 @@ spec:
       containers:
         - name: gowa
           image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:latest
-          command: ["rest"]
+          args: ["rest"]
           env:
             - name: APP_PORT
               value: "3000"
