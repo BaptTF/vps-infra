@@ -61,6 +61,32 @@ spec:
               readOnly: true
             - name: data
               mountPath: /opt/data
+        - name: init-stt
+          image: nousresearch/hermes-agent:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Install faster-whisper for local STT (speech-to-text)
+              # Uses uv from PVC or falls back to pip via apt
+              if [ ! -d /opt/data/stt-packages/faster_whisper ]; then
+                echo "Installing faster-whisper for local STT (this takes ~30s)..."
+                if [ -x /opt/data/home/.local/bin/uv ]; then
+                  /opt/data/home/.local/bin/uv pip install \
+                    --target /opt/data/stt-packages \
+                    faster-whisper 2>&1
+                else
+                  echo "uv not found, using pip..."
+                  apt-get update -qq && apt-get install -y -qq python3-pip 2>&1
+                  pip3 install --target /opt/data/stt-packages faster-whisper 2>&1
+                fi
+                chown -R 10000:10000 /opt/data/stt-packages
+                echo "STT packages installed: $(du -sh /opt/data/stt-packages | cut -f1)"
+              else
+                echo "STT packages already installed, skipping."
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /opt/data
       containers:
         - name: hermes-leo
           image: nousresearch/hermes-agent:latest
@@ -107,6 +133,8 @@ spec:
                   optional: true
             - name: PATH
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            - name: PYTHONPATH
+              value: "/opt/data/stt-packages"
           ports:
             - containerPort: 8642
               name: http
