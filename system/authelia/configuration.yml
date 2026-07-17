@@ -90,6 +90,8 @@ identity_providers:
         client_name: Hermes Leo Dashboard
         public: true
         authorization_policy: family_only
+        consent_mode: pre-configured
+        pre_configured_consent_duration: 1y
         require_pkce: true
         pkce_challenge_method: S256
         redirect_uris:
@@ -109,6 +111,8 @@ identity_providers:
         client_name: Hermes Lya Dashboard
         public: true
         authorization_policy: family_only
+        consent_mode: pre-configured
+        pre_configured_consent_duration: 1y
         require_pkce: true
         pkce_challenge_method: S256
         redirect_uris:
@@ -129,6 +133,8 @@ identity_providers:
         client_secret: '{{ secret "/config/secrets/immich-oidc-client-secret-hash" }}'
         public: false
         authorization_policy: family_only
+        consent_mode: pre-configured
+        pre_configured_consent_duration: 1y
         require_pkce: false
         pkce_challenge_method: ''
         redirect_uris:
