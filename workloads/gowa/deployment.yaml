@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: gowa
-          image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:latest
+          image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:v8.11.0
           args: ["rest"]
           env:
             - name: APP_PORT
