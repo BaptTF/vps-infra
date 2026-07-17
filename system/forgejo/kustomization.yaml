@@ -10,7 +10,7 @@ helmCharts:
   - name: forgejo
     # Kustomize supports OCI registries for Helm
     repo: oci://code.forgejo.org/forgejo-helm
-    version: 16.2.0 # Update this to your desired version
+    version: 16.2.2 # Update this to your desired version
     releaseName: forgejo
     namespace: forgejo
     valuesFile: values.yaml
