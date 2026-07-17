@@ -18,7 +18,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: lldap
-          image: ghcr.io/lldap/lldap:2026-03-04-alpine-rootless
+          image: ghcr.io/lldap/lldap:v0.6.3-alpine-rootless
           command: ["/bin/sh", "-c"]
           args:
             - |

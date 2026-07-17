@@ -24,7 +24,7 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: init-family-dirs
-          image: busybox:1.37
+          image: busybox:1.37.0
           command:
             - sh
             - -c
