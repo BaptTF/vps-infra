@@ -1,20 +1,17 @@
 # system/argocd-image-updater/crs/kustomization.yaml
-# ImageUpdater CRs for applications (must be in argocd namespace)
+# ImageUpdater CRs for first-party apps (direct write-back to main).
+# Third-party image updates are handled by Renovate PRs (see renovate.json).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: argocd
 
 resources:
-  - authelia-updater.yaml
   - bapttf-front-updater.yaml
-  - bifrost-updater.yaml
   - ce-analytics-updater.yaml
   - jujudb-updater.yaml
   - lacoope-updater.yaml
   - nullclaw-updater.yaml
   - openclaw-updater.yaml
-  - openwebui-updater.yaml
   - tripkit-frontend-updater.yaml
   - tripkit-backend-updater.yaml
-  - vaultwarden-updater.yaml
   - voyage-updater.yaml

@@ -1,19 +1,59 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "enabledManagers": ["kustomize", "argocd"],
+  "enabledManagers": [
+    "kustomize",
+    "argocd",
+    "kubernetes",
+    "helm-values",
+    "custom.regex"
+  ],
   "argocd": {
     "managerFilePatterns": ["/apps/.+\\.yaml$/"]
   },
+  "kubernetes": {
+    "managerFilePatterns": ["/(^|/)(system|workloads)/.+\\.ya?ml$/"]
+  },
+  "helm-values": {
+    "managerFilePatterns": ["/(^|/)(system|workloads)/.+/values\\.ya?ml$/"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Full image:repo:tag strings in Helm values (e.g. Velero plugins)",
+      "managerFilePatterns": ["/(^|/)(system|workloads)/.+/values\\.ya?ml$/"],
+      "matchStrings": [
+        "\\simage:\\s*[\"']?(?<depName>[^\\s\"'@]+)\\:(?<currentValue>[^\\s\"'@]+)[\"']?"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
   "ignorePaths": [
     "argocd-bootstrap.yaml",
     "disable-apps/**",
     "**/.argocd-source-*"
   ],
+  "semanticCommits": "enabled",
+  "semanticCommitType": "build",
   "packageRules": [
     {
+      "description": "First-party images: owned by ArgoCD Image Updater (direct commits to main)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "/^ghcr\\.io\\/bapttf\\//",
+        "/^ghcr\\.io\\/rjullien\\//"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Label major updates for manual review",
-      "matchManagers": ["kustomize", "argocd"],
+      "matchManagers": [
+        "kustomize",
+        "argocd",
+        "kubernetes",
+        "helm-values",
+        "custom.regex"
+      ],
       "matchUpdateTypes": ["major"],
       "labels": ["major-update"]
     }
