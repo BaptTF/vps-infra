@@ -9,7 +9,7 @@ Cluster nodes communicate over Tailscale (WireGuard). Flannel VXLAN is used for 
 - `root-app.yaml` -- ArgoCD root Application, points at `apps/`
 - `apps/` -- ArgoCD Application CRs (one per service). ArgoCD prunes anything removed from here
 - `system/` -- platform services (Traefik, cert-manager, CNPG, Infisical, etc.). Mostly **Kustomize + Helm inflation** (`helmCharts:` in `kustomization.yaml`)
-- `workloads/` -- application workloads. Mix of plain YAML dirs and Kustomize dirs (no Helm inflation except `obsidian-livesync`)
+- `workloads/` -- application workloads as Kustomize dirs (no Helm inflation except `obsidian-livesync`)
 - `disable-apps/` -- parking lot for disabled apps. Move an Application CR here to disable it (prune removes it on sync). Move it back to `apps/` to re-enable
 - `argocd-bootstrap.yaml` -- pre-rendered ArgoCD install. **Regenerate after changing `system/argocd/`**: `kustomize build --enable-helm system/argocd/ > argocd-bootstrap.yaml`
 - `scripts/` -- one-shot data migration scripts (Docker Compose -> k3s). Not part of ongoing workflow
@@ -17,7 +17,7 @@ Cluster nodes communicate over Tailscale (WireGuard). Flannel VXLAN is used for 
 ## How apps are wired
 
 Each file in `apps/` is an ArgoCD `Application` CR pointing to either:
-1. A `system/<name>/` or `workloads/<name>/` directory (Kustomize or plain YAML)
+1. A `system/<name>/` or `workloads/<name>/` directory (Kustomize)
 2. An upstream Helm chart directly (e.g., `sealed-secrets`, `infisical-operator`)
 3. Multi-source with upstream Helm chart + local values file (Traefik only)
 
@@ -74,7 +74,6 @@ build: automatic update of voyage
 
 - `argocd-bootstrap.yaml` is a generated file (~5k lines of CRDs). Do not edit it directly. Regenerate with: `kustomize build --enable-helm system/argocd/ > argocd-bootstrap.yaml`
 - `pub-cert.pem` is the SealedSecrets public cert. Committed intentionally -- it is not a secret
-- Some workloads under `workloads/` are plain YAML directories (e.g., `vaultwarden/`) with no `kustomization.yaml` -- ArgoCD handles them as raw manifests
 - `workloads/agents/` is a Kustomize aggregator with subdirectories per agent (openclaw, nullclaw, bifrost, steel, etc.)
 - Monitoring stack (kube-prometheus-stack: Prometheus, Grafana, node-exporter, kube-state-metrics) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
 
