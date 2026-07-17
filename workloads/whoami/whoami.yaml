@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: whoami
-        image: traefik/whoami
+        image: traefik/whoami:1.11.0
         resources:
           requests:
             cpu: 5m
@@ -46,10 +46,12 @@ metadata:
   namespace: default
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
-  - match: Host(`whoami.bapttf.com`)
+  - match: Host(`test.bapttf.com`)
     kind: Rule
     services:
     - name: whoami
       port: 80
+  tls:
+    secretName: tls-certificate
