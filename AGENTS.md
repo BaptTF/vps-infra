@@ -74,7 +74,7 @@ build: automatic update of voyage
 
 - `argocd-bootstrap.yaml` is a generated file (~5k lines of CRDs). Do not edit it directly. Regenerate with: `kustomize build --enable-helm system/argocd/ > argocd-bootstrap.yaml`
 - `pub-cert.pem` is the SealedSecrets public cert. Committed intentionally -- it is not a secret
-- Some workloads under `workloads/` are plain YAML directories (e.g., `vaultwarden/`, `whoami/`) with no `kustomization.yaml` -- ArgoCD handles them as raw manifests
+- Some workloads under `workloads/` are plain YAML directories (e.g., `vaultwarden/`) with no `kustomization.yaml` -- ArgoCD handles them as raw manifests
 - `workloads/agents/` is a Kustomize aggregator with subdirectories per agent (openclaw, nullclaw, bifrost, steel, etc.)
 - Monitoring stack (kube-prometheus-stack: Prometheus, Grafana, node-exporter, kube-state-metrics) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
 

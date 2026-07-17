@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-      argocd.argoproj.io/manifest-generate-paths: .
+    argocd.argoproj.io/manifest-generate-paths: .
 spec:
   project: default
   source:
@@ -15,8 +15,10 @@ spec:
     path: workloads/whoami
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: default
+    namespace: whoami
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
