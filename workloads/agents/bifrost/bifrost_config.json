@@ -81,7 +81,7 @@
           "name": "opencode-go-key-3",
           "value": "env.OPENCODE_GO_API_KEY_A",
           "models": ["*"],
-          "weight": 0.0
+          "weight": 1.0
         }
       ],
       "network_config": {
