@@ -16,7 +16,8 @@ memory:
   memory_enabled: true
   user_profile_enabled: true
 telegram:
-  require_mention: true
+  require_mention: false
+
 delegation:
   provider: custom
   model: opencode-go/glm-5.2
