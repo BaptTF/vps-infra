@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: bifrost
-          image: maximhq/bifrost:v1.6.4
+          image: maximhq/bifrost:2.1.29
           resources:
             requests:
               cpu: "100m"
