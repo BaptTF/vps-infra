@@ -1,6 +1,6 @@
 image:
   repository: getmeili/meilisearch
-  tag: v1.49.0
+  tag: v1.50.0
 
 # Replaces your docker-compose volume
 persistence:
