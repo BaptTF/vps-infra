@@ -100,7 +100,8 @@ curl -sfL https://get.k3s.io | sh
 mkdir -p ~/.kube
 cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 chown $USER:$USER ~/.kube/config
-kubectl config set-cluster default --server=https://vmi2735515:6443 --tls-server-name=vmi2735515.contaboserver.net
+# Point to the Hetzner control-plane node
+kubectl config set-cluster default --server=https://debian-16gb-hel1-2:6443 --tls-server-name=debian-16gb-hel1-2
 ```
 
 ### Step 3: Deploy ArgoCD
@@ -245,16 +246,22 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 ### Current node layout (for reference)
 
-| Node | Role | RAM | Allocatable | Typical workloads |
-|------|------|-----|-------------|-------------------|
-| `vmi2735515` (Contabo VPS) | control-plane | 8Gi | ~5.9Gi | ArgoCD, CNPG, Traefik, cert-manager, agents, stateful services (MinIO, CouchDB, Meilisearch) |
-| `bapt-debian` (worker) | worker | 8Gi | ~7.2Gi | Monitoring stack, OpenWebUI, overflow from master |
+> **Note:** Historically the control-plane ran on Contabo and a worker (`bapt-debian`, a friend's VM with 8Gi) handled overflow. When that VM died, I replaced it with a Hetzner VPS and flipped the roles: the beefier Hetzner box became control-plane and the old Contabo VPS was demoted to worker.
+
+| Node | Role | vCPU | RAM | Allocatable | OS | Typical workloads |
+|------|------|------|-----|-------------|-----|-------------------|
+| `debian-16gb-hel1-2` (Hetzner VPS) | control-plane | 8 | 15Gi | ~12Gi | Debian 13 | ArgoCD, CNPG, Traefik, cert-manager, agents, critical stateful services |
+| `vmi2735515.contaboserver.net` (Contabo VPS) | worker | 3 | 8Gi | ~5.9Gi | Debian 12 | Overflow workloads, lighter stateless pods |
 
 ---
 
 ## Manual scale-down during worker outage (2026-06-23)
 
-Worker node `bapt-debian` went `NotReady`, causing all its pods to reschedule onto the control-plane which only has ~6.9Gi allocatable. The control-plane hit 99% memory, leaving critical workloads (`bifrost`, `openclaw`) Pending/crash-looping. The following were scaled to 0 manually with `kubectl` to free RAM and unblock bifrost + openclaw:
+> **Historical context:** This incident happened when the old worker `bapt-debian` (a friend's VM, 8Gi RAM) went `NotReady`. Its pods rescheduled onto the then-control-plane (`vmi2735515`, Contabo, ~6.9Gi allocatable), which hit 99% memory and started evicting critical workloads (`bifrost`, `openclaw`).
+>
+> This is no longer the current topology, but the procedure and warnings about manual scaling vs ArgoCD pruning remain valid.
+
+The following were scaled to 0 manually with `kubectl` to free RAM and unblock bifrost + openclaw:
 
 | Workload | Namespace | RAM freed | Notes |
 |----------|-----------|-----------|-------|
@@ -266,7 +273,7 @@ Worker node `bapt-debian` went `NotReady`, causing all its pods to reschedule on
 
 Git state: `system/minio/values.yaml` has `replicas: 0` (committed), but the MinIO Helm chart ignores `replicas: 0` in standalone mode — the manual `kubectl scale` is what actually keeps the pod down. If ArgoCD does a full re-sync it may bring minio back to 1 replica; re-run the `kubectl scale` if that happens.
 
-When the worker `bapt-debian` comes back `Ready`:
+When the original worker came back `Ready`:
 1. Revert `system/minio/values.yaml` to `replicas: 1` and push
 2. Scale the rest back up: `kubectl scale deploy argocd-image-updater-controller -n argocd --replicas=1`, `kubectl scale deploy lacoope-backend lacoope-frontend -n lacoope --replicas=1`, `kubectl scale statefulset meilisearch -n meilisearch --replicas=1`
 
