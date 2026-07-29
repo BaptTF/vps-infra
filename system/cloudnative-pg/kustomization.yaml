@@ -25,5 +25,6 @@ resources:
   - database-infisical-secrets.yaml
   - immich-db-infisical-secret.yaml
   - backup-infisical-secret.yaml
-  - scheduled-backup.yaml
-  - immich-scheduled-backup.yaml
+  # ScheduledBackup CRs parked until R2 WAL archiving is re-enabled:
+  # - scheduled-backup.yaml
+  # - immich-scheduled-backup.yaml

@@ -21,22 +21,9 @@ spec:
   postgresql:
     shared_preload_libraries:
       - "vchord.so"
-  backup:
-    barmanObjectStore:
-      destinationPath: s3://cnpg-backups/
-      endpointURL: https://e16df4d29f7d54d2f57456402bebd130.r2.cloudflarestorage.com
-      s3Credentials:
-        accessKeyId:
-          name: cnpg-r2-credentials
-          key: AWS_ACCESS_KEY_ID
-        secretAccessKey:
-          name: cnpg-r2-credentials
-          key: AWS_SECRET_ACCESS_KEY
-      wal:
-        compression: gzip
-      data:
-        compression: gzip
-    retentionPolicy: "30d"
+  # backup/WAL archiving to R2 disabled: archive was failing (R2 403) and
+  # retained ~59Gi of unreclaimable local pg_wal. Re-enable with fixed
+  # credentials, weekly schedule, and short retention (e.g. 14d).
   managed:
     roles:
       - connectionLimit: -1

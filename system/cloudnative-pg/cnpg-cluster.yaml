@@ -14,22 +14,9 @@ spec:
     limits:
       cpu: 250m
       memory: 512Mi
-  backup:
-    barmanObjectStore:
-      destinationPath: s3://cnpg-backups/
-      endpointURL: https://e16df4d29f7d54d2f57456402bebd130.r2.cloudflarestorage.com
-      s3Credentials:
-        accessKeyId:
-          name: cnpg-r2-credentials
-          key: AWS_ACCESS_KEY_ID
-        secretAccessKey:
-          name: cnpg-r2-credentials
-          key: AWS_SECRET_ACCESS_KEY
-      wal:
-        compression: gzip
-      data:
-        compression: gzip
-    retentionPolicy: "30d"
+  # backup/WAL archiving to R2 disabled: same R2 403 as immich-postgres,
+  # ~5.7Gi unreclaimable local pg_wal. Re-enable with fixed credentials
+  # and short retention after immich-postgres is healthy again.
 
   managed:
     roles:
