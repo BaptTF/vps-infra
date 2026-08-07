@@ -43,6 +43,12 @@ spec:
                   key: password
             - name: BASE_PATH
               value: "/api"
+            - name: TRIPKIT_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tripkit-secrets
+                  key: jwt-secret
+                  optional: true
           resources:
             requests:
               memory: 32Mi
