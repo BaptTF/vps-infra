@@ -43,12 +43,20 @@ spec:
                   key: password
             - name: BASE_PATH
               value: "/api"
+            # Infisical /tripkit → Secret tripkit-secrets (keys observed in prod:
+            # jwt_secret, api-token). Wrong key name jwt-secret + optional:true
+            # silently left TRIPKIT_JWT_SECRET empty → dev/admin bypass stayed open.
+            # See rjullien/tripkit-seeds docs/diag-auth-acl-prod.md
             - name: TRIPKIT_JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: tripkit-secrets
-                  key: jwt-secret
-                  optional: true
+                  key: jwt_secret
+            - name: TRIPKIT_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: tripkit-secrets
+                  key: api-token
           resources:
             requests:
               memory: 32Mi
