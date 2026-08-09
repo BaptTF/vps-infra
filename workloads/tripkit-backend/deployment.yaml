@@ -53,6 +53,12 @@ spec:
                 secretKeyRef:
                   name: tripkit-secrets
                   key: api-token
+            - name: TRIPKIT_GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: tripkit-secrets
+                  key: github-token
+                  optional: true
           resources:
             requests:
               memory: 32Mi
