@@ -64,8 +64,8 @@ spec:
             - name: TRIPKIT_HERMES_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: tripkit-secrets
-                  key: hermes-api-key
+                  name: tripkit-hermes-key
+                  key: API_SERVER_KEY
                   optional: true
             - name: TRIPKIT_LEO_DASHBOARD_URL
               value: "https://hermes-leo.bapttf.com"
