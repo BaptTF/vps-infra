@@ -59,6 +59,16 @@ spec:
                   name: tripkit-secrets
                   key: github-token
                   optional: true
+            - name: TRIPKIT_HERMES_BASE_URL
+              value: "http://hermes-leo.openclaw.svc.cluster.local:8642"
+            - name: TRIPKIT_HERMES_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tripkit-secrets
+                  key: hermes-api-key
+                  optional: true
+            - name: TRIPKIT_LEO_DASHBOARD_URL
+              value: "https://hermes-leo.bapttf.com"
           resources:
             requests:
               memory: 32Mi
