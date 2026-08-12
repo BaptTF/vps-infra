@@ -1,6 +1,6 @@
 model:
   provider: custom
-  default: opencode-go/deepseek-v4-pro
+  default: opencode-go/deepseek-v4-flash
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
   api_key: dummy
   api_mode: chat_completions
