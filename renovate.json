@@ -69,6 +69,12 @@
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>-stable)$"
     },
     {
+      "description": "bifrost: only consider v-prefixed semver tags -- the same OCI repo also publishes the Helm chart under unprefixed 2.x tags (application/vnd.cncf.helm.config.v1+json), which are not runnable container images",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["maximhq/bifrost"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
       "description": "Label major updates for manual review",
       "matchManagers": [
         "kustomize",
