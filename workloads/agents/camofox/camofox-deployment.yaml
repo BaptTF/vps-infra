@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camofox
+  labels:
+    app: camofox
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: camofox
+  template:
+    metadata:
+      labels:
+        app: camofox
+    spec:
+      containers:
+        - name: camofox
+          image: ghcr.io/jo-inc/camofox-browser:1.13.0
+          env:
+            - name: CAMOFOX_CRASH_REPORT_ENABLED
+              value: "false"
+          ports:
+            - containerPort: 9377
+              name: http
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "768Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 512Mi

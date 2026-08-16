@@ -84,4 +84,3 @@ configMapGenerator:
       - weather-api=skills/weather-api/SKILL.md
       - weather=skills/weather/SKILL.md
       - frontend-design=skills/frontend-design/SKILL.md
-      - steel-browser=skills/steel-browser/SKILL.md

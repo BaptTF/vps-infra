@@ -66,4 +66,3 @@ configMapGenerator:
       - github=skills/github/SKILL.md
       - skill-creator=skills/skill-creator/SKILL.md
       - frontend-design=skills/frontend-design/SKILL.md
-      - steel-browser=skills/steel-browser/SKILL.md

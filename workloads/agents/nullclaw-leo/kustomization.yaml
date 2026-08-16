@@ -9,7 +9,6 @@ resources:
   - nullclaw-service.yaml
   - whatsmeow-bridge-deployment.yaml
   - whatsmeow-bridge-service.yaml
-  # steel-browser.yaml is a reference template — deployed separately in vps-infra
 
 configMapGenerator:
   - name: nullclaw-leo-config
@@ -82,4 +81,3 @@ configMapGenerator:
       - weather-api=skills/weather-api/SKILL.md
       - weather=skills/weather/SKILL.md
       - frontend-design=skills/frontend-design/SKILL.md
-      - steel-browser=skills/steel-browser/SKILL.md

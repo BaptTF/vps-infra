@@ -98,6 +98,8 @@ spec:
                   optional: true
             - name: PATH
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            - name: CAMOFOX_URL
+              value: "http://camofox:9377"
           ports:
             - containerPort: 8642
               name: http
