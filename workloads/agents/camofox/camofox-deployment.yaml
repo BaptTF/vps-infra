@@ -17,10 +17,13 @@ spec:
       labels:
         app: camofox
     spec:
+      enableServiceLinks: false
       containers:
         - name: camofox
           image: ghcr.io/jo-inc/camofox-browser:1.13.0
           env:
+            - name: CAMOFOX_PORT
+              value: "9377"
             - name: CAMOFOX_CRASH_REPORT_ENABLED
               value: "false"
           ports:
