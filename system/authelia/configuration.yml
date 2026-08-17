@@ -47,7 +47,9 @@ access_control:
   rules:
     - domain: tripkit.bapttf.com
       policy: one_factor
-      subject: "group:family"
+      subject:
+        - - "group:family"
+        - - "group:agent"
     - domain: drive.bapttf.com
       policy: one_factor
       subject: "group:family"
