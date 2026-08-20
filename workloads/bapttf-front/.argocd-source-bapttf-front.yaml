@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/bapttf/bapttf-front:sha-00f4529
+  - ghcr.io/bapttf/bapttf-front:sha-e80a981
