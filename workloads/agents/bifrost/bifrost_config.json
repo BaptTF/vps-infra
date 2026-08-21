@@ -68,13 +68,13 @@
           "name": "opencode-go-key-1",
           "value": "env.OPENCODE_GO_API_KEY",
           "models": ["*"],
-          "weight": 1.0
+          "weight": 0.0
         },
         {
           "name": "opencode-go-key-2",
           "value": "env.OPENCODE_GO_API_KEY_R",
           "models": ["*"],
-          "weight": 1.0
+          "weight": 0.0
         },
         {
           "id": "opencode-go-key-3",
