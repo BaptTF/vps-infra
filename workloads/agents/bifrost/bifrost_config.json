@@ -82,6 +82,13 @@
           "value": "env.OPENCODE_GO_API_KEY_A",
           "models": ["*"],
           "weight": 1.0
+        },
+        {
+          "id": "opencode-go-key-4",
+          "name": "opencode-go-key-4",
+          "value": "env.OPENCODE_GO_API_KEY_N",
+          "models": ["*"],
+          "weight": 1.0
         }
       ],
       "network_config": {
