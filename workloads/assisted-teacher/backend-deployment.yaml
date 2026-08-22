@@ -30,8 +30,8 @@ spec:
               value: "9847"
             - name: WORKSPACE_DIR
               value: "/workspace"
-            - name: ACP_AGENT_CMD
-              value: "hermes acp"
+            - name: HERMES_URL
+              value: "http://hermes-lya.openclaw.svc.cluster.local:8642"
             - name: BIFROST_API_KEY
               valueFrom:
                 secretKeyRef:
