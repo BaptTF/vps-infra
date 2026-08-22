@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: assisted-teacher
+  name: assisted-teacher-backend
   namespace: assisted-teacher
   labels:
-    app: assisted-teacher
+    app: assisted-teacher-backend
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
@@ -12,15 +12,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: assisted-teacher
+      app: assisted-teacher-backend
   template:
     metadata:
       labels:
-        app: assisted-teacher
+        app: assisted-teacher-backend
     spec:
       containers:
-        - name: assisted-teacher
-          image: ghcr.io/rjullien/assisted-teacher:main
+        - name: backend
+          image: ghcr.io/rjullien/assisted-teacher/backend:main
           ports:
             - containerPort: 9847
               name: http

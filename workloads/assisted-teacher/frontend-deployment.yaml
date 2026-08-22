@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assisted-teacher-frontend
+  namespace: assisted-teacher
+  labels:
+    app: assisted-teacher-frontend
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assisted-teacher-frontend
+  template:
+    metadata:
+      labels:
+        app: assisted-teacher-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/rjullien/assisted-teacher/frontend:main
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "5m"
+              memory: "16Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"

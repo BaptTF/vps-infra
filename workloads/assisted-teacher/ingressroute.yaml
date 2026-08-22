@@ -7,13 +7,21 @@ spec:
   entryPoints:
     - websecure
   routes:
+    - match: Host(`desk.bapttf.com`) && (PathPrefix(`/api`) || PathPrefix(`/ws`))
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: assisted-teacher-backend
+          port: 9847
     - match: Host(`desk.bapttf.com`)
       kind: Rule
       middlewares:
         - name: forwardauth-authelia
           namespace: authelia
       services:
-        - name: assisted-teacher
-          port: 9847
+        - name: assisted-teacher-frontend
+          port: 80
   tls:
     secretName: assisted-teacher-tls-certificate

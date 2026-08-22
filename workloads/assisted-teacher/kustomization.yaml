@@ -5,8 +5,10 @@ namespace: assisted-teacher
 
 resources:
   - infisical-secret.yaml
-  - deployment.yaml
-  - service.yaml
+  - pvc.yaml
+  - backend-deployment.yaml
+  - backend-service.yaml
+  - frontend-deployment.yaml
+  - frontend-service.yaml
   - certificate.yaml
   - ingressroute.yaml
-  - pvc.yaml

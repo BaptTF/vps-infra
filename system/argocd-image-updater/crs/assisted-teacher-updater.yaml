@@ -7,8 +7,12 @@ spec:
   applicationRefs:
     - namePattern: assisted-teacher
       images:
-        - alias: assisted-teacher
-          imageName: ghcr.io/rjullien/assisted-teacher
+        - alias: assisted-teacher-backend
+          imageName: ghcr.io/rjullien/assisted-teacher/backend
+          commonUpdateSettings:
+            updateStrategy: newest-build
+        - alias: assisted-teacher-frontend
+          imageName: ghcr.io/rjullien/assisted-teacher/frontend
           commonUpdateSettings:
             updateStrategy: newest-build
   writeBackConfig:
