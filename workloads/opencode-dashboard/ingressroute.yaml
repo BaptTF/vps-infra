@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: opencode-dashboard
+  namespace: opencode-dashboard
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`opencode.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: opencode-dashboard
+          port: 8080
+  tls:
+    secretName: opencode-dashboard-tls-certificate

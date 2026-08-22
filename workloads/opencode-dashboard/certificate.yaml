@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: opencode-dashboard-cert
+  namespace: opencode-dashboard
+spec:
+  secretName: opencode-dashboard-tls-certificate
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "opencode.bapttf.com"
