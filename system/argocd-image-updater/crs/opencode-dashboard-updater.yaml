@@ -1,0 +1,17 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: opencode-dashboard-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: opencode-dashboard
+      images:
+        - alias: opencode-dashboard
+          imageName: ghcr.io/rjullien/opencode-usage-tracker
+          commonUpdateSettings:
+            updateStrategy: newest-build
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main
