@@ -32,11 +32,11 @@ spec:
               value: "/workspace"
             - name: HERMES_URL
               value: "http://hermes-lya.openclaw.svc.cluster.local:8642"
-            - name: BIFROST_API_KEY
+            - name: HERMES_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: assisted-teacher-secret
-                  key: BIFROST_API_KEY
+                  key: API_SERVER_KEY
           volumeMounts:
             - name: workspace
               mountPath: /workspace
