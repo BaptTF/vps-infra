@@ -4,11 +4,11 @@ kind: Kustomization
 namespace: assisted-teacher
 
 resources:
-  - infisical-secret.yaml
-  - pvc.yaml
-  - backend-deployment.yaml
-  - backend-service.yaml
-  - frontend-deployment.yaml
-  - frontend-service.yaml
+  - backend/infisical-secret.yaml
+  - backend/pvc.yaml
+  - backend/deployment.yaml
+  - backend/service.yaml
+  - frontend/deployment.yaml
+  - frontend/service.yaml
   - certificate.yaml
   - ingressroute.yaml
