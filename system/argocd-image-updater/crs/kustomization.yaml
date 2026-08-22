@@ -12,6 +12,7 @@ resources:
   - lacoope-updater.yaml
   - nullclaw-updater.yaml
   - openclaw-updater.yaml
+  - opencode-dashboard-updater.yaml
   - tripkit-frontend-updater.yaml
   - tripkit-backend-updater.yaml
   - voyage-updater.yaml
