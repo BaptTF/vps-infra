@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`opencode.bapttf.com`)
+    - match: Host(`oc-board.bapttf.com`)
       kind: Rule
       middlewares:
         - name: forwardauth-authelia
