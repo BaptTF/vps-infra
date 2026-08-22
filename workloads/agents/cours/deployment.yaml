@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cours-ia
+  name: cours
   namespace: openclaw
   labels:
-    app: cours-ia
+    app: cours
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
@@ -12,15 +12,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cours-ia
+      app: cours
   template:
     metadata:
       labels:
-        app: cours-ia
+        app: cours
     spec:
       containers:
         - name: cours-ia
-          image: ghcr.io/rjullien/opencode-usage-tracker/cours-ia:latest
+          image: ghcr.io/rjullien/opencode-usage-tracker/cours:latest
           ports:
             - containerPort: 9847
               name: http

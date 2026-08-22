@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cours-ia
+  name: cours
   namespace: openclaw
   labels:
-    app: cours-ia
+    app: cours
 spec:
   selector:
-    app: cours-ia
+    app: cours
   ports:
     - protocol: TCP
       port: 9847

@@ -1,19 +1,19 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: cours-ia
+  name: cours
   namespace: openclaw
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`cours-ia.bapttf.com`)
+    - match: Host(`cours.bapttf.com`)
       kind: Rule
       middlewares:
         - name: forwardauth-authelia
           namespace: authelia
       services:
-        - name: cours-ia
+        - name: cours
           port: 9847
   tls:
-    secretName: cours-ia-tls-certificate
+    secretName: cours-tls-certificate
