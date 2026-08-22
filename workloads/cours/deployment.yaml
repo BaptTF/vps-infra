@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cours
-  namespace: openclaw
+  namespace: cours
   labels:
     app: cours
   annotations:
@@ -34,7 +34,7 @@ spec:
               value: "hermes acp"
           envFrom:
             - secretRef:
-                name: hermes-lya-secret-bifrost
+                name: cours-bifrost-secret
           volumeMounts:
             - name: workspace
               mountPath: /workspace

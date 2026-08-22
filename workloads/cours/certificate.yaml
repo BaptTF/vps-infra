@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: cours-cert
-  namespace: openclaw
+  namespace: cours
 spec:
   secretName: cours-tls-certificate
   issuerRef:
