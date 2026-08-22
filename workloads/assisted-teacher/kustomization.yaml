@@ -8,7 +8,8 @@ resources:
   - backend/pvc.yaml
   - backend/deployment.yaml
   - backend/service.yaml
+  - backend/ingressroute.yaml
   - frontend/deployment.yaml
   - frontend/service.yaml
+  - frontend/ingressroute.yaml
   - certificate.yaml
-  - ingressroute.yaml
