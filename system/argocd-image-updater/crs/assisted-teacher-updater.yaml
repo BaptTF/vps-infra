@@ -1,0 +1,17 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: assisted-teacher-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: assisted-teacher
+      images:
+        - alias: assisted-teacher
+          imageName: ghcr.io/rjullien/assisted-teacher
+          commonUpdateSettings:
+            updateStrategy: newest-build
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

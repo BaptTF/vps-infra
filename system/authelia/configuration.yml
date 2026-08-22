@@ -62,6 +62,9 @@ access_control:
     - domain: oc-board.bapttf.com
       policy: one_factor
       subject: "group:family"
+    - domain: desk.bapttf.com
+      policy: one_factor
+      subject: "group:family"
     - domain: hermes-*.bapttf.com
       policy: one_factor
       subject: "group:family"

@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assisted-teacher
+  namespace: assisted-teacher
+  labels:
+    app: assisted-teacher
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assisted-teacher
+  template:
+    metadata:
+      labels:
+        app: assisted-teacher
+    spec:
+      containers:
+        - name: assisted-teacher
+          image: ghcr.io/rjullien/assisted-teacher:main
+          ports:
+            - containerPort: 9847
+              name: http
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "9847"
+            - name: WORKSPACE_DIR
+              value: "/workspace"
+            - name: ACP_AGENT_CMD
+              value: "hermes acp"
+            - name: BIFROST_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: assisted-teacher-secret
+                  key: BIFROST_API_KEY
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+      volumes:
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: assisted-teacher-workspace
