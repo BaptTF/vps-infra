@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: assisted-teacher-cert
+  namespace: assisted-teacher
+spec:
+  secretName: assisted-teacher-tls-certificate
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "desk.bapttf.com"

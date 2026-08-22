@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: assisted-teacher-frontend
+  namespace: assisted-teacher
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`desk.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: assisted-teacher-frontend
+          port: 80
+  tls:
+    secretName: assisted-teacher-tls-certificate

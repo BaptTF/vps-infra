@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: assisted-teacher-backend
+  namespace: assisted-teacher
+  labels:
+    app: assisted-teacher-backend
+spec:
+  selector:
+    app: assisted-teacher-backend
+  ports:
+    - protocol: TCP
+      port: 9847
+      targetPort: http
+      name: http
