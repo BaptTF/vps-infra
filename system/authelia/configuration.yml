@@ -64,7 +64,9 @@ access_control:
       subject: "group:family"
     - domain: desk.bapttf.com
       policy: one_factor
-      subject: "group:family"
+      subject:
+        - - "group:family"
+        - - "group:agent"
     - domain: hermes-*.bapttf.com
       policy: one_factor
       subject: "group:family"
