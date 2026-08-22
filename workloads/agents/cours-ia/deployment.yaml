@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cours-ia
+  namespace: openclaw
+  labels:
+    app: cours-ia
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cours-ia
+  template:
+    metadata:
+      labels:
+        app: cours-ia
+    spec:
+      containers:
+        - name: cours-ia
+          image: ghcr.io/rjullien/opencode-usage-tracker/cours-ia:latest
+          ports:
+            - containerPort: 9847
+              name: http
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "9847"
+            - name: WORKSPACE_DIR
+              value: "/workspace"
+            - name: ACP_AGENT_CMD
+              value: "hermes acp"
+          envFrom:
+            - secretRef:
+                name: hermes-lya-secret-bifrost
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+      volumes:
+        - name: workspace
+          emptyDir: {}
