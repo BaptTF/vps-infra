@@ -67,6 +67,8 @@ spec:
               value: "hermes-lya-dashboard"
             - name: HERMES_DASHBOARD_PUBLIC_URL
               value: "https://hermes-lya.bapttf.com"
+            - name: CAMOFOX_URL
+              value: "http://camofox:9377"
             - name: PATH
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           ports:
