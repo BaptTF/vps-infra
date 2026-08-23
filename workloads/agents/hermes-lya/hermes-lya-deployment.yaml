@@ -49,6 +49,11 @@ spec:
           env:
             - name: TELEGRAM_ALLOWED_USERS
               value: "974020023,8726326688,1156623391,8761164341,8348834293,8920294477"
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-lya-secret
+                  key: API_SERVER_KEY
             - name: API_SERVER_ENABLED
               value: "true"
             - name: API_SERVER_HOST
