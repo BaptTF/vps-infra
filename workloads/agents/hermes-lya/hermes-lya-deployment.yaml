@@ -72,6 +72,8 @@ spec:
                 secretKeyRef:
                   name: hermes-lya-secret
                   key: API_SERVER_KEY
+            - name: CAMOFOX_URL
+              value: "http://camofox:9377"
             - name: PATH
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           ports:
