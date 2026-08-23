@@ -111,21 +111,6 @@
     }
   },
   "governance": {
-    "virtual_keys": [
-      {
-        "id": "hermes-lya",
-        "name": "hermes-lya",
-        "value": "env.BIFROST_API_KEY",
-        "is_active": true,
-        "provider_configs": [
-          {
-            "provider": "opencode-go",
-            "allowed_models": ["*"],
-            "key_ids": ["*"],
-            "weight": 1
-          }
-        ]
-      }
-    ]
+    "virtual_keys": []
   }
 }
