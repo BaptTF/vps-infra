@@ -67,6 +67,11 @@ spec:
               value: "hermes-lya-dashboard"
             - name: HERMES_DASHBOARD_PUBLIC_URL
               value: "https://hermes-lya.bapttf.com"
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-lya-secret
+                  key: API_SERVER_KEY
             - name: PATH
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           ports:
