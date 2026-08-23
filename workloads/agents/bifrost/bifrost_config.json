@@ -121,7 +121,7 @@
           {
             "provider": "opencode-go",
             "allowed_models": ["*"],
-            "key_ids": ["opencode-go-key-3"],
+            "key_ids": ["*"],
             "weight": 1
           }
         ]
