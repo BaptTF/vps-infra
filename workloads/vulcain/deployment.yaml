@@ -21,6 +21,11 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7331
+          env:
+            # Un service nommé "vulcain" fait injecter par le kubelet
+            # VULCAIN_PORT=tcp://<ip>:7331, que l'app essaie de parser en nombre
+            - name: VULCAIN_PORT
+              value: "7331"
           volumeMounts:
             - name: data
               mountPath: /data
