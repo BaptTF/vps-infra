@@ -37,6 +37,18 @@ spec:
                 secretKeyRef:
                   name: assisted-teacher-secret
                   key: API_SERVER_KEY
+            # Pi agent configuration
+            - name: PI_ENABLED
+              value: "true"
+            - name: PI_CMD
+              value: "pi"
+            - name: PI_MODELS_JSON
+              value: "/data/pi-config/models.json"
+            - name: BIFROST_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: assisted-teacher-bifrost
+                  key: BIFROST_API_KEY
           volumeMounts:
             - name: workspace
               mountPath: /workspace
@@ -59,10 +71,10 @@ spec:
           resources:
             requests:
               cpu: "50m"
-              memory: "64Mi"
+              memory: "128Mi"
             limits:
-              cpu: "500m"
-              memory: "256Mi"
+              cpu: "1000m"
+              memory: "512Mi"
       volumes:
         - name: workspace
           persistentVolumeClaim:

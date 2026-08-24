@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - infisical-secret.yaml
+  - infisical-secret-bifrost.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml
