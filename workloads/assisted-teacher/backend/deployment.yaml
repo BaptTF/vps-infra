@@ -37,18 +37,8 @@ spec:
                 secretKeyRef:
                   name: assisted-teacher-secret
                   key: API_SERVER_KEY
-            # Pi agent configuration
-            - name: PI_ENABLED
-              value: "true"
-            - name: PI_CMD
-              value: "pi"
-            - name: PI_MODELS_JSON
-              value: "/data/pi-config/models.json"
-            - name: BIFROST_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: assisted-teacher-bifrost
-                  key: BIFROST_API_KEY
+            # Pi reads Bifrost URL from entrypoint.sh default
+            # (bifrost.openclaw.svc.cluster.local:8080/v1, no auth needed)
           volumeMounts:
             - name: workspace
               mountPath: /workspace
