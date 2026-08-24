@@ -17,3 +17,4 @@ resources:
   - tripkit-frontend-updater.yaml
   - tripkit-backend-updater.yaml
   - voyage-updater.yaml
+  - vulcain-updater.yaml

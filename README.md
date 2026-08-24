@@ -292,6 +292,7 @@ When the original worker came back `Ready`:
 | LaCoope | https://lacoope.bapttf.com | Public |
 | LaCoope API | https://lacoope-api.bapttf.com | Public |
 | OpenCLAW | https://openclaw.bapttf.com | Public |
+| Vulcain | https://vulcain.bapttf.com | Public (Authelia) |
 | Hermes Leo dashboard | https://hermes-leo.bapttf.com | Public (Authelia) |
 | Hermes Lya dashboard | https://hermes-lya.bapttf.com | Public (Authelia) |
 | OpenWebUI | https://openwebui.bapttf.com | Public |
