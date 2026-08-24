@@ -1,4 +1,4 @@
 kustomize:
   images:
-  - ghcr.io/rjullien/assisted-teacher/backend:4b7089b
-  - ghcr.io/rjullien/assisted-teacher/frontend:4b7089b
+  - ghcr.io/rjullien/assisted-teacher/backend:bb9ebb6
+  - ghcr.io/rjullien/assisted-teacher/frontend:bb9ebb6
