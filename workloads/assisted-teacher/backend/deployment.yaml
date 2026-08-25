@@ -25,6 +25,9 @@ spec:
             - containerPort: 9847
               name: http
               protocol: TCP
+          envFrom:
+            - secretRef:
+                name: assisted-teacher-secret
           env:
             - name: PORT
               value: "9847"
