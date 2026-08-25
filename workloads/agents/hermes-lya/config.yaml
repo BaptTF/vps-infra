@@ -23,6 +23,14 @@ memory:
 telegram:
   require_mention: true
 
+# Brave est search-only (pas de web_extract) : on le pinne uniquement sur
+# search_backend et on laisse extract_backend vide pour que web_extract retombe
+# sur l'anneau keyless (exa/parallel/tavily/firecrawl/keenable).
+# La clé BRAVE_SEARCH_API_KEY arrive par envFrom (secret hermes-lya-secret,
+# path Infisical /agents/hermes-lya).
+web:
+  search_backend: "brave-free"
+
 delegation:
   provider: custom
   model: opencode-go/deepseek-v4-flash

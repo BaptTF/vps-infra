@@ -39,6 +39,19 @@ spec:
                   key: API_SERVER_KEY
             # Pi reads Bifrost URL from entrypoint.sh default
             # (bifrost.openclaw.svc.cluster.local:8080/v1, no auth needed)
+            #
+            # Brave Search. Un seul nom de variable dans tout le cluster :
+            # BRAVE_SEARCH_API_KEY, celui qu'impose l'image tierce
+            # nousresearch/hermes-agent. Le côté pi est notre code, c'est lui
+            # qui s'aligne (rjullien/assisted-teacher).
+            # optional: true -> le pod démarre même si la clé n'est pas encore
+            # dans Infisical (/agents/hermes-lya).
+            - name: BRAVE_SEARCH_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: assisted-teacher-secret
+                  key: BRAVE_SEARCH_API_KEY
+                  optional: true
           volumeMounts:
             - name: workspace
               mountPath: /workspace
