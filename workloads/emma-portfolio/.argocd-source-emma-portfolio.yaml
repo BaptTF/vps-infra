@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/emmatf/my_portfolio:sha-57e3b992e36d283c00badb22bb879976cfe8dabb
+  - ghcr.io/emmatf/my_portfolio:sha-595e225622e1ed2d69bd950dd8034935e3bb81ec
