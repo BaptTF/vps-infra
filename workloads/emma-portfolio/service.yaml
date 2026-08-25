@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: emma-portfolio
+  namespace: emma-portfolio
+  labels:
+    app: emma-portfolio
+spec:
+  selector:
+    app: emma-portfolio
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: http
+      name: http

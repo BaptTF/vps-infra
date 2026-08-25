@@ -9,6 +9,7 @@ resources:
   - bapttf-front-updater.yaml
   - assisted-teacher-updater.yaml
   - ce-analytics-updater.yaml
+  - emma-portfolio-updater.yaml
   - jujudb-updater.yaml
   - lacoope-updater.yaml
   - nullclaw-updater.yaml
