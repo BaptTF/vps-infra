@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/bapttf/vulcain:sha-3d3b4b9
+  - ghcr.io/bapttf/vulcain:sha-91f2a13
