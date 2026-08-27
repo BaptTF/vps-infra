@@ -9,4 +9,10 @@ search:
   formats:
     - html
     - json
-  safe_search: 1
+  safe_search: 2
+
+outgoing:
+  proxies:
+    http: http://nas-proxy.openclaw.svc.cluster.local:3128
+    https: http://nas-proxy.openclaw.svc.cluster.local:3128
+  request_timeout: 10
