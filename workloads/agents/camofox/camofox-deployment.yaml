@@ -26,6 +26,10 @@ spec:
               value: "9377"
             - name: CAMOFOX_CRASH_REPORT_ENABLED
               value: "false"
+            - name: PROXY_HOST
+              value: "nas-proxy.openclaw.svc.cluster.local"
+            - name: PROXY_PORT
+              value: "3128"
           ports:
             - containerPort: 9377
               name: http
