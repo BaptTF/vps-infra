@@ -4,7 +4,7 @@ metadata:
   name: nas-proxy
   namespace: openclaw
   annotations:
-    tailscale.com/tailnet-ip: "100.85.219.53"
+    tailscale.com/tailnet-ip: "100.75.160.28"
 spec:
   type: ExternalName
   externalName: placeholder  # ignoré quand l'annotation tailscale est présente
