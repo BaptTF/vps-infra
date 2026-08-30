@@ -6,6 +6,7 @@ resources:
   - bifrost-deployment.yaml
   - bifrost-service.yaml
   - bifrost-ingress.yaml
+  - vpa.yaml
 
 configMapGenerator:
   - name: bifrost-config

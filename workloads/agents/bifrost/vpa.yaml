@@ -1,0 +1,37 @@
+# VerticalPodAutoscaler pour le pod Bifrost.
+#
+# Contexte : le container bifrost a été OOMKilled le 30/08/2026 (limite 512 Mi
+# dépassée après ~44 h d'uptime). Le VPA (voir system/vpa) recommande et
+# applique les ressources automatiquement ; les bornes ici limitent le
+# sur-sizing. updateMode Auto → le VPA redémarre le pod lors d'un ajustement :
+# les poids opencode-go re-seed depuis le config file à chaque restart, le
+# sidecar bifrost-weights (PR #166) les rétablit en < 1 h.
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: bifrost
+  namespace: openclaw
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bifrost
+  updatePolicy:
+    updateMode: Auto
+  resourcePolicy:
+    containerPolicies:
+      - containerName: bifrost
+        minAllowed:
+          cpu: 50m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 4
+          memory: 2Gi
+      # Sidecar de poids (déployé par la PR #166) : minuscule, borné serré.
+      - containerName: bifrost-weights
+        minAllowed:
+          cpu: 5m
+          memory: 16Mi
+        maxAllowed:
+          cpu: 500m
+          memory: 128Mi
