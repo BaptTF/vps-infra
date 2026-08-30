@@ -65,6 +65,27 @@ spec:
             - name: config-volume
               mountPath: /app/data/config.json
               subPath: config.json
+
+        # Sidecar : rééquilibre dynamiquement les poids opencode-go de Bifrost
+        # (1x/h) d'après les quotas OpenCode Go lus sur le dashboard
+        # opencode-usage-tracker. Déployé en DRY_RUN au départ : il log les
+        # changements qu'il appliquerait sans les faire. Passage en actif
+        # (DRY_RUN=false) après validation.
+        - name: bifrost-weights
+          image: ghcr.io/rjullien/bifrost-weight-sidecar:main
+          imagePullPolicy: Always
+          env:
+            - name: BIFROST_URL
+              value: http://localhost:8080
+            - name: DRY_RUN
+              value: "true"
+          resources:
+            requests:
+              cpu: "5m"
+              memory: "16Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
       volumes:
         - name: config-volume
           configMap:
