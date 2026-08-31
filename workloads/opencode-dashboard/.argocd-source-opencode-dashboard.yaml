@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/rjullien/opencode-usage-tracker:855eb43
+  - ghcr.io/rjullien/opencode-usage-tracker:271bb45
