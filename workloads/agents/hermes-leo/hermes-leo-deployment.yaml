@@ -54,7 +54,10 @@ spec:
               mountPath: /opt/data
       containers:
         - name: hermes-leo
-          image: nousresearch/hermes-agent:v2026.8.16
+          # Image custom : hermes-agent officiel + gws (Google Workspace CLI) + gh + kubectl
+          # Source : rjullien/hermes-leo-config (public) — Renovate keep les versions à jour
+          # sha-a35d7c7 = build du commit a35d7c7 (main 2026-08-31)
+          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:sha-a35d7c7
           args: ["gateway", "run"]
           envFrom:
             - secretRef:
