@@ -70,6 +70,13 @@ spec:
         - name: bifrost-weights
           image: ghcr.io/rjullien/bifrost-weight-sidecar:main
           imagePullPolicy: Always
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           env:
             - name: OPENCODE_GO_API_KEY
               valueFrom:
