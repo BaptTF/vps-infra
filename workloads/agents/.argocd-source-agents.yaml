@@ -2,4 +2,4 @@ kustomize:
   images:
   - ghcr.io/bapttf/openclaw-lea-config:sha-b576e24598385425dd03e691a44dc997481862fa
   - ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-0571d53
-  - ghcr.io/rjullien/bifrost-weight-sidecar:5be31f5
+  - ghcr.io/rjullien/bifrost-weight-sidecar:0c5d93b
