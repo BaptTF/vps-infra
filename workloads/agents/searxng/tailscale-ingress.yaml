@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: searxng
+  labels:
+    app: searxng
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - searxng
+  defaultBackend:
+    service:
+      name: searxng
+      port:
+        number: 8080

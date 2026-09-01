@@ -5,6 +5,7 @@ resources:
   - infisical-secret.yaml
   - deployment.yaml
   - service.yaml
+  - tailscale-ingress.yaml
 
 configMapGenerator:
   - name: searxng-config
