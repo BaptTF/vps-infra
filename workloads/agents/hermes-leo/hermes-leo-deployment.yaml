@@ -24,6 +24,8 @@ spec:
         app: hermes-leo
     spec:
       serviceAccountName: hermes-leo
+      imagePullSecrets:
+        - name: ghcr-login-secret
       initContainers:
         - name: init-config
           image: busybox:1.38.0
