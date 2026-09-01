@@ -92,7 +92,7 @@ spec:
                   name: bifrost-secret
                   key: OPENCODE_GO_API_KEY_N
             - name: BIFROST_URL
-              value: http://localhost:8080
+              value: http://127.0.0.1:8080
             - name: DRY_RUN
               value: "true"
           resources:
