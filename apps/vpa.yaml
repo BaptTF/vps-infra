@@ -8,7 +8,7 @@ metadata:
   annotations:
     argocd.argoproj.io/manifest-generate-paths: .
 spec:
-  project: default
+  project: system
   source:
     repoURL: 'https://github.com/BaptTF/vps-infra.git'
     targetRevision: HEAD
@@ -21,4 +21,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+      - CreateNamespace=true
       - ServerSideApply=true
