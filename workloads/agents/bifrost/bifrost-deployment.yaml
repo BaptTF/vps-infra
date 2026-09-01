@@ -65,6 +65,43 @@ spec:
             - name: config-volume
               mountPath: /app/data/config.json
               subPath: config.json
+
+        # Sidecar : rééquilibre dynamiquement les poids opencode-go de Bifrost
+        - name: bifrost-weights
+          image: ghcr.io/rjullien/bifrost-weight-sidecar:main
+          imagePullPolicy: Always
+          env:
+            - name: OPENCODE_GO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bifrost-secret
+                  key: OPENCODE_GO_API_KEY
+            - name: OPENCODE_GO_API_KEY_R
+              valueFrom:
+                secretKeyRef:
+                  name: bifrost-secret
+                  key: OPENCODE_GO_API_KEY_R
+            - name: OPENCODE_GO_API_KEY_A
+              valueFrom:
+                secretKeyRef:
+                  name: bifrost-secret
+                  key: OPENCODE_GO_API_KEY_A
+            - name: OPENCODE_GO_API_KEY_N
+              valueFrom:
+                secretKeyRef:
+                  name: bifrost-secret
+                  key: OPENCODE_GO_API_KEY_N
+            - name: BIFROST_URL
+              value: http://localhost:8080
+            - name: DRY_RUN
+              value: "true"
+          resources:
+            requests:
+              cpu: "5m"
+              memory: "16Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
       volumes:
         - name: config-volume
           configMap:
