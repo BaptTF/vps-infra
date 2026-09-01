@@ -52,28 +52,6 @@ spec:
               readOnly: true
             - name: data
               mountPath: /opt/data
-        - name: init-devin-credentials
-          image: busybox:1.38.0
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              # Write the Devin CLI credentials.toml (from Infisical /agents/devin)
-              # to the CLI's expected location on the PVC. Optional: if the secret
-              # does not exist yet, the pod still starts (no Devin CLI auth).
-              if [ -f /devin-creds/credentials.toml ]; then
-                mkdir -p /opt/data/home/.local/share/devin
-                cp /devin-creds/credentials.toml /opt/data/home/.local/share/devin/credentials.toml
-                chown 10000:10000 /opt/data/home/.local/share/devin/credentials.toml
-                echo "devin credentials.toml written"
-              else
-                echo "no devin credentials.toml yet (optional, skipping)"
-              fi
-          volumeMounts:
-            - name: devin-credentials
-              mountPath: /devin-creds
-              readOnly: true
-            - name: data
-              mountPath: /opt/data
       containers:
         - name: hermes-leo
           image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.8.31
@@ -132,6 +110,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/data
+            - name: devin-credentials
+              mountPath: /opt/data/home/.local/share/devin/credentials.toml
+              subPath: credentials.toml
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /health
