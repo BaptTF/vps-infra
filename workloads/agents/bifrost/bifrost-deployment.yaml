@@ -67,13 +67,19 @@ spec:
               subPath: config.json
 
         # Sidecar : rééquilibre dynamiquement les poids opencode-go de Bifrost
-        # (1x/h) d'après les quotas OpenCode Go lus sur le dashboard
-        # opencode-usage-tracker. Déployé en DRY_RUN au départ : il log les
-        # changements qu'il appliquerait sans les faire. Passage en actif
-        # (DRY_RUN=false) après validation.
+        # (1x/h) d'après les quotas OpenCode Go lus DIRECTEMENT sur l'API
+        # opencode.ai (clés OPENCODE_GO_API_KEY* injectées via bifrost-secret).
+        # Le sidecar est autonome : il ne dépend pas du dashboard
+        # opencode-usage-tracker (découplage voulu — revue Baptiste #166).
+        # Déployé en DRY_RUN au départ : il log les changements qu'il
+        # appliquerait sans les faire. Passage en actif (DRY_RUN=false) après
+        # validation.
         - name: bifrost-weights
           image: ghcr.io/rjullien/bifrost-weight-sidecar:main
           imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: bifrost-secret
           env:
             - name: BIFROST_URL
               value: http://localhost:8080
