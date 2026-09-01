@@ -101,7 +101,7 @@ spec:
             - name: BIFROST_URL
               value: http://127.0.0.1:8080
             - name: DRY_RUN
-              value: "true"
+              value: "false"
           resources:
             requests:
               cpu: "5m"
