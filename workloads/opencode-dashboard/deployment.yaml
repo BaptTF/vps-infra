@@ -50,6 +50,12 @@ spec:
                 secretKeyRef:
                   name: opencode-dashboard-secret
                   key: OPENCODE_GO_API_KEY_N
+            - name: DEVIN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: opencode-dashboard-secret-devin
+                  key: DEVIN_API_KEY
+                  optional: true
           livenessProbe:
             httpGet:
               path: /health
