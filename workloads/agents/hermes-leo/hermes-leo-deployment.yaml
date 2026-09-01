@@ -54,9 +54,6 @@ spec:
               mountPath: /opt/data
       containers:
         - name: hermes-leo
-          # Image custom : hermes-agent officiel + gws (Google Workspace CLI) + gh + kubectl
-          # Source : rjullien/hermes-leo-config (public) — Renovate keep les versions à jour
-          # Tag calver v2026.8.31 (release GitHub du même nom) — voir renovate.json pour les délais
           image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.8.31
           args: ["gateway", "run"]
           envFrom:
