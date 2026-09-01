@@ -93,7 +93,7 @@ spec:
             - name: DEVIN_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-leo-secret
+                  name: nullclaw-leo-secret-devin
                   key: DEVIN_API_KEY
                   optional: true
             - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
