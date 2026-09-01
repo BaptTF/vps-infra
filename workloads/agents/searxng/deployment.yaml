@@ -20,7 +20,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: searxng
-          image: searxng/searxng:2026.8.22-9fea41204
+          image: searxng/searxng:2026.8.22-777ba8fa4
           env:
             - name: SEARXNG_BASE_URL
               value: "http://searxng.openclaw.svc.cluster.local:8080"
