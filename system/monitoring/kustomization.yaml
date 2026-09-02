@@ -10,6 +10,6 @@ helmCharts:
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
     releaseName: kps
-    version: 88.5.4
+    version: 88.6.1
     valuesFile: values/kube-prometheus-stack.yaml
     namespace: monitoring
