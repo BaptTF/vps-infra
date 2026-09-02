@@ -12,6 +12,7 @@ resources:
   - ce-analytics-updater.yaml
   - emma-portfolio-updater.yaml
   - jujudb-updater.yaml
+  - hermes-leo-updater.yaml
   - lacoope-updater.yaml
   - nullclaw-updater.yaml
   - openclaw-updater.yaml
