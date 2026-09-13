@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recettes
+  namespace: recettes
+  labels:
+    app: recettes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recettes
+  template:
+    metadata:
+      labels:
+        app: recettes
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.31.5-alpine
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: 16Mi
+              cpu: 5m
+            limits:
+              memory: 64Mi
+              cpu: 100m
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: recettes-nginx

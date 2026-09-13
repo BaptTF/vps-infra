@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: recettes
+  namespace: recettes
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`recettes.bapttf.com`)
+      kind: Rule
+      services:
+        - name: recettes
+          port: 80
+  tls:
+    secretName: tls-certificate
