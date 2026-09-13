@@ -1,8 +1,6 @@
 # Traefik values for k3s
 # https://github.com/traefik/traefik-helm-chart
-
-# Namespace
-namespace: traefik
+# Schema-aligned for chart 41.4.0 (additionalProperties: false at root)
 
 # Service configuration
 service:
@@ -35,7 +33,7 @@ ports:
     expose:
       default: true
     exposedPort: 22
-    protocol: TCP 
+    protocol: TCP
 
 # Providers configuration
 # Instructs Traefik to publish its LoadBalancer IP to standard Ingress resources.
@@ -55,29 +53,25 @@ ingressClass:
   name: traefik
 
 # Dashboard disabled - use Prometheus/Grafana metrics instead
-dashboard:
-  enabled: false
+api:
+  dashboard: false
 
 # Logs configuration
-logs:
-  general:
-    level: INFO
-  access:
-    enabled: true
+log:
+  level: INFO
+accessLog:
+  enabled: true
 
 # Metrics configuration
+# Prometheus is enabled by default when the prometheus key is non-null.
+# ServiceMonitor must nest under metrics.prometheus (chart 41.x).
 metrics:
   prometheus:
-    enabled: true
     addRoutersLabels: true
     addEntryPointsLabels: true
     addServicesLabels: true
-  serviceMonitor:
-    enabled: true
-
-# Security
-security:
-  podsAntiAffinity: true
+    serviceMonitor:
+      enabled: true
 
 # Resource limits
 resources:
