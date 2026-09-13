@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: recettes
-  namespace: recettes
+  name: camille-recettes
+  namespace: camille-recettes
   labels:
-    app: recettes
+    app: camille-recettes
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: recettes
+      app: camille-recettes
   template:
     metadata:
       labels:
-        app: recettes
+        app: camille-recettes
     spec:
       containers:
         - name: nginx
@@ -53,4 +53,4 @@ spec:
       volumes:
         - name: nginx-config
           configMap:
-            name: recettes-nginx
+            name: camille-recettes-nginx

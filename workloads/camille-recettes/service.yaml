@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: recettes
-  namespace: recettes
+  name: camille-recettes
+  namespace: camille-recettes
   labels:
-    app: recettes
+    app: camille-recettes
 spec:
   selector:
-    app: recettes
+    app: camille-recettes
   ports:
     - name: http
       port: 80

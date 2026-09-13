@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: recettes-nginx
-  namespace: recettes
+  name: camille-recettes-nginx
+  namespace: camille-recettes
   labels:
-    app: recettes
+    app: camille-recettes
 data:
   default.conf: |
     server {
@@ -19,7 +19,7 @@ data:
         }
 
         # Serve GitHub project page as site root:
-        # recettes.bapttf.com/ → https://rjullien.github.io/camille-recettes/
+        # camille-recettes.bapttf.com/ → https://rjullien.github.io/camille-recettes/
         location / {
             resolver 1.1.1.1 8.8.8.8 valid=300s ipv6=off;
             resolver_timeout 5s;
