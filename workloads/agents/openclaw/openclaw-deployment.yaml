@@ -30,7 +30,7 @@ spec:
           resources:
             requests:
               cpu: "50m"
-              memory: "1Gi"
+              memory: "768Mi"
             limits:
               cpu: "2000m"
               memory: "1Gi"
@@ -68,7 +68,7 @@ spec:
             - name: OPENCLAW_CONFIG_PATH
               value: "/home/node/.openclaw/lea/openclaw.json"
             - name: NODE_OPTIONS
-              value: "--max-old-space-size=1280 --max-semi-space-size=16"
+              value: "--max-old-space-size=768 --max-semi-space-size=16"
             - name: LEO_HERMES_TOKEN
               valueFrom:
                 secretKeyRef:
