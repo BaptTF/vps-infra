@@ -13,6 +13,7 @@ resources:
   - emma-portfolio-updater.yaml
   - jujudb-updater.yaml
   - hermes-leo-updater.yaml
+  - kirocrew-updater.yaml
   - lacoope-updater.yaml
   - nullclaw-updater.yaml
   - openclaw-updater.yaml
