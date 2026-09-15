@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kirocrew
+  namespace: openclaw
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`kirocrew.bapttf.com`)
+      kind: Rule
+      services:
+        - name: kirocrew
+          port: 5476
+  tls:
+    secretName: kirocrew-tls-certificate
