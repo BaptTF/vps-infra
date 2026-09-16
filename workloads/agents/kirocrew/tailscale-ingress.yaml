@@ -9,7 +9,7 @@ spec:
   ingressClassName: tailscale
   tls:
     - hosts:
-        # MagicDNS short name → https://kirocrew.<tailnet>.ts.net (tail4c7c90)
+        # MagicDNS short name → https://kirocrew.<tailnet>.ts.net
         - kirocrew
   defaultBackend:
     service:

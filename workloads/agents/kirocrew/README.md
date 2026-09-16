@@ -29,9 +29,10 @@ pod would stay `ImagePullBackOff` and block first-boot login.
 
 ## Resources
 
-Official remote-host guidance is ~10 Gi RAM. This cluster is a small personal
-k3s (control-plane ~12 Gi allocatable, worker ~6 Gi) and sibling agents such as
-`hermes-leo` use a **1.5 Gi** memory limit.
+Official remote-host guidance is ~10 Gi RAM. Sibling agents on this cluster
+(e.g. `hermes-leo`) use a **1.5 Gi** memory limit, and node allocatable is
+on the order of ~6–12 Gi depending on the node. A 10 Gi request would not
+fit comfortably alongside other workloads.
 
 This Deployment therefore starts at:
 
@@ -45,30 +46,34 @@ Do not jump to a 10 Gi request without capacity planning.
 ## Networking (Tailscale only)
 
 **Not** exposed on the public internet. No Traefik `IngressRoute` / cert-manager
-`Certificate` for `kirocrew.bapttf.com`.
+`Certificate`.
 
 Private access uses a Tailscale Kubernetes Ingress (same pattern as searxng /
 gowa):
 
 - `ingressClassName: tailscale`
 - MagicDNS short hostname: `kirocrew` (`spec.tls.hosts[0]`)
-- Expected HTTPS origin on this tailnet: `https://kirocrew.tail4c7c90.ts.net`
 - Backend: Service `kirocrew:5476`
 
-Confirm the served FQDN after sync:
+Discover the served HTTPS FQDN after sync (do not hardcode a tailnet id in
+Git):
 
 ```bash
 kubectl -n openclaw get ingress kirocrew
-# ADDRESS / hostname should look like kirocrew.tail4c7c90.ts.net
+# or:
+kubectl -n openclaw get ingress kirocrew -o jsonpath='{.status.loadBalancer.ingress[0].hostname}{"\n"}'
 ```
+
+The ADDRESS / hostname is typically `kirocrew.<tailnet>.ts.net`. Use that as
+the browser origin for dashboard links, `KIROCREW_CORS_ORIGINS`, and
+`dashboard.url`.
 
 Dashboard API/WebSocket still require a minted session token. Health probes
 (`/api/health`, `/api/live`, `/api/ready`) are tokenless by design.
 
-`KIROCREW_CORS_ORIGINS` is set to `https://kirocrew.tail4c7c90.ts.net`. After
-first boot, also set `dashboard.url` in the persisted config to that same
-Tailscale origin (see below). If MagicDNS ever differs, update both the env
-var and `dashboard.url`.
+`KIROCREW_CORS_ORIGINS` is intentionally unset in the Deployment until the
+ingress ADDRESS is known — set it (and `dashboard.url`) to
+`https://<ingress ADDRESS>` after first sync. See the TODO on the Deployment.
 
 Break-glass without Tailscale MagicDNS:
 
@@ -99,6 +104,8 @@ kubectl -n openclaw port-forward svc/kirocrew 5476:5476
    ```bash
    kubectl -n openclaw get deploy,svc,pvc,ingress kirocrew
    kubectl -n openclaw rollout status deploy/kirocrew
+   INGRESS_HOST=$(kubectl -n openclaw get ingress kirocrew -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+   echo "https://${INGRESS_HOST}"
    ```
 
 3. One-time agent runtime login (credentials persist on the PVC):
@@ -114,15 +121,21 @@ kubectl -n openclaw port-forward svc/kirocrew 5476:5476
    ```
 
    Open the printed URL from a machine on the tailnet, substituting
-   `https://kirocrew.tail4c7c90.ts.net` for `http://localhost:5476` if needed.
+   `https://$INGRESS_HOST` for `http://localhost:5476` if needed.
 
-5. Persist Tailscale dashboard URL inside the volume (survives upgrades):
+5. Set CORS + persist dashboard URL (survives upgrades):
+
+   - Patch / edit the Deployment to set
+     `KIROCREW_CORS_ORIGINS=https://$INGRESS_HOST` (replace with ingress
+     ADDRESS origin), then let Argo sync — or set it transiently for a
+     first test and commit the value once confirmed.
+   - Set `dashboard.url` in the PVC config to the same origin:
 
    ```bash
    kubectl -n openclaw exec -it deploy/kirocrew -- sh -c \
      'test -f /home/kirocrew/.kiro/crew/config.json && cat /home/kirocrew/.kiro/crew/config.json'
-   # Edit dashboard.url to https://kirocrew.tail4c7c90.ts.net (via dashboard UI
-   # or copy/edit/chown as described in the upstream Docker guide), then:
+   # Edit dashboard.url to https://$INGRESS_HOST (via dashboard UI or
+   # copy/edit/chown as described in the upstream Docker guide), then:
    kubectl -n openclaw rollout restart deploy/kirocrew
    ```
 
@@ -136,5 +149,5 @@ kubectl -n openclaw port-forward svc/kirocrew 5476:5476
 
 - Infisical channel-token wiring
 - Custom image build/publish (`kirocrew-config`)
-- Public Traefik / `*.bapttf.com` exposure
+- Public Traefik / internet exposure
 - Anything from `feat/kiro-cli-pod` / a bare `kiro-cli` shell Deployment
