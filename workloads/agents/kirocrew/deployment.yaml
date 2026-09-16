@@ -52,11 +52,12 @@ spec:
               value: "5476"
             - name: KIROCREW_BIND
               value: "0.0.0.0"
-            # Allow browser Origin/Host via the public Traefik hostname.
+            # Tailscale MagicDNS origin only (no public internet).
             # Also set dashboard.url in the PVC config after first boot
-            # (see README.md).
+            # (see README.md). Confirm FQDN with:
+            #   kubectl -n openclaw get ingress kirocrew
             - name: KIROCREW_CORS_ORIGINS
-              value: "https://kirocrew.bapttf.com"
+              value: "https://kirocrew.tail4c7c90.ts.net"
           ports:
             - containerPort: 5476
               name: dashboard

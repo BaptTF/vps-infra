@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kirocrew
+  namespace: openclaw
+  labels:
+    app: kirocrew
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        # MagicDNS short name → https://kirocrew.<tailnet>.ts.net (tail4c7c90)
+        - kirocrew
+  defaultBackend:
+    service:
+      name: kirocrew
+      port:
+        number: 5476

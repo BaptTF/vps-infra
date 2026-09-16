@@ -42,24 +42,35 @@ Expect OOM under heavy MCP / parallel tool use. Raise the limit only after
 checking node headroom (`kubectl describe node`, `kubectl top pods -n openclaw`).
 Do not jump to a 10 Gi request without capacity planning.
 
-## Networking / TLS
+## Networking (Tailscale only)
 
-Public Traefik ingress follows the hermes-leo pattern:
+**Not** exposed on the public internet. No Traefik `IngressRoute` / cert-manager
+`Certificate` for `kirocrew.bapttf.com`.
 
-- Host: `kirocrew.bapttf.com`
-- cert-manager `Certificate` → `letsencrypt-prod` (DNS-01 / Cloudflare)
-- Traefik `IngressRoute` on `websecure`
+Private access uses a Tailscale Kubernetes Ingress (same pattern as searxng /
+gowa):
+
+- `ingressClassName: tailscale`
+- MagicDNS short hostname: `kirocrew` (`spec.tls.hosts[0]`)
+- Expected HTTPS origin on this tailnet: `https://kirocrew.tail4c7c90.ts.net`
+- Backend: Service `kirocrew:5476`
+
+Confirm the served FQDN after sync:
+
+```bash
+kubectl -n openclaw get ingress kirocrew
+# ADDRESS / hostname should look like kirocrew.tail4c7c90.ts.net
+```
 
 Dashboard API/WebSocket still require a minted session token. Health probes
 (`/api/health`, `/api/live`, `/api/ready`) are tokenless by design.
 
-`KIROCREW_CORS_ORIGINS` is set to `https://kirocrew.bapttf.com`. After first
-boot, also set `dashboard.url` in the persisted config (see below) so Slack /
-mobile links and CSRF Origin checks stay consistent.
+`KIROCREW_CORS_ORIGINS` is set to `https://kirocrew.tail4c7c90.ts.net`. After
+first boot, also set `dashboard.url` in the persisted config to that same
+Tailscale origin (see below). If MagicDNS ever differs, update both the env
+var and `dashboard.url`.
 
-Tailscale-only access is unnecessary here because Traefik TLS + dashboard
-tokens already match how hermes-leo is exposed. Port-forward remains available
-for break-glass:
+Break-glass without Tailscale MagicDNS:
 
 ```bash
 kubectl -n openclaw port-forward svc/kirocrew 5476:5476
@@ -81,12 +92,12 @@ kubectl -n openclaw port-forward svc/kirocrew 5476:5476
 
 ## Deploy / first boot
 
-1. Merge this PR to the fork `main` (René syncs upstream to BaptTF separately).
+1. Merge / sync this PR so ArgoCD applies it.
 2. Wait for ArgoCD `agents` (and `argocd-image-updater` if the new CR is new)
    to sync. Confirm:
 
    ```bash
-   kubectl -n openclaw get deploy,svc,pvc,ingressroute,certificate kirocrew
+   kubectl -n openclaw get deploy,svc,pvc,ingress kirocrew
    kubectl -n openclaw rollout status deploy/kirocrew
    ```
 
@@ -102,16 +113,16 @@ kubectl -n openclaw port-forward svc/kirocrew 5476:5476
    kubectl -n openclaw exec deploy/kirocrew -- kirocrew token --ttl 2h
    ```
 
-   Open the printed URL, substituting `https://kirocrew.bapttf.com` for
-   `http://localhost:5476` if needed.
+   Open the printed URL from a machine on the tailnet, substituting
+   `https://kirocrew.tail4c7c90.ts.net` for `http://localhost:5476` if needed.
 
-5. Persist public dashboard URL inside the volume (survives upgrades):
+5. Persist Tailscale dashboard URL inside the volume (survives upgrades):
 
    ```bash
    kubectl -n openclaw exec -it deploy/kirocrew -- sh -c \
      'test -f /home/kirocrew/.kiro/crew/config.json && cat /home/kirocrew/.kiro/crew/config.json'
-   # Edit dashboard.url to https://kirocrew.bapttf.com (via dashboard UI or
-   # copy/edit/chown as described in the upstream Docker guide), then restart:
+   # Edit dashboard.url to https://kirocrew.tail4c7c90.ts.net (via dashboard UI
+   # or copy/edit/chown as described in the upstream Docker guide), then:
    kubectl -n openclaw rollout restart deploy/kirocrew
    ```
 
@@ -125,4 +136,5 @@ kubectl -n openclaw port-forward svc/kirocrew 5476:5476
 
 - Infisical channel-token wiring
 - Custom image build/publish (`kirocrew-config`)
+- Public Traefik / `*.bapttf.com` exposure
 - Anything from `feat/kiro-cli-pod` / a bare `kiro-cli` shell Deployment
