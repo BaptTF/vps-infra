@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fabron
+  namespace: fabron
+  labels:
+    app: fabron
+spec:
+  selector:
+    app: fabron
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

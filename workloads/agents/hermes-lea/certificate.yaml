@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hermes-lea-dashboard-cert
+  namespace: openclaw
+spec:
+  secretName: hermes-lea-dashboard-tls-certificate
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "hermes-lea.bapttf.com"

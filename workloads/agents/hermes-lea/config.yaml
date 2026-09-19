@@ -1,0 +1,50 @@
+# Minimal Hermes stub for agent lea (scaffold).
+# Prefer a Bifrost-routed default that does not hard-depend on a broken
+# OpenCode Go flash lane; replace REPLACE_ME after vault/model cutover.
+model:
+  provider: custom
+  default: REPLACE_ME  # e.g. bedrock/claude-sonnet via Bifrost
+  base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+  api_key: dummy
+  api_mode: chat_completions
+approvals:
+  mode: false
+terminal:
+  backend: local
+  timeout: 180
+compression:
+  enabled: true
+  threshold: 0.5
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+telegram:
+  require_mention: false
+
+delegation:
+  provider: custom
+  model: REPLACE_ME
+auxiliary:
+  vision:
+    provider: custom
+    model: REPLACE_ME
+    base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+    api_key: dummy
+    api_mode: chat_completions
+display:
+  tool_progress: all
+agent:
+  verify_on_stop: false
+plugins:
+  enabled: []
+_config_version: 33
+onboarding:
+  seen:
+    busy_input_prompt: true
+tts:
+  provider: edge
+stt:
+  provider: openai
+  model: groq-whisper
+  base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+  api_key: dummy
