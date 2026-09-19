@@ -6,6 +6,7 @@ resources:
   - openclaw
   - nullclaw
   - hermes-leo
+  - hermes-lea
   - hermes-lya
   - hermes-lya-filebrowser
   - bifrost
