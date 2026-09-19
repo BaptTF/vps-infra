@@ -8,6 +8,7 @@ resources:
   - hermes-leo
   - hermes-lya
   - hermes-lya-filebrowser
+  - kirocrew
   - bifrost
   - camofox
   - searxng

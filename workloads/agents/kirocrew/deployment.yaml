@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kirocrew
+  namespace: openclaw
+  labels:
+    app: kirocrew
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  # RWO PVC: avoid RollingUpdate stuck with a single replica.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: kirocrew
+  template:
+    metadata:
+      labels:
+        app: kirocrew
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: kirocrew
+          # Bootstrap on the official pinned release until the self-managed
+          # image ghcr.io/rjullien/kirocrew-config/kirocrew is published.
+          # ImageUpdater already watches that future image (see
+          # system/argocd-image-updater/crs/kirocrew-updater.yaml); swap
+          # this imageName to the custom repo when the first calver tag lands,
+          # then let ImageUpdater rewrite tags via .argocd-source-agents.yaml.
+          # TODO(kirocrew): replace with ghcr.io/rjullien/kirocrew-config/kirocrew:<calver>
+          image: ghcr.io/kirodotdev/kirocrew:0.6.0@sha256:ba01bb1c75ea454af2b53773f39c3b38899f0d1d9ab51a0eb97001df6db27407
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+          env:
+            # Inner userns sandbox usually fails under default container seccomp;
+            # without this, agent command execution stays fail-closed.
+            - name: KIROCREW_ALLOW_UNSANDBOXED
+              value: "1"
+            - name: KIROCREW_PORT
+              value: "5476"
+            - name: KIROCREW_BIND
+              value: "0.0.0.0"
+            # TODO(kirocrew): set KIROCREW_CORS_ORIGINS to https://<ingress ADDRESS>
+            # after: kubectl -n openclaw get ingress kirocrew
+            # Also set dashboard.url in the PVC config to that same origin
+            # (see README.md). No public internet exposure.
+          ports:
+            - containerPort: 5476
+              name: dashboard
+              protocol: TCP
+          volumeMounts:
+            - name: home
+              mountPath: /home/kirocrew
+          startupProbe:
+            httpGet:
+              path: /api/ready
+              port: dashboard
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 18
+          livenessProbe:
+            httpGet:
+              path: /api/live
+              port: dashboard
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: dashboard
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            # Official docs suggest ~10Gi RAM for heavy MCP/tool spikes; this
+            # cluster cannot spare that (sibling agents like hermes-leo cap at
+            # 1.5Gi). Start conservative; raise the limit only if OOMKilled.
+            requests:
+              cpu: "100m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: kirocrew-home
