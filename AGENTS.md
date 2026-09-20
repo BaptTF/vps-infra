@@ -43,7 +43,7 @@ kubectl create secret generic infisical-universal-auth \
 1. Create manifests in `system/<name>/` (with `kustomization.yaml` if using Kustomize/Helm) or `workloads/<name>/`
 2. Add an ArgoCD `Application` CR in `apps/<name>.yaml` -- follow an existing file as template
 3. If the service needs secrets, add an `infisical-secret.yaml` using `universalAuth` pointed at `infisical-universal-auth` in the `infisical` namespace
-4. If publicly exposed, add a Traefik `IngressRoute` on `websecure` with `tls: {}`. TLS is the cluster default wildcard (`system/traefik/certificate.yaml`); do not add a per-app Certificate
+4. If publicly exposed, add a Traefik `IngressRoute` on `websecure` with `tls: {}`. TLS is Traefik's default wildcard (`extraObjects` in `system/traefik/values.yaml`); do not add a per-app Certificate
 
 ## Commit conventions
 

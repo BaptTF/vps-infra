@@ -1,22 +1,17 @@
 # Traefik values for k3s
 # https://github.com/traefik/traefik-helm-chart
+# Chart 41.x schema: unknown root keys are rejected.
 
-# Namespace
-namespace: traefik
-
-# Service configuration
 service:
   spec:
     type: LoadBalancer
 
-# EntryPoints configuration
 ports:
   web:
     port: 80
     expose:
       default: true
     exposedPort: 80
-    # Redirect all HTTP (including unknown hosts like x.bapttf.com) to HTTPS.
     http:
       redirections:
         entryPoint:
@@ -42,11 +37,8 @@ ports:
     expose:
       default: true
     exposedPort: 22
-    protocol: TCP 
+    protocol: TCP
 
-# Providers configuration
-# Instructs Traefik to publish its LoadBalancer IP to standard Ingress resources.
-# This ensures tools like ArgoCD can accurately read the Ingress health status.
 providers:
   kubernetesIngress:
     publishedService:
@@ -55,45 +47,46 @@ providers:
     allowCrossNamespace: true
     allowExternalNameServices: true
 
-# IngressClass configuration
 ingressClass:
   enabled: true
   isDefaultClass: true
   name: traefik
 
-# Cluster default cert for all public hosts (bapttf.com + *.bapttf.com).
-# IngressRoutes should use `tls: {}` and not set secretName.
+ingressRoute:
+  dashboard:
+    enabled: false
+
+log:
+  level: INFO
+
+accessLog:
+  enabled: true
+
+metrics:
+  prometheus:
+    addRoutersLabels: true
+    addEntryPointsLabels: true
+    addServicesLabels: true
+
 tlsStore:
   default:
     defaultCertificate:
       secretName: wildcard-bapttf-tls
 
-# Dashboard disabled - use Prometheus/Grafana metrics instead
-dashboard:
-  enabled: false
+extraObjects:
+  - apiVersion: cert-manager.io/v1
+    kind: Certificate
+    metadata:
+      name: wildcard-bapttf
+    spec:
+      secretName: wildcard-bapttf-tls
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+      dnsNames:
+        - bapttf.com
+        - "*.bapttf.com"
 
-# Logs configuration
-logs:
-  general:
-    level: INFO
-  access:
-    enabled: true
-
-# Metrics configuration
-metrics:
-  prometheus:
-    enabled: true
-    addRoutersLabels: true
-    addEntryPointsLabels: true
-    addServicesLabels: true
-  serviceMonitor:
-    enabled: true
-
-# Security
-security:
-  podsAntiAffinity: true
-
-# Resource limits
 resources:
   requests:
     memory: "128Mi"

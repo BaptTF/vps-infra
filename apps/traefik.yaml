@@ -19,9 +19,6 @@ spec:
     - repoURL: https://github.com/BaptTF/vps-infra.git
       targetRevision: main
       ref: values
-    - repoURL: https://github.com/BaptTF/vps-infra.git
-      targetRevision: main
-      path: system/traefik
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
