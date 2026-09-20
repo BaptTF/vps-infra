@@ -89,3 +89,5 @@ spec:
                 path: oidc-jwks-private-key
               - key: immich-oidc-client-secret-hash
                 path: immich-oidc-client-secret-hash
+              - key: vikunja-oidc-client-secret-hash
+                path: vikunja-oidc-client-secret-hash

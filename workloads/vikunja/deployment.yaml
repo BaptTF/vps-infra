@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vikunja
+  labels:
+    app: vikunja
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: vikunja
+  template:
+    metadata:
+      labels:
+        app: vikunja
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: vikunja
+          image: vikunja/vikunja:2.6.0
+          ports:
+            - name: http
+              containerPort: 3456
+          env:
+            - name: VIKUNJA_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-db-secret
+                  key: password
+            - name: VIKUNJA_SERVICE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: service-secret
+            - name: VIKUNJA_AUTH_OPENID_PROVIDERS_AUTHELIA_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: oidc-client-secret
+          volumeMounts:
+            - name: config
+              mountPath: /etc/vikunja/config.yml
+              subPath: config.yml
+              readOnly: true
+            - name: files
+              mountPath: /app/vikunja/files
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: config
+          configMap:
+            name: vikunja-config
+        - name: files
+          persistentVolumeClaim:
+            claimName: vikunja-files

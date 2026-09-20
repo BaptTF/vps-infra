@@ -1,0 +1,25 @@
+service:
+  publicurl: https://task.bapttf.com/
+  timezone: Europe/Paris
+
+database:
+  type: postgres
+  host: postgres-cluster-rw.cnpg-system.svc.cluster.local
+  user: vikunja
+  database: vikunja
+  sslmode: disable
+
+files:
+  basepath: /app/vikunja/files
+
+auth:
+  local:
+    enabled: false
+  openid:
+    enabled: true
+    providers:
+      authelia:
+        name: Authelia
+        authurl: https://auth.bapttf.com
+        clientid: vikunja
+        scope: openid profile email

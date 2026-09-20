@@ -461,9 +461,11 @@ restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo rest
 
 Restic will ask for the Storage Box SFTP password and for the restic repository password. Keep the restic password safe: without it, the backup cannot be decrypted.
 
-## Authelia OIDC for Immich (immich.bapttf.com)
+## Authelia OIDC
 
-Immich uses Authelia as an OIDC provider (SSO). Do **not** add the Authelia forwardAuth middleware on Immich — that would cause double authentication.
+Authelia is the OIDC provider for Immich and Vikunja. Do **not** add the Authelia forwardAuth middleware on these apps — that would cause double authentication.
+
+OIDC client registrations live in Git. The secrets below do not: create them in Infisical **before** Authelia syncs a new client, or Authelia will fail to start.
 
 ### 1. Create OIDC secrets in Infisical
 
@@ -474,18 +476,28 @@ In project `infrastructure`, environment `prod`, path `/authelia`, add:
 | `oidc-hmac-secret` | Random 64+ char string (`authelia crypto rand --length 64 --charset rfc3986`) |
 | `oidc-jwks-private-key` | RSA 2048 private key PEM (`openssl genrsa 2048`) |
 | `immich-oidc-client-secret` | Plaintext OAuth client secret (for Immich admin UI) |
-| `immich-oidc-client-secret-hash` | pbkdf2 hash of the client secret (for Authelia) |
+| `immich-oidc-client-secret-hash` | pbkdf2 hash of the Immich client secret (for Authelia) |
+| `vikunja-oidc-client-secret-hash` | pbkdf2 hash of the Vikunja client secret (for Authelia) |
 
-Generate the client secret pair:
+Path `/vikunja`:
+
+| Key | Description |
+|---|---|
+| `service-secret` | Random 32+ byte string (`openssl rand -base64 32`) |
+| `oidc-client-secret` | Plaintext OAuth client secret (hash stored under `/authelia` as `vikunja-oidc-client-secret-hash`) |
+
+Generate a client secret pair:
 
 ```bash
 CLIENT_SECRET="$(openssl rand -base64 32)"
-echo "Plaintext (Immich): $CLIENT_SECRET"
+echo "Plaintext: $CLIENT_SECRET"
 authelia crypto hash generate pbkdf2 --password "$CLIENT_SECRET"
-# Store plaintext in immich-oidc-client-secret, hash output in immich-oidc-client-secret-hash
 ```
 
-After ArgoCD syncs, Authelia reads these from the `authelia-secrets` Kubernetes secret via the template filter.
+Immich: store plaintext in `immich-oidc-client-secret` and the hash in `immich-oidc-client-secret-hash` (both `/authelia`).  
+Vikunja: store plaintext in `/vikunja` `oidc-client-secret` and the hash in `/authelia` `vikunja-oidc-client-secret-hash`.
+
+After ArgoCD syncs, Authelia reads hashes from the `authelia-secrets` Kubernetes secret via the template filter.
 
 ### 2. Configure Immich OAuth (one-time admin setup)
 

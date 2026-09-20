@@ -83,3 +83,10 @@ spec:
         login: true
         passwordSecret:
           name: compreface-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: vikunja
+        login: true
+        passwordSecret:
+          name: vikunja-db-secret
