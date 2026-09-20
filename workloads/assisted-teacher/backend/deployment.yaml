@@ -37,6 +37,12 @@ spec:
                 secretKeyRef:
                   name: assisted-teacher-secret
                   key: API_SERVER_KEY
+            - name: BRAVE_SEARCH_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: assisted-teacher-secret
+                  key: BRAVE_SEARCH_API_KEY
+                  optional: true
           volumeMounts:
             - name: workspace
               mountPath: /workspace
