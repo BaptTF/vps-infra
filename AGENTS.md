@@ -74,6 +74,7 @@ build: automatic update of voyage
 - `pub-cert.pem` is the SealedSecrets public cert. Committed intentionally -- it is not a secret
 - `workloads/agents/` is a Kustomize aggregator with subdirectories per agent (openclaw, nullclaw, bifrost, etc.)
 - Monitoring stack (kube-prometheus-stack: Prometheus, Grafana, node-exporter, kube-state-metrics) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
+- OpenCode Go session: default `x-opencode-session` lives on Bifrost `extra_headers`; Hermes overrides with `x-bf-eh-x-opencode-session`. Rotate a stuck ID via git (see README "OpenCode Go session headers"). Do not put a reverse proxy in front of Bifrost for this.
 
 ## Manual operations policy
 

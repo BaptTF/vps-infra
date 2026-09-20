@@ -532,6 +532,31 @@ Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in n
 | `GROQ_API_KEY` | Groq API key (provider `groq`, whisper transcriptions) |
 | `OPENCODE_GO_API_KEY` | OpenCode Go subscription API key (https://opencode.ai/auth → Go). Backs two providers: `opencode-go` (OpenAI-compatible, models `glm-5.2`/`glm-5.1`/`glm-5`/`kimi-k2.7-code`/`kimi-k2.6`/`kimi-k2.5`/`deepseek-v4-pro`/`deepseek-v4-flash`/`mimo-v2.5`/`mimo-v2.5-pro`/`mimo-v2-pro`/`mimo-v2-omni`) and `opencode-go-anthropic` (Anthropic-compatible, models `minimax-m3`/`minimax-m2.7`/`minimax-m2.5`/`qwen3.7-max`/`qwen3.7-plus`/`qwen3.6-plus`/`qwen3.5-plus`). Same key used for both — Bifrost sends the right auth header per `base_provider_type`. |
 
+### OpenCode Go session headers
+
+OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifrost v2.0.0 drops the organic header and only forwards `x-bf-eh-*`. Do **not** send a per-conversation ID from every OpenAI-compat client: keep the OpenAI abstraction, with a default session on the gateway and optional per-agent overrides.
+
+| Who | Session | Where |
+|---|---|---|
+| Default (Nullclaw, curl, Open WebUI, any OpenAI-compat app) | `ses_bifrost_default_YYYYMMDD` | `workloads/agents/bifrost/bifrost_config.json` → `providers.opencode-go.network_config.extra_headers.x-opencode-session` |
+| Hermes Leo | `ses_hermesleo_YYYYMMDD` | `workloads/agents/hermes-leo/config.yaml` → `model.extra_headers` and `auxiliary.vision.extra_headers` (`x-bf-eh-x-opencode-session`) |
+| Hermes Lya | `ses_hermeslya_YYYYMMDD` | `workloads/agents/hermes-lya/config.yaml` (same keys) |
+
+`x-bf-eh-x-opencode-session` from a client **overrides** the Bifrost default. A bare `x-opencode-session` from a client is dropped; that caller falls back to the default. Never reuse a dead ID (`ses_hermesleo` is pinned to a dead `blackbox-dsv4flash` upstream).
+
+Symptom that the pin is dead: `Error from provider (Console Go): Upstream request failed: [server_error] Upstream response was not valid JSON` (often HTTP 530 on the OpenCode side). Confirm with a **fresh** session before rotating:
+
+```bash
+KEY=$(kubectl get secret -n openclaw bifrost-secret -o jsonpath='{.data.LITELLM_MASTER_KEY}' | base64 -d)
+# Fresh ID works → the stuck session is the problem, not the keys/models
+curl -skS -m 45 -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+  -H "x-bf-eh-x-opencode-session: ses_diag_$(date +%Y%m%dT%H%M%S)" \
+  https://bifrost.tail4c7c90.ts.net/v1/chat/completions \
+  -d '{"model":"opencode-go/deepseek-v4-flash","messages":[{"role":"user","content":"pong"}],"max_tokens":8}'
+```
+
+Then bump **only** the stuck ID (`ses_<name>_YYYYMMDDTHHMMSS`) and push. Hashed ConfigMaps restart the touched workload (Hermes init copies `config.yaml` onto the PVC at pod start). Bifrost SQLite is pod-local: a live `PUT /api/providers/opencode-go` unsticks the default immediately, but git must follow or the next Bifrost restart reloads the old ID. Rotating the default does not affect Hermes overrides; rotating a Hermes ID does not bounce the other agents.
+
 The Bedrock provider (`bedrock` in `bifrost_config.json`) does not reference a key `value` — Bifrost's Bedrock provider resolves AWS credentials via the standard SDK chain (env vars / IAM), so the AWS credentials for Bedrock are also stored in this Infisical path under the conventional `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names. Bedrock also backs nullclaw's vector memory embeddings (`bedrock/amazon.titan-embed-text-v2:0`).
 
 ## Note
