@@ -15,5 +15,4 @@ spec:
       services:
         - name: opencode-dashboard
           port: 8080
-  tls:
-    secretName: opencode-dashboard-tls-certificate
+  tls: {}

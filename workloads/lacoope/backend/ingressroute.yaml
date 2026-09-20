@@ -12,5 +12,4 @@ spec:
       services:
         - name: lacoope-backend
           port: 8080
-  tls:
-    secretName: tls-certificate-backend
+  tls: {}

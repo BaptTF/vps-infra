@@ -10,5 +10,4 @@ resources:
   - data-pvc.yaml
   - deployment.yaml
   - service.yaml
-  - certificate.yaml
   - ingressroute.yaml

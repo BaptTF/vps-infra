@@ -9,9 +9,7 @@ resources:
   - hermes-leo-pvc.yaml
   - hermes-leo-deployment.yaml
   - hermes-leo-service.yaml
-  - certificate.yaml
   - ingressroute.yaml
-
 
 configMapGenerator:
   - name: hermes-leo-config

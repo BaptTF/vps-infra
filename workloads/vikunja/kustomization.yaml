@@ -6,7 +6,6 @@ namespace: vikunja
 resources:
   - infisical-secret.yaml
   - pvc.yaml
-  - certificate.yaml
   - deployment.yaml
   - service.yaml
   - ingressroute.yaml

@@ -12,5 +12,4 @@ spec:
       services:
         - name: jujudb
           port: 8080
-  tls:
-    secretName: tls-certificate
+  tls: {}

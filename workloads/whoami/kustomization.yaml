@@ -4,7 +4,6 @@ kind: Kustomization
 namespace: whoami
 
 resources:
-  - certificate.yaml
   - deployment.yaml
   - service.yaml
   - ingressroute.yaml

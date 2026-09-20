@@ -12,5 +12,4 @@ spec:
       services:
         - name: lacoope-frontend
           port: 3000
-  tls:
-    secretName: tls-certificate-frontend
+  tls: {}

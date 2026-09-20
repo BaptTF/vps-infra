@@ -16,6 +16,13 @@ ports:
     expose:
       default: true
     exposedPort: 80
+    # Redirect all HTTP (including unknown hosts like x.bapttf.com) to HTTPS.
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
     transport:
       respondingTimeouts:
         readTimeout: 600s
@@ -53,6 +60,13 @@ ingressClass:
   enabled: true
   isDefaultClass: true
   name: traefik
+
+# Cluster default cert for all public hosts (bapttf.com + *.bapttf.com).
+# IngressRoutes should use `tls: {}` and not set secretName.
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: wildcard-bapttf-tls
 
 # Dashboard disabled - use Prometheus/Grafana metrics instead
 dashboard:

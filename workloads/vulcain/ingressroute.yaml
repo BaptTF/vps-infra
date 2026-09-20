@@ -15,5 +15,4 @@ spec:
       services:
         - name: vulcain
           port: 7331
-  tls:
-    secretName: tls-certificate
+  tls: {}

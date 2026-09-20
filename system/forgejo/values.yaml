@@ -9,7 +9,6 @@ ingress:
   tls:
     - hosts:
       - git.bapttf.com
-      secretName: tls-certificate
 
 persistence:
   enabled: true

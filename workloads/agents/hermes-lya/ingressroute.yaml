@@ -12,5 +12,4 @@ spec:
       services:
         - name: hermes-lya
           port: 9119
-  tls:
-    secretName: hermes-lya-dashboard-tls-certificate
+  tls: {}

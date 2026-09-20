@@ -1,12 +1,13 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: opencode-dashboard-cert
-  namespace: opencode-dashboard
+  name: wildcard-bapttf
+  namespace: traefik
 spec:
-  secretName: opencode-dashboard-tls-certificate
+  secretName: wildcard-bapttf-tls
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-    - "oc-board.bapttf.com"
+    - "bapttf.com"
+    - "*.bapttf.com"

@@ -7,6 +7,5 @@ resources:
   - infisical-secret.yaml
   - deployment.yaml
   - service.yaml
-  - certificate.yaml
   - middleware.yaml
   - ingressroute.yaml

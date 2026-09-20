@@ -23,5 +23,4 @@ spec:
       services:
         - name: tripkit-frontend
           port: 80
-  tls:
-    secretName: tls-certificate
+  tls: {}

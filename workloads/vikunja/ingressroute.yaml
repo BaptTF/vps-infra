@@ -11,5 +11,4 @@ spec:
       services:
         - name: vikunja
           port: 3456
-  tls:
-    secretName: tls-certificate
+  tls: {}

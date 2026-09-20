@@ -33573,19 +33573,6 @@ spec:
       serviceAccountName: argocd-redis-secret-init
   ttlSecondsAfterFinished: 60
 ---
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: argocd-cert
-  namespace: argocd
-spec:
-  dnsNames:
-  - argocd.bapttf.com
-  issuerRef:
-    kind: ClusterIssuer
-    name: letsencrypt-prod
-  secretName: tls-certificate
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -33644,5 +33631,4 @@ spec:
     services:
     - name: argocd-server
       port: 80
-  tls:
-    secretName: tls-certificate
+  tls: {}

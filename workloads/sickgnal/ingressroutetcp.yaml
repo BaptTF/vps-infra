@@ -11,5 +11,4 @@ spec:
       services:
         - name: sickgnal-server
           port: 8080
-  tls:
-    secretName: sickgnal-tls
+  tls: {}

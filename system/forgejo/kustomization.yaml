@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - forgejo-infisical-secret.yaml
   - forgejo-ssh-ingress.yaml
-  - certificate.yaml
 
 helmCharts:
   - name: forgejo

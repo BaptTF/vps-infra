@@ -4,7 +4,6 @@ namespace: ce-analytics
 
 resources:
   - namespace.yaml
-  - certificate.yaml
   - infisical-secret.yaml
   - agent-deployment.yaml
   - app-deployment.yaml

@@ -7,11 +7,9 @@ commonLabels:
 resources:
   - infisical-secret.yaml
   - backend/infisical-secret.yaml
-  - backend/certificate.yaml
   - backend/deployment.yaml
   - backend/service.yaml
   - backend/ingressroute.yaml
-  - frontend/certificate.yaml
   - frontend/deployment.yaml
   - frontend/service.yaml
   - frontend/ingressroute.yaml

@@ -3,7 +3,6 @@ kind: Kustomization
 
 resources:
   - pvc.yaml
-  - certificate.yaml
   - ingressroute.yaml
   - deployment.yaml
   - service.yaml

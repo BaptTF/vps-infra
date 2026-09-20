@@ -11,5 +11,4 @@ spec:
       services:
         - name: openclaw-ssh
           port: 22
-  tls:
-    secretName: tls-certificate
+  tls: {}

@@ -14,7 +14,6 @@ helmCharts:
 
 # 2. Add your custom Ingress manifests alongside it
 resources:
-  - certificate.yaml
   - ingress.yaml
   - tailscale-ingress.yaml
   - namespace.yaml

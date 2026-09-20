@@ -12,5 +12,4 @@ spec:
       services:
         - name: hermes-leo
           port: 9119
-  tls:
-    secretName: hermes-leo-dashboard-tls-certificate
+  tls: {}

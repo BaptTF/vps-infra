@@ -15,5 +15,4 @@ spec:
       services:
         - name: assisted-teacher-frontend
           port: 80
-  tls:
-    secretName: assisted-teacher-tls-certificate
+  tls: {}

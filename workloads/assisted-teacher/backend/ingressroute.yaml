@@ -15,5 +15,4 @@ spec:
       services:
         - name: assisted-teacher-backend
           port: 9847
-  tls:
-    secretName: assisted-teacher-tls-certificate
+  tls: {}

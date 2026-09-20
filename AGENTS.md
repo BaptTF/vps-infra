@@ -43,7 +43,7 @@ kubectl create secret generic infisical-universal-auth \
 1. Create manifests in `system/<name>/` (with `kustomization.yaml` if using Kustomize/Helm) or `workloads/<name>/`
 2. Add an ArgoCD `Application` CR in `apps/<name>.yaml` -- follow an existing file as template
 3. If the service needs secrets, add an `infisical-secret.yaml` using `universalAuth` pointed at `infisical-universal-auth` in the `infisical` namespace
-4. If publicly exposed, add a `certificate.yaml` (cert-manager `Certificate` with `letsencrypt-prod` ClusterIssuer) and a Traefik `IngressRoute`
+4. If publicly exposed, add a Traefik `IngressRoute` on `websecure` with `tls: {}`. TLS is the cluster default wildcard (`system/traefik/certificate.yaml`); do not add a per-app Certificate
 
 ## Commit conventions
 
@@ -65,8 +65,7 @@ build: automatic update of voyage
 
 - System Helm charts are inflated via Kustomize (`helmCharts:` block), **not** Helm releases -- ArgoCD must have `--enable-helm` in its Kustomize config
 - Namespace per service, named after the service
-- TLS certs use DNS-01 via Cloudflare (token from Infisical)
-- Public ingress: Traefik `IngressRoute` CRs. Private ingress: Tailscale `Ingress` with `ingressClassName: tailscale`
+- TLS: one wildcard cert (`bapttf.com` + `*.bapttf.com`) as Traefik's default TLSStore, issued via DNS-01/Cloudflare. Public IngressRoutes use `tls: {}` (no secretName). Private ingress: Tailscale `Ingress` with `ingressClassName: tailscale`
 - ArgoCD Image Updater auto-commits image tag bumps to `main` for first-party images (`ghcr.io/bapttf/*`, `ghcr.io/rjullien/*`). Renovate opens PRs for third-party images, Helm charts, and other dependency updates (`renovate.json`)
 - Resource requests must be right-sized to actual usage -- the scheduler relies on them for multi-node placement. `system-reserved` and `kube-reserved` are configured on all nodes so allocatable reflects real available memory
 

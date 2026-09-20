@@ -13,5 +13,4 @@ spec:
         # Matches the fullnameOverride service name
         - name: couchdb-svc-couchdb
           port: 5984
-  tls: 
-     secretName: tls-certificate
+  tls: {}
