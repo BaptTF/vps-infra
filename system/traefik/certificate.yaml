@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-bapttf
+  namespace: traefik
+spec:
+  secretName: wildcard-bapttf-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "bapttf.com"
+    - "*.bapttf.com"

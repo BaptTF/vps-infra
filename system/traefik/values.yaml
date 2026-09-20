@@ -73,20 +73,6 @@ tlsStore:
     defaultCertificate:
       secretName: wildcard-bapttf-tls
 
-extraObjects:
-  - apiVersion: cert-manager.io/v1
-    kind: Certificate
-    metadata:
-      name: wildcard-bapttf
-    spec:
-      secretName: wildcard-bapttf-tls
-      issuerRef:
-        name: letsencrypt-prod
-        kind: ClusterIssuer
-      dnsNames:
-        - bapttf.com
-        - "*.bapttf.com"
-
 resources:
   requests:
     memory: "128Mi"

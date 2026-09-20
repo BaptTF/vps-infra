@@ -17,9 +17,8 @@ Cluster nodes communicate over Tailscale (WireGuard). Flannel VXLAN is used for 
 ## How apps are wired
 
 Each file in `apps/` is an ArgoCD `Application` CR pointing to either:
-1. A `system/<name>/` or `workloads/<name>/` directory (Kustomize)
+1. A `system/<name>/` or `workloads/<name>/` directory (Kustomize, including Helm inflation via `helmCharts:`)
 2. An upstream Helm chart directly (e.g., `sealed-secrets`, `infisical-operator`)
-3. Multi-source with upstream Helm chart + local values file (Traefik only)
 
 All apps auto-sync with `prune: true` and `selfHeal: true`. Every app creates its own namespace via `CreateNamespace=true` sync option.
 
@@ -43,7 +42,7 @@ kubectl create secret generic infisical-universal-auth \
 1. Create manifests in `system/<name>/` (with `kustomization.yaml` if using Kustomize/Helm) or `workloads/<name>/`
 2. Add an ArgoCD `Application` CR in `apps/<name>.yaml` -- follow an existing file as template
 3. If the service needs secrets, add an `infisical-secret.yaml` using `universalAuth` pointed at `infisical-universal-auth` in the `infisical` namespace
-4. If publicly exposed, add a Traefik `IngressRoute` on `websecure` with `tls: {}`. TLS is Traefik's default wildcard (`extraObjects` in `system/traefik/values.yaml`); do not add a per-app Certificate
+4. If publicly exposed, add a Traefik `IngressRoute` on `websecure` with `tls: {}`. TLS is the cluster default wildcard (`system/traefik/certificate.yaml`); do not add a per-app Certificate
 
 ## Commit conventions
 

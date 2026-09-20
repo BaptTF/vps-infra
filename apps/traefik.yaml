@@ -4,21 +4,15 @@ metadata:
   name: traefik
   namespace: argocd
   annotations:
-      argocd.argoproj.io/manifest-generate-paths: .
+    argocd.argoproj.io/manifest-generate-paths: .
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  sources:
-    - repoURL: https://helm.traefik.io/traefik
-      targetRevision: 41.4.0
-      chart: traefik
-      helm:
-        valueFiles:
-          - $values/system/traefik/values.yaml
-    - repoURL: https://github.com/BaptTF/vps-infra.git
-      targetRevision: main
-      ref: values
+  source:
+    repoURL: https://github.com/BaptTF/vps-infra.git
+    targetRevision: HEAD
+    path: system/traefik
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
@@ -28,3 +22,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
