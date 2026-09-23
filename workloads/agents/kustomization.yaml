@@ -4,7 +4,6 @@ namespace: openclaw
 
 resources:
   - openclaw
-  - nullclaw
   - hermes-leo
   - hermes-lya
   - hermes-lya-filebrowser
