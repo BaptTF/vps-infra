@@ -36,9 +36,19 @@ spec:
               # Setup skills directory structure for Hermes
               mkdir -p /opt/data/skills
               cd /skills-in
-              for skill in *; do
-                mkdir -p "/opt/data/skills/$skill"
-                cp "/skills-in/$skill" "/opt/data/skills/$skill/SKILL.md"
+              for entry in *; do
+                case "$entry" in
+                  *.references.*)
+                    skill="${entry%%.references.*}"
+                    ref="${entry#*.references.}"
+                    mkdir -p "/opt/data/skills/$skill/references"
+                    cp "/skills-in/$entry" "/opt/data/skills/$skill/references/$ref"
+                    ;;
+                  *)
+                    mkdir -p "/opt/data/skills/$entry"
+                    cp "/skills-in/$entry" "/opt/data/skills/$entry/SKILL.md"
+                    ;;
+                esac
               done
 
               # Ensure correct ownership (Hermes runs as UID 10000)
