@@ -79,6 +79,7 @@ configMapGenerator:
       - skill-creator=skills/skill-creator/SKILL.md
       - teaser=skills/teaser/SKILL.md
       - travel=skills/travel/SKILL.md
+      - travel.references.admin-check.md=skills/travel/references/admin-check.md
       - weather-api=skills/weather-api/SKILL.md
       - weather=skills/weather/SKILL.md
       - frontend-design=skills/frontend-design/SKILL.md
