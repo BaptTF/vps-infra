@@ -97,10 +97,10 @@ Envoyer ce message :
 ## Calendrier Google
 
 - Accès via `mcporter call mcp-gsuite.get_calendar_events` / `create_calendar_event` / `delete_calendar_event`
-- **User ID** : `example@example.com` (paramètre `__user_id__`)
+- **User ID** : `rene.jullien@gmail.com` (paramètre `__user_id__`)
 - **Pas d'update** : supprimer + recréer pour modifier un event
 - **Format summary** : `🏨 [Ville] - [Hôtel] ([N pers]) - [Prix]`
-- **Inviter Laurine** : `example@example.com` (son email Google Calendar)
+- **Inviter Laurine** : `laurine.rolland83400@gmail.com` (son email Google Calendar)
 
 ## Analyse nuisances
 

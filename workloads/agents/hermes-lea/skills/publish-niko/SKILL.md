@@ -86,7 +86,7 @@ Compose a ready-to-copy message for René to send to Niko:
 Hey Niko,
 
 I just published [DOC TITLE] to our shared repo:
-👉 https://github.com/example/REPLACE_ME/blob/main/<dest-path>
+👉 https://github.com/rjullien/genai-engineering-strategy/blob/main/<dest-path>
 
 **TL;DR:** [2-3 sentences — genuine exec summary, not fluff]
 
