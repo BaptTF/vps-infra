@@ -8,7 +8,6 @@ metadata:
 spec:
   revisionHistoryLimit: 2
   replicas: 1
-  # RWO PVC: avoid RollingUpdate stuck with a single replica.
   strategy:
     type: Recreate
   selector:
@@ -27,16 +26,23 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: seed-config
+          image: busybox:1.38.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              cfg=/home/kirocrew/.kiro/crew/config.json
+              if [ ! -f "$cfg" ]; then
+                mkdir -p /home/kirocrew/.kiro/crew
+                printf '%s\n' '{"agent":{"sandbox":"auto","sandbox_allow_unsandboxed_exec":true},"dashboard":{"url":"https://kirocrew.tail4c7c90.ts.net"}}' > "$cfg"
+              fi
+          volumeMounts:
+            - name: home
+              mountPath: /home/kirocrew
       containers:
         - name: kirocrew
-          # Bootstrap on the official pinned release until the self-managed
-          # image ghcr.io/rjullien/kirocrew-config/kirocrew is published.
-          # ImageUpdater already watches that future image (see
-          # system/argocd-image-updater/crs/kirocrew-updater.yaml); swap
-          # this imageName to the custom repo when the first calver tag lands,
-          # then let ImageUpdater rewrite tags via .argocd-source-agents.yaml.
-          # TODO(kirocrew): replace with ghcr.io/rjullien/kirocrew-config/kirocrew:<calver>
-          image: ghcr.io/kirodotdev/kirocrew:0.6.0@sha256:ba01bb1c75ea454af2b53773f39c3b38899f0d1d9ab51a0eb97001df6db27407
+          image: ghcr.io/rjullien/kirocrew-config/kirocrew:v2026.9.20
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -44,15 +50,14 @@ spec:
             capabilities:
               drop: ["ALL"]
           env:
-            # Inner userns sandbox usually fails under default container seccomp;
-            # without this, agent command execution stays fail-closed.
             - name: KIROCREW_ALLOW_UNSANDBOXED
               value: "1"
             - name: KIROCREW_PORT
               value: "5476"
             - name: KIROCREW_BIND
               value: "0.0.0.0"
-            # TODO: set KIROCREW_CORS_ORIGINS and dashboard.url to the Tailscale ingress origin
+            - name: KIROCREW_CORS_ORIGINS
+              value: "https://kirocrew.tail4c7c90.ts.net"
           ports:
             - containerPort: 5476
               name: dashboard
@@ -83,9 +88,6 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
-            # Official docs suggest ~10Gi RAM for heavy MCP/tool spikes; this
-            # cluster cannot spare that (sibling agents like hermes-leo cap at
-            # 1.5Gi). Start conservative; raise the limit only if OOMKilled.
             requests:
               cpu: "100m"
               memory: "1Gi"
