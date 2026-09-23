@@ -100,7 +100,7 @@ included:
 
 ```bash
 mcporter call mcp-gsuite create_calendar_event --args '{
-  "__user_id__": "example@example.com",
+  "__user_id__": "rene.jullien@gmail.com",
   "summary": "🏨 [Ville] - [Hôtel] ([N pers]) - [Prix]",
   "start_time": "YYYY-MM-DDTHH:MM:00",
   "end_time": "YYYY-MM-DDTHH:MM:00",
