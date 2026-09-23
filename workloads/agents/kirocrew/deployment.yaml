@@ -52,10 +52,7 @@ spec:
               value: "5476"
             - name: KIROCREW_BIND
               value: "0.0.0.0"
-            # TODO(kirocrew): set KIROCREW_CORS_ORIGINS to https://<ingress ADDRESS>
-            # after: kubectl -n openclaw get ingress kirocrew
-            # Also set dashboard.url in the PVC config to that same origin
-            # (see README.md). No public internet exposure.
+            # TODO: set KIROCREW_CORS_ORIGINS and dashboard.url to the Tailscale ingress origin
           ports:
             - containerPort: 5476
               name: dashboard
