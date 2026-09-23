@@ -1,6 +1,6 @@
 ---
 name: pool-watch
-description: Surveillance quotidienne de la piscine via caméra Ring + Home Assistant. Capture un snapshot, analyse le niveau d'eau et la couleur, envoie un rapport photo dans le groupe "CHAT_ID_PLACEHOLDER" sur Telegram.
+description: Surveillance quotidienne de la piscine via caméra Ring + Home Assistant. Capture un snapshot, analyse le niveau d'eau et la couleur, envoie un rapport photo dans le groupe "Nicole et Lea" sur Telegram.
 user-invocable: true
 ---
 
@@ -96,7 +96,7 @@ Ouvrir l'image avec `read` et analyser visuellement :
 ### 5. Envoyer le rapport
 
 ```
-message action=send channel=telegram target=CHAT_ID_PLACEHOLDER filePath=<snapshot_path>
+message action=send channel=telegram target=-5162092129 filePath=<snapshot_path>
 message="🏊 Rapport Piscine — [DATE]
 
 📷 Snapshot Ring (heure capture)
@@ -129,7 +129,7 @@ Programmer un cron pendant la durée d'absence :
 cron add job={
   name: "pool-watch-daily",
   schedule: { kind: "cron", expr: "0 12 * * *", tz: "Europe/Paris" },
-  payload: { kind: "agentTurn", message: "Exécute le skill pool-watch : capture un snapshot de la piscine via HA, analyse l'image, récupère la température et la filtration, et envoie le rapport photo + analyse dans le groupe Telegram 'CHAT_ID_PLACEHOLDER' (target=CHAT_ID_PLACEHOLDER)." },
+  payload: { kind: "agentTurn", message: "Exécute le skill pool-watch : capture un snapshot de la piscine via HA, analyse l'image, récupère la température et la filtration, et envoie le rapport photo + analyse dans le groupe Telegram 'Nicole et Lea' (target=-5162092129)." },
   sessionTarget: "isolated",
   delivery: { mode: "none" }
 }

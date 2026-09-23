@@ -173,7 +173,7 @@ curl -s "https://api.open-meteo.com/v1/forecast?latitude=35.4161&longitude=-114.
 
 ## Groupe WhatsApp
 
-USA-Vegas 2026 : `CHAT_ID_PLACEHOLDER@g.us`
+USA-Vegas 2026 : `120363407054932815@g.us`
 
 ## Workflow Complet (OBLIGATOIRE)
 
@@ -194,7 +194,7 @@ USA-Vegas 2026 : `CHAT_ID_PLACEHOLDER@g.us`
 
 ### APRÈS validation René
 
-1. **Envoyer** au groupe WhatsApp `CHAT_ID_PLACEHOLDER@g.us`
+1. **Envoyer** au groupe WhatsApp `120363407054932815@g.us`
 2. **Sauvegarder** le fichier :
    ```
    /home/node/.config/travel/trips/2026-usa-google-next/briefs/teasers/teaser-XX-YYYY-MM-DD.whatsapp.txt
