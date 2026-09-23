@@ -26,39 +26,32 @@ spec:
       serviceAccountName: hermes-leo
       initContainers:
         - name: init-config
-          image: busybox:1.38.0
+          image: alpine/git:2.54.0
           command: ["/bin/sh", "-c"]
           args:
             - |
-              # Copy config.yaml from ConfigMap into the PVC
               cp /config-template/config.yaml /opt/data/config.yaml
-
-              # Setup skills directory structure for Hermes
+              mkdir -p /tmp/ssh /opt/data/skills
+              cp /deploy-key/id_ed25519 /tmp/ssh/id_ed25519
+              chmod 600 /tmp/ssh/id_ed25519
+              printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > /tmp/ssh/known_hosts
+              export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
+              git clone --depth 1 git@github.com:BaptTF/agents-skills.git /tmp/skills-repo
+              rm -rf /opt/data/skills
               mkdir -p /opt/data/skills
-              cd /skills-in
-              for entry in *; do
-                case "$entry" in
-                  *.references.*)
-                    skill="${entry%%.references.*}"
-                    ref="${entry#*.references.}"
-                    mkdir -p "/opt/data/skills/$skill/references"
-                    cp "/skills-in/$entry" "/opt/data/skills/$skill/references/$ref"
-                    ;;
-                  *)
-                    mkdir -p "/opt/data/skills/$entry"
-                    cp "/skills-in/$entry" "/opt/data/skills/$entry/SKILL.md"
-                    ;;
-                esac
+              for dir in /tmp/skills-repo/*/; do
+                name=$(basename "$dir")
+                if [ -f "$dir/SKILL.md" ]; then
+                  cp -a "$dir" "/opt/data/skills/$name"
+                fi
               done
-
-              # Ensure correct ownership (Hermes runs as UID 10000)
               chown -R 10000:10000 /opt/data/config.yaml /opt/data/skills
           volumeMounts:
             - name: config-template
               mountPath: /config-template
               readOnly: true
-            - name: skills
-              mountPath: /skills-in
+            - name: skills-deploy-key
+              mountPath: /deploy-key
               readOnly: true
             - name: data
               mountPath: /opt/data
@@ -158,9 +151,9 @@ spec:
         - name: config-template
           configMap:
             name: hermes-leo-config
-        - name: skills
-          configMap:
-            name: hermes-leo-skills
+        - name: skills-deploy-key
+          secret:
+            secretName: agents-skills-deploy-key
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-leo-data

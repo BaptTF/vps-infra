@@ -27,7 +27,7 @@ spec:
     spec:
       initContainers:
         - name: init-config
-          image: busybox:1.38.0
+          image: alpine/git:2.54.0
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -42,12 +42,19 @@ spec:
               echo -e "github.com:\n  oauth_token: $GH_TOKEN\n  user: Louclaw\n  git_protocol: https" > /nullclaw-data/.config/gh/hosts.yml
               chown -R 65534:65534 /nullclaw-data/.config/gh
               chmod 600 /nullclaw-data/.config/gh/hosts.yml
-              # Copy skills into workspace (one SKILL.md per directory)
+              mkdir -p /tmp/ssh
+              cp /deploy-key/id_ed25519 /tmp/ssh/id_ed25519
+              chmod 600 /tmp/ssh/id_ed25519
+              printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > /tmp/ssh/known_hosts
+              export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
+              git clone --depth 1 git@github.com:BaptTF/agents-skills.git /tmp/skills-repo
+              rm -rf /nullclaw-data/workspace/skills
               mkdir -p /nullclaw-data/workspace/skills
-              cd /skills-in
-              for skill in *; do
-                mkdir -p "/nullclaw-data/workspace/skills/$skill"
-                cp "/skills-in/$skill" "/nullclaw-data/workspace/skills/$skill/SKILL.md"
+              for dir in /tmp/skills-repo/*/; do
+                name=$(basename "$dir")
+                if [ -f "$dir/SKILL.md" ]; then
+                  cp -a "$dir" "/nullclaw-data/workspace/skills/$name"
+                fi
               done
               chown -R 65534:65534 /nullclaw-data/workspace/skills
           env:
@@ -81,8 +88,9 @@ spec:
               readOnly: true
             - name: data
               mountPath: /nullclaw-data
-            - name: skills
-              mountPath: /skills-in
+            - name: skills-deploy-key
+              mountPath: /deploy-key
+              readOnly: true
       containers:
         - name: nullclaw
           image: ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom
@@ -159,6 +167,6 @@ spec:
           persistentVolumeClaim:
             claimName: openclaw-home-pvc
             readOnly: true
-        - name: skills
-          configMap:
-            name: nullclaw-lou-skills
+        - name: skills-deploy-key
+          secret:
+            secretName: agents-skills-deploy-key

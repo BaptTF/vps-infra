@@ -27,30 +27,32 @@ spec:
     spec:
       initContainers:
         - name: init-config
-          image: busybox:1.38.0
+          image: alpine/git:2.54.0
           command: ["/bin/sh", "-c"]
           args:
             - |
-              # Ensure PVC is writable by nobody (65534)
               chown -R 65534:65534 /nullclaw-data
-              # Inject secrets into config.json
               sed -e 's/\${TELEGRAM_BOT_TOKEN}/'"$TELEGRAM_BOT_TOKEN"'/g' \
                   -e 's/\${WHATSMEOW_BRIDGE_TOKEN}/'"$WHATSMEOW_BRIDGE_TOKEN"'/g' \
                 /config-template/config.json > /config/config.json
-
-              # Setup GitHub CLI auth (HTTPS, no SSH needed)
               mkdir -p /nullclaw-data/.config/gh
               echo -e "github.com:\n  oauth_token: $GH_TOKEN\n  user: rjullien\n  git_protocol: https" \
                 > /nullclaw-data/.config/gh/hosts.yml
               chown -R 65534:65534 /nullclaw-data/.config/gh
               chmod 600 /nullclaw-data/.config/gh/hosts.yml
-
-              # Copy skills into workspace (one SKILL.md per directory)
+              mkdir -p /tmp/ssh
+              cp /deploy-key/id_ed25519 /tmp/ssh/id_ed25519
+              chmod 600 /tmp/ssh/id_ed25519
+              printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > /tmp/ssh/known_hosts
+              export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
+              git clone --depth 1 git@github.com:BaptTF/agents-skills.git /tmp/skills-repo
+              rm -rf /nullclaw-data/workspace/skills
               mkdir -p /nullclaw-data/workspace/skills
-              cd /skills-in
-              for skill in *; do
-                mkdir -p "/nullclaw-data/workspace/skills/$skill"
-                cp "/skills-in/$skill" "/nullclaw-data/workspace/skills/$skill/SKILL.md"
+              for dir in /tmp/skills-repo/*/; do
+                name=$(basename "$dir")
+                if [ -f "$dir/SKILL.md" ]; then
+                  cp -a "$dir" "/nullclaw-data/workspace/skills/$name"
+                fi
               done
               chown -R 65534:65534 /nullclaw-data/workspace/skills
           env:
@@ -75,8 +77,8 @@ spec:
               mountPath: /config-template
             - name: config
               mountPath: /config
-            - name: skills
-              mountPath: /skills-in
+            - name: skills-deploy-key
+              mountPath: /deploy-key
               readOnly: true
             - name: data
               mountPath: /nullclaw-data
@@ -145,9 +147,9 @@ spec:
             name: nullclaw-leo-config
         - name: config
           emptyDir: {}
-        - name: skills
-          configMap:
-            name: nullclaw-leo-skills
+        - name: skills-deploy-key
+          secret:
+            secretName: agents-skills-deploy-key
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-leo-data
