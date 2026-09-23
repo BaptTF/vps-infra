@@ -85,12 +85,6 @@ spec:
                 secretKeyRef:
                   name: hermes-lea-secret
                   key: API_SERVER_KEY
-            - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: hermes-lea-secret-bridge
-                  key: WHATSMEOW_BRIDGE_TOKEN
-                  optional: true
             - name: PATH
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: CAMOFOX_URL
