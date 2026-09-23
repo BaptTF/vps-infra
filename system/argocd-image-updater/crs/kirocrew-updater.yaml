@@ -7,15 +7,10 @@ spec:
   applicationRefs:
     - namePattern: agents
       images:
-        # Watches the future self-managed image. The Deployment currently pins
-        # ghcr.io/kirodotdev/kirocrew:0.6.0@sha256:… so the pod can start before
-        # this registry path exists. After the first calver publish, change the
-        # Deployment image to this imageName so write-back can take effect.
         - alias: kirocrew
           imageName: ghcr.io/rjullien/kirocrew-config/kirocrew
           commonUpdateSettings:
             updateStrategy: newest-build
-            # Match hermes-leo-style calver tags (e.g. v2026.9.15 or 2026.9.15).
             allowTags: "regexp:^v?[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,2}(\\.[0-9]+)?$"
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
