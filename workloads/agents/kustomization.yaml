@@ -5,6 +5,7 @@ namespace: openclaw
 resources:
   - openclaw
   - hermes-leo
+  - hermes-lea
   - hermes-lya
   - hermes-lya-filebrowser
   - kirocrew

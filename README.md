@@ -540,6 +540,7 @@ OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifr
 |---|---|---|
 | Default (Nullclaw, curl, Open WebUI, any OpenAI-compat app) | `ses_bifrost_default_YYYYMMDD` | `workloads/agents/bifrost/bifrost_config.json` → `providers.opencode-go.network_config.extra_headers.x-opencode-session` |
 | Hermes Leo | `ses_hermesleo_YYYYMMDD` | `workloads/agents/hermes-leo/config.yaml` → `model.extra_headers` and `auxiliary.vision.extra_headers` (`x-bf-eh-x-opencode-session`) |
+| Hermes Lea | `ses_hermeslea_YYYYMMDD` | `workloads/agents/hermes-lea/config.yaml` (same keys) |
 | Hermes Lya | `ses_hermeslya_YYYYMMDD` | `workloads/agents/hermes-lya/config.yaml` (same keys) |
 
 `x-bf-eh-x-opencode-session` from a client **overrides** the Bifrost default. A bare `x-opencode-session` from a client is dropped; that caller falls back to the default. Never reuse a dead ID (`ses_hermesleo` is pinned to a dead `blackbox-dsv4flash` upstream).
