@@ -70,7 +70,6 @@ configMapGenerator:
       - infra-diag=skills/infra-diag/SKILL.md
       - nicole-digest=skills/nicole-digest/SKILL.md
       - osm=skills/osm/SKILL.md
-      - perplexity=skills/perplexity/SKILL.md
       - pool-watch=skills/pool-watch/SKILL.md
       - publish-niko=skills/publish-niko/SKILL.md
       - sequential-thinking=skills/sequential-thinking/SKILL.md
