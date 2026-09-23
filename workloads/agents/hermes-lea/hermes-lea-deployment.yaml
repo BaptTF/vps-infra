@@ -36,7 +36,7 @@ spec:
               chmod 600 /tmp/ssh/id_ed25519
               printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > /tmp/ssh/known_hosts
               export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
-              git clone --depth 1 git@github.com:BaptTF/hermes-lea-skills.git /tmp/skills-repo
+              git clone --depth 1 git@github.com:BaptTF/agents-skills.git /tmp/skills-repo
               rm -rf /opt/data/skills
               mkdir -p /opt/data/skills
               for dir in /tmp/skills-repo/*/; do
@@ -147,7 +147,7 @@ spec:
             name: hermes-lea-config
         - name: skills-deploy-key
           secret:
-            secretName: hermes-lea-skills-deploy-key
+            secretName: agents-skills-deploy-key
         - name: data
           persistentVolumeClaim:
             claimName: hermes-lea-data
