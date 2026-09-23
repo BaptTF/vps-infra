@@ -15,7 +15,7 @@ Quand l'utilisateur invoque `/travel` ou `/travel:xxx`, exécuter l'action corre
 **Toujours** répondre avec un menu à boutons inline Telegram + résumé rapide :
 
 ```
-message action=send channel=telegram target=CHAT_ID_PLACEHOLDER message="🗺️ **Travel — USA 2026**\nJ-XX avant le départ !\n\nChoisis une commande :" buttons=[[{"callback_data":"/travel:hotels","text":"🏨 Hotels"},{"callback_data":"/travel:route","text":"🛣️ Route"}],[{"callback_data":"/travel:restaurants","text":"🍽️ Restaurants"},{"callback_data":"/travel:bookings","text":"📋 Bookings"}],[{"callback_data":"/travel:calendar","text":"📅 Calendar"},{"callback_data":"/travel:brief","text":"📝 Brief"}],[{"callback_data":"/travel:daily-brief","text":"📋 Brief Daily"},{"callback_data":"/travel:teaser","text":"🎯 Teaser"}],[{"callback_data":"/travel:admin","text":"🛂 Admin"},{"callback_data":"/travel:validate","text":"✅ Validate"}],[{"callback_data":"/travel:help","text":"❓ Help"}]]
+message action=send channel=telegram target=974020023 message="🗺️ **Travel — USA 2026**\nJ-XX avant le départ !\n\nChoisis une commande :" buttons=[[{"callback_data":"/travel:hotels","text":"🏨 Hotels"},{"callback_data":"/travel:route","text":"🛣️ Route"}],[{"callback_data":"/travel:restaurants","text":"🍽️ Restaurants"},{"callback_data":"/travel:bookings","text":"📋 Bookings"}],[{"callback_data":"/travel:calendar","text":"📅 Calendar"},{"callback_data":"/travel:brief","text":"📝 Brief"}],[{"callback_data":"/travel:daily-brief","text":"📋 Brief Daily"},{"callback_data":"/travel:teaser","text":"🎯 Teaser"}],[{"callback_data":"/travel:admin","text":"🛂 Admin"},{"callback_data":"/travel:validate","text":"✅ Validate"}],[{"callback_data":"/travel:help","text":"❓ Help"}]]
 ```
 
 Calculer J-XX depuis la date du jour jusqu'au 17 avril 2026. Puis répondre NO_REPLY (le message tool envoie déjà la réponse).
@@ -91,7 +91,7 @@ Envoyer ce message :
 - **Budget** : max 200€/nuit groupe, 65€/pers resto
 - **Pas de chaînes** : Éviter Applebee's, Olive Garden, etc.
 - **Max 4h route/jour** et 1 parc majeur/jour
-- **WhatsApp groupe** : USA-Vegas 2026 (`CHAT_ID_PLACEHOLDER@g.us`)
+- **WhatsApp groupe** : USA-Vegas 2026 (`120363407054932815@g.us`)
 - **Git** : après toute modification → `cd /home/node/.config/travel && git add -A && git commit -m "msg" && git push`
 
 ## Calendrier Google

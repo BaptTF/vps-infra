@@ -83,7 +83,7 @@ Bonne soirée ! 😘
 Envoyer en DM à Nicole (pas dans un groupe) :
 
 ```
-message action=send channel=whatsapp target="CHAT_ID_PLACEHOLDER@s.whatsapp.net" message="[digest]"
+message action=send channel=whatsapp target="33662809538@s.whatsapp.net" message="[digest]"
 ```
 
 **⚠️ TIMEZONE :** Nicole est en Europe/Paris. Le digest part à ~19h heure française (18h UTC en hiver, 17h UTC en été). Ne JAMAIS envoyer entre 22h et 8h heure de Nice.
