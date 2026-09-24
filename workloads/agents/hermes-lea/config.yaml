@@ -17,9 +17,6 @@ compression:
 memory:
   memory_enabled: true
   user_profile_enabled: true
-telegram:
-  require_mention: false
-
 delegation:
   provider: custom
   model: opencode-go/mimo-v2.6-pro
