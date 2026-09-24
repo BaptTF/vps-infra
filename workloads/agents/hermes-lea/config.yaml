@@ -1,11 +1,9 @@
 model:
   provider: custom
-  default: opencode-go/mimo-v2.6-pro
+  default: bedrock/us.anthropic.claude-opus-5-5
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
   api_key: dummy
   api_mode: chat_completions
-  extra_headers:
-    x-bf-eh-x-opencode-session: ses_hermeslea_20260923
 approvals:
   mode: false
 terminal:
