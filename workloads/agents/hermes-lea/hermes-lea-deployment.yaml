@@ -30,22 +30,33 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              set -e
               cp /config-template/config.yaml /opt/data/config.yaml
               mkdir -p /tmp/ssh /opt/data/skills
               cp /deploy-key/id_ed25519 /tmp/ssh/id_ed25519
               chmod 600 /tmp/ssh/id_ed25519
               printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > /tmp/ssh/known_hosts
               export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
-              git clone --depth 1 git@github.com:BaptTF/agents-skills.git /tmp/skills-repo
-              rm -rf /opt/data/skills
-              mkdir -p /opt/data/skills
-              for dir in /tmp/skills-repo/*/; do
-                name=$(basename "$dir")
-                if [ -f "$dir/SKILL.md" ]; then
-                  cp -a "$dir" "/opt/data/skills/$name"
+              cd /opt/data/skills
+              if [ ! -d .git ]; then
+                if [ -z "$(find . -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+                  git clone --depth 1 --branch main git@github.com:BaptTF/agents-skills.git .
+                else
+                  git init -b main
+                  git remote add origin git@github.com:BaptTF/agents-skills.git
+                  git fetch --depth 1 origin main
+                  git reset --mixed FETCH_HEAD
                 fi
-              done
-              chown -R 10000:10000 /opt/data/config.yaml /opt/data/skills
+                chown -R 10000:10000 /opt/data/skills
+              else
+                git fetch --depth 1 origin main
+                if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
+                  if git merge --ff-only FETCH_HEAD; then
+                    chown -R 10000:10000 /opt/data/skills
+                  fi
+                fi
+              fi
+              chown 10000:10000 /opt/data/config.yaml
           volumeMounts:
             - name: config-template
               mountPath: /config-template
