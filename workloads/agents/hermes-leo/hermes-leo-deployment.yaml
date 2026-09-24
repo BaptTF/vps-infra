@@ -37,6 +37,7 @@ spec:
               chmod 600 /tmp/ssh/id_ed25519
               printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > /tmp/ssh/known_hosts
               export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
+              git config --global --add safe.directory /opt/data/skills
               cd /opt/data/skills
               if [ ! -d .git ]; then
                 if [ -z "$(find . -mindepth 1 -maxdepth 1 -print -quit)" ]; then
