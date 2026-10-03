@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: camille-recettes
+  namespace: camille-recettes
+  labels:
+    app: camille-recettes
+spec:
+  selector:
+    app: camille-recettes
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
