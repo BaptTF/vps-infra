@@ -73,6 +73,9 @@ access_control:
     - domain: hermes-*.bapttf.com
       policy: one_factor
       subject: "group:family"
+    - domain: camille.bapttf.com
+      policy: one_factor
+      subject: "group:family"
     - domain: "*.bapttf.com"
       policy: one_factor
       subject: "group:lldap_admin"

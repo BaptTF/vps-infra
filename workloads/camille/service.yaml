@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: camille
+  namespace: camille
+  labels:
+    app: camille
+spec:
+  selector:
+    app: camille
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: http
+      name: http

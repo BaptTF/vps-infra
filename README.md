@@ -298,6 +298,15 @@ When the original worker came back `Ready`:
 | OpenWebUI | https://openwebui.bapttf.com | Public |
 | MinIO | https://minio (Tailscale) | Tailscale VPN |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
+| Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
+
+---
+
+## Camille (camille.bapttf.com)
+
+Camille's site. Static Web Server serves the current content and pulls it every 60s. The files come from the `site` branch of `rjullien/camille-potager`, which GitHub Actions rebuilds on push to `main`. Another site for Camille later is a path on this same host (`camille.bapttf.com/<path>`), not a new hostname.
+
+Deploy key `k3s-camille.bapttf.com` (read-only). Private key in Infisical, project `infrastructure`, environment `prod`, path `/camille`, key `id_ed25519`. Authelia allows `group:family`.
 
 ---
 

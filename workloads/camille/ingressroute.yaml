@@ -1,0 +1,19 @@
+# Whole host for now. A later site is another route with PathPrefix on this host.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: camille
+  namespace: camille
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`camille.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: camille
+          port: 80
+  tls: {}
