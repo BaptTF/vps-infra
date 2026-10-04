@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: camofox
+  labels:
+    app: camofox
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - camofox
+  defaultBackend:
+    service:
+      name: camofox
+      port:
+        number: 9377

@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - camofox-deployment.yaml
   - camofox-service.yaml
+  - tailscale-ingress.yaml
