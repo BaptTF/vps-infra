@@ -3,9 +3,11 @@ kind: Kustomization
 namespace: openclaw
 
 resources:
+  - agents-rbac
   - openclaw
   - hermes-leo
   - hermes-lea
+  - grokbot
   - hermes-lya
   - hermes-lya-filebrowser
   - kirocrew
