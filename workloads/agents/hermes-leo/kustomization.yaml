@@ -3,7 +3,6 @@ kind: Kustomization
 
 resources:
   - serviceaccount.yaml
-  - clusterrole.yaml
   - clusterrolebinding.yaml
   - infisical-secret.yaml
   - hermes-leo-pvc.yaml
