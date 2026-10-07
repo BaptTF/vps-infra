@@ -5,9 +5,7 @@ namespace: openclaw
 resources:
   - agents-rbac
   - openclaw
-  - hermes-shared
-  - hermes-leo
-  - hermes-lea
+  - hermes
   - grokbot
   - hermes-lya
   - hermes-lya-filebrowser
