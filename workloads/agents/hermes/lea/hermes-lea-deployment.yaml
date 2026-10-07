@@ -27,44 +27,16 @@ spec:
       initContainers:
         - name: init-config
           image: alpine/git:2.54.0
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              set -e
-              cp /config-template/config.yaml /opt/data/config.yaml
-              mkdir -p /tmp/ssh /opt/data/skills
-              cp /deploy-key/id_ed25519 /tmp/ssh/id_ed25519
-              chmod 600 /tmp/ssh/id_ed25519
-              printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > /tmp/ssh/known_hosts
-              export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
-              git config --global --add safe.directory /opt/data/skills
-              cd /opt/data/skills
-              if [ ! -d .git ]; then
-                if [ -z "$(find . -mindepth 1 -maxdepth 1 -print -quit)" ]; then
-                  git clone --depth 1 --branch main git@github.com:BaptTF/agents-skills.git .
-                else
-                  git init -b main
-                  git remote add origin git@github.com:BaptTF/agents-skills.git
-                  git fetch --depth 1 origin main
-                  git reset --mixed FETCH_HEAD
-                fi
-                chown -R 10000:10000 /opt/data/skills
-              else
-                git remote get-url origin >/dev/null 2>&1 && git remote set-url origin git@github.com:BaptTF/agents-skills.git || git remote add origin git@github.com:BaptTF/agents-skills.git
-                git fetch --depth 1 origin main
-                if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
-                  if git merge --ff-only FETCH_HEAD; then
-                    chown -R 10000:10000 /opt/data/skills
-                  fi
-                fi
-              fi
-              chown 10000:10000 /opt/data/config.yaml
+          command: ["/bin/sh", "/scripts/init-skills.sh"]
           volumeMounts:
             - name: config-template
               mountPath: /config-template
               readOnly: true
             - name: skills-deploy-key
               mountPath: /deploy-key
+              readOnly: true
+            - name: init-skills
+              mountPath: /scripts
               readOnly: true
             - name: data
               mountPath: /opt/data
@@ -160,6 +132,10 @@ spec:
         - name: skills-deploy-key
           secret:
             secretName: agents-skills-deploy-key
+            defaultMode: 0400
+        - name: init-skills
+          configMap:
+            name: hermes-init-skills
         - name: data
           persistentVolumeClaim:
             claimName: hermes-lea-data
