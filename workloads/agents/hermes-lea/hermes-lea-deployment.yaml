@@ -11,7 +11,10 @@ spec:
   revisionHistoryLimit: 2
   replicas: 1
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: hermes-lea
@@ -47,6 +50,7 @@ spec:
                 fi
                 chown -R 10000:10000 /opt/data/skills
               else
+                git remote get-url origin >/dev/null 2>&1 && git remote set-url origin git@github.com:BaptTF/agents-skills.git || git remote add origin git@github.com:BaptTF/agents-skills.git
                 git fetch --depth 1 origin main
                 if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
                   if git merge --ff-only FETCH_HEAD; then
@@ -69,6 +73,8 @@ spec:
           image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.9.18
           args: ["gateway", "run"]
           env:
+            - name: HERMES_GATEWAY_LOCK_DIR
+              value: /tmp/hermes-gateway-locks
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
