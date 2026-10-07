@@ -39,6 +39,11 @@ spec:
               export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ssh/known_hosts -o IdentitiesOnly=yes"
               git config --global --add safe.directory /opt/data/skills
               cd /opt/data/skills
+              # Orphan .git (no usable origin) CrashLoops fetch forever; wipe .git only and re-bootstrap.
+              if [ -d .git ] && ! git remote get-url origin >/dev/null 2>&1; then
+                echo "skills: incomplete .git (no usable origin); wiping .git to re-bootstrap"
+                rm -rf .git
+              fi
               if [ ! -d .git ]; then
                 if [ -z "$(find . -mindepth 1 -maxdepth 1 -print -quit)" ]; then
                   git clone --depth 1 --branch main git@github.com:BaptTF/agents-skills.git .
