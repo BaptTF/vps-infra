@@ -48,6 +48,8 @@ spec:
             - secretRef:
                 name: nullclaw-leo-secret
           env:
+            - name: HERMES_GATEWAY_LOCK_DIR
+              value: /tmp/hermes-gateway-locks
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
