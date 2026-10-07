@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Single source for the skills init script used by hermes-leo and hermes-lea.
+configMapGenerator:
+  - name: hermes-init-skills
+    files:
+      - init-skills.sh
