@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: fabron
+  namespace: fabron
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`fabron.bapttf.com`)
+      kind: Rule
+      services:
+        - name: fabron
+          port: 80
+  tls:
+    secretName: tls-certificate

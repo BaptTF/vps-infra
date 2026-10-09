@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fabron-nginx
+  namespace: fabron
+  labels:
+    app: fabron
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+
+        # Local probe — do not proxy to GitHub Pages
+        location = /healthz {
+            access_log off;
+            default_type text/plain;
+            return 200 'ok';
+        }
+
+        # Serve GitHub project page as site root:
+        # fabron.bapttf.com/ → https://rjullien.github.io/fabron-site/
+        location / {
+            resolver 1.1.1.1 8.8.8.8 valid=300s ipv6=off;
+            resolver_timeout 5s;
+            set $gh_host rjullien.github.io;
+            proxy_pass https://$gh_host/fabron-site$request_uri;
+
+            proxy_http_version 1.1;
+            proxy_ssl_server_name on;
+            proxy_ssl_protocols TLSv1.2 TLSv1.3;
+            proxy_set_header Host rjullien.github.io;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Connection "";
+
+            # Rewrite absolute GitHub Pages redirects back onto this host
+            proxy_redirect https://rjullien.github.io/fabron-site/ /;
+            proxy_redirect https://rjullien.github.io/fabron-site /;
+            proxy_redirect http://rjullien.github.io/fabron-site/ /;
+            proxy_redirect http://rjullien.github.io/fabron-site /;
+        }
+    }
