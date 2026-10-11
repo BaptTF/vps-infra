@@ -11,6 +11,8 @@ spec:
           imageName: ghcr.io/rjullien/hermes-lya-config
           commonUpdateSettings:
             updateStrategy: newest-build
+            # Only calver release tags; excludes sha-*, sha256-* (attestations), latest, vYYYY.M
+            allowTags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
