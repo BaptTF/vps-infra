@@ -11,6 +11,11 @@ spec:
           imageName: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom
           commonUpdateSettings:
             updateStrategy: newest-build
+            # Comme hermes-lya-updater : ne déployer QUE les images de release
+            # (calver vX.Y.Z[.W]). Sans ce filtre, chaque merge sur main pouvant
+            # publier un tag sha-*, l'updater déployait ces images hors release
+            # (ex. sha-14412e8 au lieu d'une release).
+            allowTags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
