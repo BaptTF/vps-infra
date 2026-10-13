@@ -81,7 +81,6 @@ resources:
     memory: "256Mi"
     cpu: "500m"
 
-# Haute dispo : 1 pod par nœud (Contabo + Hetzner). Pas de PVC (certs via cert-manager).
 deployment:
   replicas: 2
 
