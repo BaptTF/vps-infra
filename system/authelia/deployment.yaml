@@ -16,6 +16,9 @@ spec:
         app: authelia
     spec:
       enableServiceLinks: false
+      # Co-localisé avec Postgres (CNPG) et CoreDNS pour éviter ~37 ms RTT inter-nœuds
+      nodeSelector:
+        kubernetes.io/hostname: debian-16gb-hel1-2
       containers:
         - name: authelia
           image: authelia/authelia:4.39.28
