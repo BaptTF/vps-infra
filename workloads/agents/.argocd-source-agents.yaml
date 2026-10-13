@@ -3,5 +3,5 @@ kustomize:
   - ghcr.io/bapttf/openclaw-lea-config:sha-b576e24598385425dd03e691a44dc997481862fa
   - ghcr.io/bapttf/nullclaw-lou-config/nullclaw-custom:main-0571d53
   - ghcr.io/rjullien/bifrost-weight-sidecar:main
-  - ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:sha-14412e8
+  - ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.10.12.2
   - ghcr.io/rjullien/hermes-lya-config:v2026.10.12.2
