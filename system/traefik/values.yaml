@@ -80,3 +80,20 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "500m"
+
+# Haute dispo : 1 pod par nœud (Contabo + Hetzner). Pas de PVC (certs via cert-manager).
+deployment:
+  replicas: 2
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: '{{ template "traefik.name" . }}'
+        app.kubernetes.io/instance: '{{ .Release.Name }}-{{ include "traefik.namespace" . }}'
+
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
