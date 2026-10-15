@@ -92,6 +92,8 @@ topologySpreadConstraints:
       matchLabels:
         app.kubernetes.io/name: '{{ template "traefik.name" . }}'
         app.kubernetes.io/instance: '{{ .Release.Name }}-{{ include "traefik.namespace" . }}'
+    matchLabelKeys:
+      - pod-template-hash
 
 podDisruptionBudget:
   enabled: true
