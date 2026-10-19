@@ -1,6 +1,6 @@
 model:
   provider: custom
-  default: opencode-go/mimo-v2.6-pro
+  default: opencode-go/deepseek-v4.1-flash
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
   api_key: dummy
   api_mode: chat_completions
@@ -27,11 +27,11 @@ telegram:
 
 delegation:
   provider: custom
-  model: opencode-go/mimo-v2.6-pro
+  model: opencode-go/deepseek-v4.1-flash
 auxiliary:
   vision:
     provider: custom
-    model: opencode-go/deepseek-v4-flash-vision-exp
+    model: opencode-go/mimo-v2.6-flash
     base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
     api_key: dummy
     api_mode: chat_completions
