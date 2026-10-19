@@ -23,12 +23,10 @@ delegation:
 auxiliary:
   vision:
     provider: custom
-    model: opencode-go/deepseek-v4-flash-vision-exp
+    model: bedrock/us.anthropic.claude-opus-5-5
     base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
     api_key: dummy
     api_mode: chat_completions
-    extra_headers:
-      x-bf-eh-x-opencode-session: ses_hermeslea_20260923
 display:
   tool_progress: all
 agent:
