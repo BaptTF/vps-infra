@@ -58,6 +58,11 @@ spec:
               value: "0.0.0.0"
             - name: KIROCREW_CORS_ORIGINS
               value: "https://kirocrew.tail4c7c90.ts.net"
+            - name: KIRO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kiro-secret
+                  key: KIRO_API_KEY
           ports:
             - containerPort: 5476
               name: dashboard

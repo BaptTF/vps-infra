@@ -6,3 +6,4 @@ resources:
   - deployment.yaml
   - service.yaml
   - tailscale-ingress.yaml
+  - infisical-secret.yaml 
