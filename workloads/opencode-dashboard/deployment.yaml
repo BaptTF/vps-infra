@@ -56,6 +56,12 @@ spec:
                   name: opencode-dashboard-secret-devin
                   key: DEVIN_API_KEY
                   optional: true
+            - name: CURSOR_REFRESH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: opencode-dashboard-secret-cursor
+                  key: CURSOR_REFRESH_TOKEN
+                  optional: true
           livenessProbe:
             httpGet:
               path: /health
