@@ -120,6 +120,18 @@
           }
         ]
       }
+    ],
+    "routing_rules": [
+      {
+        "id": "deepseek-flash-fallback",
+        "name": "deepseek-v4.1-flash -> glm-5.3-flash -> mimo-v2.6-flash",
+        "enabled": true,
+        "cel_expression": "provider == \"opencode-go\" && model.endsWith(\"deepseek-v4.1-flash\")",
+        "targets": [{ "weight": 1 }],
+        "fallbacks": ["opencode-go/glm-5.3-flash", "opencode-go/mimo-v2.6-flash"],
+        "scope": "global",
+        "priority": 0
+      }
     ]
   }
 }
