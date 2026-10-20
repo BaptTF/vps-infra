@@ -59,6 +59,14 @@
       "enabled": false
     },
     {
+      "description": "opencode-usage-tracker: track the mutable :main tag pinned as tag@digest; Renovate opens a PR for each new :main build (replaces ArgoCD Image Updater for this image)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/rjullien/opencode-usage-tracker"],
+      "enabled": true,
+      "pinDigests": true,
+      "minimumReleaseAge": "0 days"
+    },
+    {
       "description": "LLDAP: stay on alpine-rootless semver tags (ignore date-based tags)",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/lldap/lldap"],

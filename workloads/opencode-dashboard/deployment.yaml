@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: opencode-dashboard
-          image: ghcr.io/rjullien/opencode-usage-tracker:main
+          image: ghcr.io/rjullien/opencode-usage-tracker:main@sha256:8d33c7c0cc379d3fd1ff19ebce7a326acdb68ddc5988e369b95aa214f899ac21
           ports:
             - containerPort: 8080
               name: http

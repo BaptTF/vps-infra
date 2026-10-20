@@ -1,3 +1,0 @@
-kustomize:
-  images:
-  - ghcr.io/rjullien/opencode-usage-tracker:main
