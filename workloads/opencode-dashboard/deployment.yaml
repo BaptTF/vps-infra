@@ -56,11 +56,11 @@ spec:
                   name: opencode-dashboard-secret-devin
                   key: DEVIN_API_KEY
                   optional: true
-            - name: CURSOR_REFRESH_TOKEN
+            - name: CURSOR_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: opencode-dashboard-secret-cursor
-                  key: CURSOR_REFRESH_TOKEN
+                  key: CURSOR_API_KEY
                   optional: true
           livenessProbe:
             httpGet:
