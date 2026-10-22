@@ -1,0 +1,62 @@
+# Tailscale egress Services for off-cluster scrape targets (same pattern as
+# workloads/agents/openclaw/egress-tailscale.yaml). The operator rewrites
+# spec.externalName, which apps/monitoring.yaml ignores.
+apiVersion: v1
+kind: Service
+metadata:
+  name: ha-home
+  namespace: monitoring
+  annotations:
+    tailscale.com/tailnet-fqdn: homeassistant.tail4c7c90.ts.net
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: http
+      port: 8123
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ha-cam
+  namespace: monitoring
+  annotations:
+    tailscale.com/tailnet-fqdn: homeassistant-cam.tail4c7c90.ts.net
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: http
+      port: 8123
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ha-eyg
+  namespace: monitoring
+  annotations:
+    tailscale.com/tailnet-fqdn: homeassistant-eyg.tail4c7c90.ts.net
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: http
+      port: 8123
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nas-snmp
+  namespace: monitoring
+  annotations:
+    tailscale.com/tailnet-ip: "100.75.160.28"
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: snmp
+      port: 161
+      protocol: UDP

@@ -119,11 +119,7 @@ spec:
       labels:
         app: snmp-exporter
     spec:
-      # UDP to the NAS goes through the node's Tailscale interface.
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
-      nodeSelector:
-        kubernetes.io/hostname: vmi2735515.contaboserver.net
+      # The NAS is reached through the nas-snmp Tailscale egress Service.
       initContainers:
         - name: render-config
           image: busybox:1.38.0
