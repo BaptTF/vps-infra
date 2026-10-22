@@ -115,9 +115,9 @@ grafana:
   resources:
     requests:
       cpu: 25m
-      memory: 100Mi
+      memory: 192Mi
     limits:
-      memory: 256Mi
+      memory: 512Mi
   sidecar:
     resources:
       requests:
