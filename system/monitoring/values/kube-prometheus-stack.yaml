@@ -25,6 +25,9 @@ prometheus:
       kubernetes.io/hostname: vmi2735515.contaboserver.net
     secrets:
       - monitoring-scrape-auth
+    # ServiceMonitors from any namespace must not read files (mounted tokens).
+    arbitraryFSAccessThroughSMs:
+      deny: true
     serviceMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelector: {}
     serviceMonitorNamespaceSelector: {}
