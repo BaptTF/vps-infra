@@ -11,6 +11,10 @@ spec:
           imageName: ghcr.io/rjullien/opencode-usage-tracker
           commonUpdateSettings:
             updateStrategy: newest-build
+            # Uniquement les tags sha court (7 hex) poussés par le CI. Sans ce filtre,
+            # newest-build peut écrire le tag flottant "main" (observé le 8 oct. 2026) :
+            # ArgoCD ne voit alors aucun diff et le pod reste sur une image périmée.
+            allowTags: "regexp:^[0-9a-f]{7}$"
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
