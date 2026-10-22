@@ -20,6 +20,8 @@ loki:
           period: 24h
   limits_config:
     retention_period: 336h
+    # No delete API: logs only expire through retention.
+    deletion_mode: disabled
   compactor:
     working_directory: /var/loki/compactor
     compaction_interval: 10m
@@ -68,3 +70,8 @@ monitoring:
     enabled: false
     grafanaAgent:
       installOperator: false
+
+# The rules sidecar is unused and its ClusterRole would read every Secret.
+sidecar:
+  rules:
+    enabled: false

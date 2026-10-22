@@ -287,7 +287,6 @@ When the original worker came back `Ready`:
 | Grafana | https://grafana (Tailscale) | Tailscale VPN |
 | Prometheus | https://prometheus (Tailscale) | Tailscale VPN |
 | Alertmanager | https://alertmanager (Tailscale) | Tailscale VPN |
-| Loki | https://loki (Tailscale) | Tailscale VPN |
 | Vaultwarden | https://vault.bapttf.com | Public |
 | CouchDB (Obsidian LiveSync) | https://obsidian-livesync.bapttf.com | Public |
 | Meilisearch | https://meilisearch.bapttf.com | Public |
@@ -312,8 +311,8 @@ Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because thei
 Tailscale is the only access path. The SRE agent (service account `grokbot`) can read the monitoring CRDs and call:
 
 - Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`
-- Alertmanager: `GET https://alertmanager/api/v2/alerts`
-- Loki: `GET https://loki/loki/api/v1/query_range`
+- Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences
+- Loki: no Tailscale ingress. Query logs through Grafana (Explore, Loki datasource). Loki's delete API is disabled; logs only expire through the 14-day retention.
 
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That is what wakes the SRE agent. `Watchdog` (always firing) and `InfoInhibitor` are dropped and never sent, so they do not spend tokens. A real alert that stays firing is repeated every 4 hours.
 
