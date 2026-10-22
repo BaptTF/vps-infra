@@ -6,6 +6,7 @@ resources:
   - infisical-secret.yaml
   - grafana-tailscale-ingress.yaml
   - tailscale-ingress.yaml
+  - tailscale-egress.yaml
   - grafana-datasource-loki.yaml
   - prometheusrules.yaml
   - servicemonitors.yaml

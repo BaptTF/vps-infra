@@ -18,10 +18,9 @@ prometheus:
     retention: 30d
     retentionSize: 18GB
     scrapeInterval: 30s
-    # Tailscale routes live on the node. hostNetwork lets Prometheus reach the
-    # Home Assistants. The chart sets ClusterFirstWithHostNet when this is on.
-    hostNetwork: true
-    dnsPolicy: ClusterFirstWithHostNet
+    # Pinned to Contabo only because the PVC is local-path and must not land on
+    # Hetzner (disk ~79%). Off-cluster targets go through the Tailscale egress
+    # Services in tailscale-egress.yaml, not the host network.
     nodeSelector:
       kubernetes.io/hostname: vmi2735515.contaboserver.net
     secrets:
@@ -42,7 +41,7 @@ prometheus:
         scheme: http
         bearer_token_file: /etc/prometheus/secrets/monitoring-scrape-auth/HA_TOKEN
         static_configs:
-          - targets: ["homeassistant.tail4c7c90.ts.net:8123"]
+          - targets: ["ha-home.monitoring.svc.cluster.local:8123"]
             labels:
               instance: homeassistant
               env: home
@@ -52,7 +51,7 @@ prometheus:
         scheme: http
         bearer_token_file: /etc/prometheus/secrets/monitoring-scrape-auth/HA_CAM_TOKEN
         static_configs:
-          - targets: ["homeassistant-cam.tail4c7c90.ts.net:8123"]
+          - targets: ["ha-cam.monitoring.svc.cluster.local:8123"]
             labels:
               instance: homeassistant-cam
               env: cam
@@ -63,7 +62,7 @@ prometheus:
         scheme: http
         bearer_token_file: /etc/prometheus/secrets/monitoring-scrape-auth/HA_EYG_TOKEN
         static_configs:
-          - targets: ["homeassistant-eyg.tail4c7c90.ts.net:8123"]
+          - targets: ["ha-eyg.monitoring.svc.cluster.local:8123"]
             labels:
               instance: homeassistant-eyg
               env: eyg
@@ -75,14 +74,12 @@ prometheus:
           module: [synology]
           auth: [syno_v2]
         static_configs:
-          - targets: ["100.75.160.28"]
+          - targets: ["nas-snmp.monitoring.svc.cluster.local"]
             labels:
               instance: dsplay
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
-          - source_labels: [__param_target]
-            target_label: instance
           - target_label: __address__
             replacement: snmp-exporter.monitoring.svc.cluster.local:9116
     resources:
@@ -102,6 +99,8 @@ prometheus:
 
 grafana:
   enabled: true
+  testFramework:
+    enabled: false
   persistence:
     enabled: false
   admin:
@@ -161,6 +160,9 @@ alertmanager:
 
 defaultRules:
   create: true
+  # Two small nodes: requests exceed (total - largest node) by design.
+  disabled:
+    KubeMemoryOvercommit: true
 
 prometheus-node-exporter:
   resources:
