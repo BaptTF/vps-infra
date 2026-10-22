@@ -1,0 +1,16 @@
+# Lets agents on the tailnet talk to Léo; auth remains the API_SERVER_KEY bearer.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes-leo-api
+  namespace: openclaw
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - hermes-leo-api
+  defaultBackend:
+    service:
+      name: hermes-leo
+      port:
+        number: 8642
