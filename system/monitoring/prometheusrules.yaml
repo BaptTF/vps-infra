@@ -16,16 +16,18 @@ spec:
           annotations:
             summary: "CNPG pod {{ $labels.pod }} is not ready"
         - alert: CnpgClusterNoReadyPod
+          # Only when no instance pod exists at all. A pod that exists but is not
+          # ready is already covered by CnpgPodNotReady (instances: 1).
           expr: |
-            # "or vector(0)" keeps the alert firing when every instance pod is gone.
-            label_replace((sum(kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"postgres-cluster-[0-9]+"}) or vector(0)) == 0, "cluster", "postgres-cluster", "", "")
+            label_replace(absent(kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"postgres-cluster-[0-9]+"}), "cluster", "postgres-cluster", "", "")
             or
-            label_replace((sum(kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"immich-postgres-[0-9]+"}) or vector(0)) == 0, "cluster", "immich-postgres", "", "")
+            label_replace(absent(kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"immich-postgres-[0-9]+"}), "cluster", "immich-postgres", "", "")
           for: 5m
           labels:
             severity: critical
+            namespace: cnpg-system
           annotations:
-            summary: "CNPG cluster {{ $labels.cluster }} has no ready instance pod"
+            summary: "CNPG cluster {{ $labels.cluster }} has no instance pod"
         - alert: ArgoCDAppNotHealthy
           expr: |
             argocd_app_info{health_status=~"Degraded|Missing"} == 1
