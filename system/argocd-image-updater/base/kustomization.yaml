@@ -24,3 +24,22 @@ patches:
           limits:
             cpu: 500m
             memory: 256Mi
+  # Allow Prometheus (namespace monitoring) to scrape the controller metrics.
+  # Upstream policy only admits namespaces labelled metrics=enabled.
+  - target:
+      kind: NetworkPolicy
+      name: allow-metrics-traffic
+    patch: |-
+      - op: add
+        path: /spec/ingress/-
+        value:
+          from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: monitoring
+              podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: prometheus
+          ports:
+            - port: 8443
+              protocol: TCP
