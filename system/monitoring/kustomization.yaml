@@ -32,3 +32,14 @@ helmCharts:
     version: 1.14.2
     valuesFile: values/alloy.yaml
     namespace: monitoring
+
+# Never prune the Prometheus Operator CRDs: deleting them would cascade to every
+# ServiceMonitor, PodMonitor and PrometheusRule in the cluster.
+patches:
+  - target:
+      kind: CustomResourceDefinition
+      name: ".*\\.monitoring\\.coreos\\.com"
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-options
+        value: Prune=false,ServerSideApply=true
