@@ -1,0 +1,70 @@
+# Single binary on Contabo. Filesystem only, 14 days, no gateway and no cache.
+deploymentMode: SingleBinary
+
+loki:
+  auth_enabled: false
+  analytics:
+    reporting_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+  limits_config:
+    retention_period: 336h
+  compactor:
+    working_directory: /var/loki/compactor
+    compaction_interval: 10m
+    retention_enabled: true
+    retention_delete_delay: 2h
+    delete_request_store: filesystem
+
+singleBinary:
+  replicas: 1
+  nodeSelector:
+    kubernetes.io/hostname: vmi2735515.contaboserver.net
+  persistence:
+    size: 20Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
+gateway:
+  enabled: false
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+lokiCanary:
+  enabled: false
+minio:
+  enabled: false
+test:
+  enabled: false
+monitoring:
+  dashboards:
+    enabled: false
+  rules:
+    enabled: false
+  selfMonitoring:
+    enabled: false
+    grafanaAgent:
+      installOperator: false

@@ -76,3 +76,11 @@ rules:
   - apiGroups: ["secrets.infisical.com"]
     resources: ["infisicalsecrets"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["monitoring.coreos.com"]
+    resources:
+      - prometheuses
+      - alertmanagers
+      - prometheusrules
+      - servicemonitors
+      - podmonitors
+    verbs: ["get", "list", "watch"]

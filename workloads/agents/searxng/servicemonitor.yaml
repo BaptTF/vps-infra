@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: searxng-metrics-username
+  labels:
+    app: searxng
+stringData:
+  username: prometheus
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: searxng
+  labels:
+    app: searxng
+spec:
+  selector:
+    matchLabels:
+      app: searxng
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 60s
+      basicAuth:
+        username:
+          name: searxng-metrics-username
+          key: username
+        password:
+          name: searxng-secret
+          key: OPEN_METRICS

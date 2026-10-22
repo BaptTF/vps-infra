@@ -4,6 +4,8 @@ metadata:
   name: searxng
   labels:
     app: searxng
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   revisionHistoryLimit: 2
   replicas: 1
@@ -18,6 +20,39 @@ spec:
         app: searxng
     spec:
       enableServiceLinks: false
+      initContainers:
+        - name: settings
+          image: busybox:1.38.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              cp /src/settings.yml /out/settings.yml
+              if [ -s /secret/OPEN_METRICS ]; then
+                pw=$(cat /secret/OPEN_METRICS)
+                case "$pw" in
+                  *\"*|*\\*|*" "*)
+                    echo "OPEN_METRICS contains a character the config writer rejects" >&2
+                    exit 1
+                    ;;
+                esac
+                printf '\ngeneral:\n  open_metrics: "%s"\n' "$pw" >> /out/settings.yml
+              fi
+          volumeMounts:
+            - name: searxng-config-src
+              mountPath: /src
+              readOnly: true
+            - name: settings
+              mountPath: /out
+            - name: metrics-secret
+              mountPath: /secret
+              readOnly: true
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
       containers:
         - name: searxng
           image: searxng/searxng:2026.9.11-ffe96f8a6
@@ -57,11 +92,17 @@ spec:
               cpu: "500m"
               memory: "512Mi"
           volumeMounts:
-            - name: searxng-config
+            - name: settings
               mountPath: /etc/searxng/settings.yml
               subPath: settings.yml
               readOnly: true
       volumes:
-        - name: searxng-config
+        - name: searxng-config-src
           configMap:
             name: searxng-config
+        - name: settings
+          emptyDir: {}
+        - name: metrics-secret
+          secret:
+            secretName: searxng-secret
+            optional: true

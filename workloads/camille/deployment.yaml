@@ -76,6 +76,8 @@ spec:
               value: info
             - name: SERVER_COMPRESSION
               value: "true"
+            - name: SERVER_METRICS
+              value: "true"
           ports:
             - name: http
               containerPort: 8080

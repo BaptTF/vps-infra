@@ -40,6 +40,7 @@ spec:
               value: "json"
           ports:
             - containerPort: 8080
+              name: http
           livenessProbe:
             httpGet:
               path: /health

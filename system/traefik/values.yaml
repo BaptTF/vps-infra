@@ -67,6 +67,8 @@ metrics:
     addRoutersLabels: true
     addEntryPointsLabels: true
     addServicesLabels: true
+    service:
+      enabled: true
 
 tlsStore:
   default:

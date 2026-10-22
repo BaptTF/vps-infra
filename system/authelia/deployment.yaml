@@ -22,7 +22,10 @@ spec:
         - name: authelia
           image: authelia/authelia:4.39.28
           ports:
-            - containerPort: 9091
+            - name: http
+              containerPort: 9091
+            - name: metrics
+              containerPort: 9959
           env:
             - name: X_AUTHELIA_CONFIG_FILTERS
               value: template

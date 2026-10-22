@@ -1,7 +1,7 @@
-# kube-prometheus-stack - metrics monitoring for multi-node k3s
-# Includes: Prometheus Operator, Prometheus (TSDB), Grafana, node-exporter, kube-state-metrics
+# kube-prometheus-stack. Prometheus is pinned to Contabo because its PVC is
+# local-path and must not land on Hetzner. Grafana and Alertmanager have no
+# volume, so the scheduler places them.
 
-# -- Prometheus Operator
 prometheusOperator:
   resources:
     requests:
@@ -10,17 +10,87 @@ prometheusOperator:
     limits:
       memory: 96Mi
 
-# -- Prometheus (TSDB)
 prometheus:
+  serviceAccount:
+    create: true
+    name: kps-prometheus
   prometheusSpec:
-    retention: 90d
+    retention: 30d
+    retentionSize: 18GB
     scrapeInterval: 30s
+    # Tailscale routes live on the node. hostNetwork lets Prometheus reach the
+    # Home Assistants. The chart sets ClusterFirstWithHostNet when this is on.
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+    nodeSelector:
+      kubernetes.io/hostname: vmi2735515.contaboserver.net
+    secrets:
+      - monitoring-scrape-auth
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
+    ruleSelectorNilUsesHelmValues: false
+    ruleSelector: {}
+    ruleNamespaceSelector: {}
+    additionalScrapeConfigs:
+      - job_name: homeassistant
+        scrape_interval: 60s
+        metrics_path: /api/prometheus
+        scheme: http
+        bearer_token_file: /etc/prometheus/secrets/monitoring-scrape-auth/HA_TOKEN
+        static_configs:
+          - targets: ["homeassistant.tail4c7c90.ts.net:8123"]
+            labels:
+              instance: homeassistant
+              env: home
+      - job_name: homeassistant-cam
+        scrape_interval: 60s
+        metrics_path: /api/prometheus
+        scheme: http
+        bearer_token_file: /etc/prometheus/secrets/monitoring-scrape-auth/HA_CAM_TOKEN
+        static_configs:
+          - targets: ["homeassistant-cam.tail4c7c90.ts.net:8123"]
+            labels:
+              instance: homeassistant-cam
+              env: cam
+      - job_name: homeassistant-eyg
+        scrape_interval: 120s
+        scrape_timeout: 30s
+        metrics_path: /api/prometheus
+        scheme: http
+        bearer_token_file: /etc/prometheus/secrets/monitoring-scrape-auth/HA_EYG_TOKEN
+        static_configs:
+          - targets: ["homeassistant-eyg.tail4c7c90.ts.net:8123"]
+            labels:
+              instance: homeassistant-eyg
+              env: eyg
+      - job_name: snmp-dsplay
+        scrape_interval: 60s
+        scrape_timeout: 30s
+        metrics_path: /snmp
+        params:
+          module: [synology]
+          auth: [syno_v2]
+        static_configs:
+          - targets: ["100.75.160.28"]
+            labels:
+              instance: dsplay
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: snmp-exporter.monitoring.svc.cluster.local:9116
     resources:
       requests:
-        cpu: 50m
-        memory: 256Mi
+        cpu: 100m
+        memory: 1Gi
       limits:
-        memory: 768Mi
+        memory: 3Gi
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -28,11 +98,12 @@ prometheus:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 10Gi
+              storage: 20Gi
 
-# -- Grafana
 grafana:
   enabled: true
+  persistence:
+    enabled: false
   admin:
     existingSecret: "grafana-auth"
     userKey: "admin-user"
@@ -53,15 +124,44 @@ grafana:
       limits:
         memory: 128Mi
 
-# -- Alertmanager (disabled to save RAM)
 alertmanager:
-  enabled: false
+  enabled: true
+  config:
+    route:
+      receiver: sre
+      group_by: ["alertname", "namespace"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      routes:
+        # Watchdog is always firing. InfoInhibitor is a synthetic rule.
+        # Neither is an incident, so they must not wake the SRE agent.
+        - receiver: "null"
+          matchers:
+            - alertname =~ "Watchdog|InfoInhibitor"
+    receivers:
+      - name: "null"
+      - name: sre
+        webhook_configs:
+          - url_file: /etc/alertmanager/secrets/monitoring-scrape-auth/ALERTMANAGER_WEBHOOK_URL
+            send_resolved: true
+            http_config:
+              authorization:
+                type: Bearer
+                credentials_file: /etc/alertmanager/secrets/monitoring-scrape-auth/ALERTMANAGER_WEBHOOK_KEY
+  alertmanagerSpec:
+    secrets:
+      - monitoring-scrape-auth
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 96Mi
 
-# -- Default rules (recording rules for dashboards)
 defaultRules:
   create: true
 
-# -- node-exporter (DaemonSet for host metrics)
 prometheus-node-exporter:
   resources:
     requests:
@@ -70,7 +170,6 @@ prometheus-node-exporter:
     limits:
       memory: 32Mi
 
-# -- kube-state-metrics
 kube-state-metrics:
   resources:
     requests:
@@ -79,7 +178,7 @@ kube-state-metrics:
     limits:
       memory: 48Mi
 
-# -- k3s compatibility: disable scrape targets that don't exist
+# k3s does not run these as scrapeable pods.
 kubeControllerManager:
   enabled: false
 kubeEtcd:
@@ -89,7 +188,6 @@ kubeScheduler:
 kubeProxy:
   enabled: false
 
-# -- Enabled scrape targets
 kubelet:
   enabled: true
 kubeApiServer:

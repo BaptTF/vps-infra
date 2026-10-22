@@ -8,6 +8,14 @@ spec:
   entryPoints:
     - websecure
   routes:
+    - match: Host(`camille.bapttf.com`) && Path(`/metrics`)
+      kind: Rule
+      priority: 100
+      middlewares:
+        - name: deny-public-metrics
+      services:
+        - name: camille
+          port: 80
     - match: Host(`camille.bapttf.com`)
       kind: Rule
       middlewares:
@@ -17,3 +25,13 @@ spec:
         - name: camille
           port: 80
   tls: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: deny-public-metrics
+  namespace: camille
+spec:
+  ipAllowList:
+    sourceRange:
+      - 127.0.0.1/32

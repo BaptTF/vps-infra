@@ -5,6 +5,11 @@ namespace: monitoring
 resources:
   - infisical-secret.yaml
   - grafana-tailscale-ingress.yaml
+  - tailscale-ingress.yaml
+  - grafana-datasource-loki.yaml
+  - prometheusrules.yaml
+  - servicemonitors.yaml
+  - snmp-exporter.yaml
 
 helmCharts:
   - name: kube-prometheus-stack
@@ -12,4 +17,17 @@ helmCharts:
     releaseName: kps
     version: 92.10.1
     valuesFile: values/kube-prometheus-stack.yaml
+    namespace: monitoring
+    includeCRDs: true
+  - name: loki
+    repo: https://grafana.github.io/helm-charts
+    releaseName: loki
+    version: 7.5.0
+    valuesFile: values/loki.yaml
+    namespace: monitoring
+  - name: alloy
+    repo: https://grafana.github.io/helm-charts
+    releaseName: alloy
+    version: 1.14.2
+    valuesFile: values/alloy.yaml
     namespace: monitoring

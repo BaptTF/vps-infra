@@ -36,6 +36,10 @@ helmCharts:
           limits:
             cpu: 100m
             memory: 128Mi
+      prometheus:
+        enabled: true
+        podmonitor:
+          enabled: true
 
 resources:
   - 02-cloudflare-infisical-secret.yaml
