@@ -131,19 +131,19 @@ spec:
               if [ -s /auth/SNMP_COMMUNITY ]; then
                 community=$(cat /auth/SNMP_COMMUNITY)
                 case "$community" in
-                  *\"*|*\\*|*" "*)
+                  *\"*|*\\*|*" "*|*"'"*)
                     echo "SNMP_COMMUNITY contains a character the config writer rejects" >&2
                     exit 1
                     ;;
                 esac
               else
-                echo "SNMP_COMMUNITY is missing; dsplay scrapes will fail until it is set in Infisical /monitoring" >&2
+                echo "SNMP_COMMUNITY is missing; dsplay scrapes will fail until it is set in Infisical /monitoring/scrape" >&2
               fi
               cat > /etc/snmp_exporter/snmp.yml << EOF
               auths:
                 syno_v2:
                   version: 2
-                  community: ${community}
+                  community: '${community}'
                   security_level: noAuthNoPriv
               EOF
               cat /modules/modules.yml >> /etc/snmp_exporter/snmp.yml
