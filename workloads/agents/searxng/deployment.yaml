@@ -30,8 +30,10 @@ spec:
               cp /src/settings.yml /out/settings.yml
               if [ -s /secret/OPEN_METRICS ]; then
                 pw=$(cat /secret/OPEN_METRICS)
+                # Also reject CR/LF: they would break the generated YAML.
+                crlf="$(printf '\r\n_')"; crlf="${crlf%_}"
                 case "$pw" in
-                  *\"*|*\\*|*" "*)
+                  *\"*|*\\*|*" "*|*["$crlf"]*)
                     echo "OPEN_METRICS contains a character the config writer rejects" >&2
                     exit 1
                     ;;

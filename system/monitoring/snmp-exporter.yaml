@@ -130,8 +130,10 @@ spec:
               community="invalid"
               if [ -s /auth/SNMP_COMMUNITY ]; then
                 community=$(cat /auth/SNMP_COMMUNITY)
+                # Also reject CR/LF: they would break the generated YAML.
+                crlf="$(printf '\r\n_')"; crlf="${crlf%_}"
                 case "$community" in
-                  *\"*|*\\*|*" "*|*"'"*)
+                  *\"*|*\\*|*" "*|*"'"*|*["$crlf"]*)
                     echo "SNMP_COMMUNITY contains a character the config writer rejects" >&2
                     exit 1
                     ;;

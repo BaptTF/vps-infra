@@ -35,5 +35,25 @@ spec:
   ignoreDifferences:
     - group: ""
       kind: Service
+      name: ha-home
+      namespace: monitoring
+      jsonPointers:
+        - /spec/externalName
+    - group: ""
+      kind: Service
+      name: ha-cam
+      namespace: monitoring
+      jsonPointers:
+        - /spec/externalName
+    - group: ""
+      kind: Service
+      name: ha-eyg
+      namespace: monitoring
+      jsonPointers:
+        - /spec/externalName
+    - group: ""
+      kind: Service
+      name: nas-snmp
+      namespace: monitoring
       jsonPointers:
         - /spec/externalName
