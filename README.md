@@ -307,7 +307,7 @@ When the original worker came back `Ready`:
 
 ## Monitoring
 
-Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes. Grafana and Alertmanager have no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector.
+Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Grafana and Alertmanager have no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector.
 
 Tailscale is the only access path. The SRE agent (service account `grokbot`) can read the monitoring CRDs and call:
 
@@ -317,20 +317,29 @@ Tailscale is the only access path. The SRE agent (service account `grokbot`) can
 
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That is what wakes the SRE agent. `Watchdog` (always firing) and `InfoInhibitor` are dropped and never sent, so they do not spend tokens. A real alert that stays firing is repeated every 4 hours.
 
-Create these keys in Infisical project `infrastructure`, environment `prod`, path `/monitoring`, before expecting alerts and external scrapes to work. `admin-user` and `admin-password` are already there.
+Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Grafana never sees the webhook or scrape tokens and Prometheus/Alertmanager never see the Grafana admin password.
+
+Path `/monitoring/grafana` -> Secret `grafana-auth` (move the existing keys from `/monitoring`):
 
 | Key | Used by |
 |-----|---------|
-| `ALERTMANAGER_WEBHOOK_URL` | Alertmanager webhook URL, one line. Alertmanager crashloops until this key exists. |
-| `ALERTMANAGER_WEBHOOK_KEY` | Bearer token sent as `Authorization: Bearer`. One line, no quotes. Alertmanager crashloops until this key exists. |
+| `admin-user` | Grafana admin user |
+| `admin-password` | Grafana admin password |
+
+Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth`:
+
+| Key | Used by |
+|-----|---------|
+| `ALERTMANAGER_WEBHOOK_URL` | Alertmanager webhook URL, one line. |
+| `ALERTMANAGER_WEBHOOK_KEY` | Bearer token sent as `Authorization: Bearer`. One line, no quotes. |
 | `HA_TOKEN` | Prometheus scrape of `homeassistant` (`/api/prometheus`, 60s) |
 | `HA_CAM_TOKEN` | Prometheus scrape of `homeassistant-cam` (60s) |
 | `HA_EYG_TOKEN` | Prometheus scrape of `homeassistant-eyg` (120s, the Pi 3) |
-| `SNMP_COMMUNITY` | snmp-exporter read of `dsplay` (`100.75.160.28`). Read-only community, already limited to localhost on the NAS. |
+| `SNMP_COMMUNITY` | snmp-exporter read of `dsplay` (`100.75.160.28`). Read-only community, no quotes, backslashes or spaces. |
 
 SearXNG `/metrics` stays off until path `/agents/searxng` also has `OPEN_METRICS` (the basic-auth password; the username is ignored).
 
-Prometheus and snmp-exporter use the Contabo host network so they can reach Tailscale addresses. App metrics that are enabled in-cluster: Traefik, Argo CD, cert-manager, sealed-secrets, CNPG, Authelia (`:9959`), Immich (`8081` and `8082`), Vikunja (`/api/v1/metrics`, denied on the public ingress), Bifrost, Camille, and the image updater. Vaultwarden and LLDAP have no metrics endpoint.
+Nothing uses the host network. Off-cluster targets (the three Home Assistants and the NAS over SNMP/UDP 161) are reached through Tailscale egress Services in `system/monitoring/tailscale-egress.yaml` (`ha-home`, `ha-cam`, `ha-eyg`, `nas-snmp`), the same pattern as `nas-proxy`. Prometheus stays pinned to Contabo only because its local-path PVC must not land on Hetzner. App metrics that are enabled in-cluster: Traefik, Argo CD, cert-manager, sealed-secrets, CNPG, Authelia (`:9959`), Immich (`8081` and `8082`), Vikunja (`/api/v1/metrics`, denied on the public ingress), Bifrost, Camille, and the image updater. Vaultwarden and LLDAP have no metrics endpoint.
 
 ---
 
