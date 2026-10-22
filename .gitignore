@@ -1,0 +1,3 @@
+
+# kustomize --enable-helm cache: never commit rendered/downloaded Helm charts
+**/charts/
