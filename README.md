@@ -317,7 +317,7 @@ Tailscale is the only access path. The SRE agent (service account `grokbot`) can
 
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That is what wakes the SRE agent. `Watchdog` (always firing) and `InfoInhibitor` are dropped and never sent, so they do not spend tokens. A real alert that stays firing is repeated every 4 hours.
 
-Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Grafana never sees the webhook or scrape tokens and Prometheus/Alertmanager never see the Grafana admin password.
+Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Grafana, Prometheus and Alertmanager each only see their own credentials.
 
 Path `/monitoring/grafana` -> Secret `grafana-auth` (move the existing keys from `/monitoring`):
 
@@ -326,12 +326,17 @@ Path `/monitoring/grafana` -> Secret `grafana-auth` (move the existing keys from
 | `admin-user` | Grafana admin user |
 | `admin-password` | Grafana admin password |
 
-Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth`:
+Path `/monitoring/alertmanager` -> Secret `alertmanager-webhook` (mounted in Alertmanager only):
 
 | Key | Used by |
 |-----|---------|
 | `ALERTMANAGER_WEBHOOK_URL` | Alertmanager webhook URL, one line. |
 | `ALERTMANAGER_WEBHOOK_KEY` | Bearer token sent as `Authorization: Bearer`. One line, no quotes. |
+
+Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth` (mounted in Prometheus; snmp-exporter only gets `SNMP_COMMUNITY`):
+
+| Key | Used by |
+|-----|---------|
 | `HA_TOKEN` | Prometheus scrape of `homeassistant` (`/api/prometheus`, 60s) |
 | `HA_CAM_TOKEN` | Prometheus scrape of `homeassistant-cam` (60s) |
 | `HA_EYG_TOKEN` | Prometheus scrape of `homeassistant-eyg` (120s, the Pi 3) |

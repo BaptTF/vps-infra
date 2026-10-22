@@ -193,6 +193,9 @@ spec:
           secret:
             secretName: monitoring-scrape-auth
             optional: true
+            items:
+              - key: SNMP_COMMUNITY
+                path: SNMP_COMMUNITY
         - name: config
           emptyDir: {}
 ---
