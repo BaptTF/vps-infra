@@ -98,6 +98,16 @@ spec:
                 secretKeyRef:
                   name: bifrost-secret
                   key: OPENCODE_GO_API_KEY_N
+            # Bifrost >= v2.2.6 : /api verrouillé par setup token tant que l'auth dashboard est off.
+            # Clé BIFROST_SETUP_TOKEN dans Infisical infrastructure/prod:/agents/bifrost
+            # (déjà injectée dans le conteneur bifrost via envFrom bifrost-secret).
+            # optional: sans la clé, le sidecar n'envoie pas de header (OK en v2.2.2).
+            - name: BIFROST_SETUP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bifrost-secret
+                  key: BIFROST_SETUP_TOKEN
+                  optional: true
             - name: BIFROST_URL
               value: http://127.0.0.1:8080
             - name: DRY_RUN
