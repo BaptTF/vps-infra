@@ -50,6 +50,12 @@
   "internalChecksFilter": "strict",
   "packageRules": [
     {
+      "description": "ghcr.io ne fournit pas de releaseTimestamp : ne pas bloquer indéfiniment sur minimumReleaseAge",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["/^ghcr\\.io\\//"],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
       "description": "First-party images: owned by ArgoCD Image Updater (direct commits to main)",
       "matchDatasources": ["docker"],
       "matchPackageNames": [
