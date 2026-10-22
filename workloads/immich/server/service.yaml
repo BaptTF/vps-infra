@@ -17,6 +17,6 @@ spec:
     - name: metrics-api
       port: 8081
       targetPort: metrics-api
-    - name: metrics-microservices
+    - name: metrics-ms
       port: 8082
-      targetPort: metrics-microservices
+      targetPort: metrics-ms
