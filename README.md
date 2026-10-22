@@ -251,7 +251,7 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 | Node | Role | vCPU | RAM | Allocatable | OS | Typical workloads |
 |------|------|------|-----|-------------|-----|-------------------|
 | `debian-16gb-hel1-2` (Hetzner VPS) | control-plane | 8 | 15Gi | ~12Gi | Debian 13 | ArgoCD, CNPG, Traefik, cert-manager, agents, critical stateful services |
-| `vmi2735515.contaboserver.net` (Contabo VPS) | worker | 3 | 8Gi | ~5.9Gi | Debian 12 | Overflow workloads, lighter stateless pods |
+| `vmi2735515.contaboserver.net` (Contabo VPS) | worker | 6 | 12Gi | ~11Gi | Debian 12 | Prometheus, Loki, overflow workloads |
 
 ---
 
@@ -285,6 +285,9 @@ When the original worker came back `Ready`:
 |---------|-----|--------|
 | ArgoCD | https://argocd.bapttf.com | Public |
 | Grafana | https://grafana (Tailscale) | Tailscale VPN |
+| Prometheus | https://prometheus (Tailscale) | Tailscale VPN |
+| Alertmanager | https://alertmanager (Tailscale) | Tailscale VPN |
+| Loki | https://loki (Tailscale) | Tailscale VPN |
 | Vaultwarden | https://vault.bapttf.com | Public |
 | CouchDB (Obsidian LiveSync) | https://obsidian-livesync.bapttf.com | Public |
 | Meilisearch | https://meilisearch.bapttf.com | Public |
@@ -299,6 +302,35 @@ When the original worker came back `Ready`:
 | MinIO | https://minio (Tailscale) | Tailscale VPN |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
+
+---
+
+## Monitoring
+
+Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes. Grafana and Alertmanager have no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector.
+
+Tailscale is the only access path. The SRE agent (service account `grokbot`) can read the monitoring CRDs and call:
+
+- Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`
+- Alertmanager: `GET https://alertmanager/api/v2/alerts`
+- Loki: `GET https://loki/loki/api/v1/query_range`
+
+Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That is what wakes the SRE agent. `Watchdog` (always firing) and `InfoInhibitor` are dropped and never sent, so they do not spend tokens. A real alert that stays firing is repeated every 4 hours.
+
+Create these keys in Infisical project `infrastructure`, environment `prod`, path `/monitoring`, before expecting alerts and external scrapes to work. `admin-user` and `admin-password` are already there.
+
+| Key | Used by |
+|-----|---------|
+| `ALERTMANAGER_WEBHOOK_URL` | Alertmanager webhook URL, one line. Alertmanager crashloops until this key exists. |
+| `ALERTMANAGER_WEBHOOK_KEY` | Bearer token sent as `Authorization: Bearer`. One line, no quotes. Alertmanager crashloops until this key exists. |
+| `HA_TOKEN` | Prometheus scrape of `homeassistant` (`/api/prometheus`, 60s) |
+| `HA_CAM_TOKEN` | Prometheus scrape of `homeassistant-cam` (60s) |
+| `HA_EYG_TOKEN` | Prometheus scrape of `homeassistant-eyg` (120s, the Pi 3) |
+| `SNMP_COMMUNITY` | snmp-exporter read of `dsplay` (`100.75.160.28`). Read-only community, already limited to localhost on the NAS. |
+
+SearXNG `/metrics` stays off until path `/agents/searxng` also has `OPEN_METRICS` (the basic-auth password; the username is ignored).
+
+Prometheus and snmp-exporter use the Contabo host network so they can reach Tailscale addresses. App metrics that are enabled in-cluster: Traefik, Argo CD, cert-manager, sealed-secrets, CNPG, Authelia (`:9959`), Immich (`8081` and `8082`), Vikunja (`/api/v1/metrics`, denied on the public ingress), Bifrost, Camille, and the image updater. Vaultwarden and LLDAP have no metrics endpoint.
 
 ---
 

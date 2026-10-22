@@ -23,3 +23,6 @@ auth:
         authurl: https://auth.bapttf.com
         clientid: vikunja
         scope: openid profile email
+
+metrics:
+  enabled: true

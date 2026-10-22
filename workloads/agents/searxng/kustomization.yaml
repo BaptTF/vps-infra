@@ -6,6 +6,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - tailscale-ingress.yaml
+  - servicemonitor.yaml
 
 configMapGenerator:
   - name: searxng-config

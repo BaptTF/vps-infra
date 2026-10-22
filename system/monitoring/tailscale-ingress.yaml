@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - prometheus
+  defaultBackend:
+    service:
+      name: kps-kube-prometheus-stack-prometheus
+      port:
+        number: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - alertmanager
+  defaultBackend:
+    service:
+      name: kps-kube-prometheus-stack-alertmanager
+      port:
+        number: 9093
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: loki
+  namespace: monitoring
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - loki
+  defaultBackend:
+    service:
+      name: loki
+      port:
+        number: 3100
