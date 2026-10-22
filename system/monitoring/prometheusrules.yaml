@@ -9,12 +9,23 @@ spec:
       rules:
         - alert: CnpgPodNotReady
           expr: |
-            kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"postgres-cluster-.+|immich-postgres-.+"} == 0
+            kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"(postgres-cluster|immich-postgres)-[0-9]+"} == 0
           for: 5m
           labels:
             severity: critical
           annotations:
             summary: "CNPG pod {{ $labels.pod }} is not ready"
+        - alert: CnpgClusterNoReadyPod
+          expr: |
+            # "or vector(0)" keeps the alert firing when every instance pod is gone.
+            label_replace((sum(kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"postgres-cluster-[0-9]+"}) or vector(0)) == 0, "cluster", "postgres-cluster", "", "")
+            or
+            label_replace((sum(kube_pod_status_ready{namespace="cnpg-system", condition="true", pod=~"immich-postgres-[0-9]+"}) or vector(0)) == 0, "cluster", "immich-postgres", "", "")
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CNPG cluster {{ $labels.cluster }} has no ready instance pod"
         - alert: ArgoCDAppNotHealthy
           expr: |
             argocd_app_info{health_status=~"Degraded|Missing"} == 1
@@ -26,7 +37,13 @@ spec:
             summary: "Argo CD application {{ $labels.name }} is {{ $labels.health_status }} / {{ $labels.sync_status }}"
         - alert: TraefikService5xx
           expr: |
-            sum by (service) (rate(traefik_service_requests_total{code=~"5.."}[5m])) > 1
+            (
+              sum by (service) (rate(traefik_service_requests_total{code=~"5.."}[5m]))
+              /
+              sum by (service) (rate(traefik_service_requests_total[5m]))
+            ) > 0.05
+            and
+            sum by (service) (rate(traefik_service_requests_total[5m])) > 0.05
           for: 10m
           labels:
             severity: warning
