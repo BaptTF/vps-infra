@@ -11,6 +11,8 @@ helmCharts:
     valuesInline:
       monitoring:
         podMonitorEnabled: true
+        grafanaDashboard:
+          create: true
       resources:
         requests:
           cpu: 10m
