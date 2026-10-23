@@ -1,0 +1,35 @@
+# Only used for R2 bucket size; zone analytics are filtered out.
+image:
+  # 0.0.16 (chart default) predates R2 metrics.
+  tag: "0.2.3"
+  pullPolicy: IfNotPresent
+secretRef: cloudflare-exporter
+env:
+  - name: FREE_TIER
+    value: "true"
+  - name: CF_ZONES
+    value: "none"
+  # R2 storage analytics refresh slowly; no need to poll every minute.
+  - name: SCRAPE_INTERVAL
+    value: "300"
+deploymentAnnotations:
+  secrets.infisical.com/auto-reload: "true"
+service:
+  addPrometheusScrapeAnnotation: false
+serviceMonitor:
+  enabled: true
+  interval: 5m
+  timeout: 30s
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 64Mi
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]

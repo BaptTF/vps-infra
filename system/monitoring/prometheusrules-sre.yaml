@@ -15,7 +15,7 @@ spec:
           annotations:
             summary: "CNPG collector down on {{ $labels.pod }}"
             description: "The CNPG metrics collector cannot query PostgreSQL on {{ $labels.pod }} ({{ $labels.cluster }})."
-        # R2 archiving is disabled on purpose: these only fire on actual failures or a growing backlog.
+        # Archiving goes through the Barman Cloud plugin; pg_stat_archiver still reflects its result.
         - alert: CnpgWalArchiveFailing
           expr: increase(cnpg_pg_stat_archiver_failed_count[15m]) > 0
           for: 5m
@@ -50,6 +50,63 @@ spec:
           annotations:
             summary: "Long transaction on {{ $labels.pod }}/{{ $labels.datname }}"
             description: "A transaction by {{ $labels.usename }} has been open for {{ $value | humanizeDuration }}."
+    - name: sre-backups
+      rules:
+        # Plugin metrics are per instance; 0 means no backup recorded yet.
+        - alert: CnpgBackupTooOld
+          expr: time() - max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp) > 8 * 86400
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No recent base backup for {{ $labels.cluster }}"
+            description: "Last successful base backup is {{ $value | humanizeDuration }} old; the schedule is weekly."
+        - alert: CnpgBackupFailed
+          expr: |
+            max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp)
+              > max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp)
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Last base backup of {{ $labels.cluster }} failed"
+            description: "The most recent backup attempt failed after the last successful one."
+        # 14d retention plus one weekly cycle: anything older means retention is not pruning R2.
+        - alert: CnpgRecoveryPointTooOld
+          expr: time() - max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_first_recoverability_point > 0) > 23 * 86400
+          for: 6h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Retention not applied for {{ $labels.cluster }}"
+            description: "First recoverability point is {{ $value | humanizeDuration }} old, beyond the 14d policy."
+        - alert: CnpgWalArchiveStalled
+          expr: |
+            cnpg_pg_stat_archiver_seconds_since_last_archival > 3600
+              and on (namespace, pod) cnpg_collector_pg_wal_archive_status{value="ready"} > 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "WAL archiving stalled on {{ $labels.pod }}"
+            description: "WAL segments are waiting and nothing was archived for {{ $value | humanizeDuration }}."
+        # The bucket is capped at 10 GB; R2 analytics lag by up to an hour.
+        - alert: R2BackupBucketNearFull
+          expr: max by (bucket) (cloudflare_r2_storage_bytes{bucket="cnpg-backups"}) > 9e9
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "R2 bucket {{ $labels.bucket }} above 9 GB"
+            description: "{{ $value | humanize }}B stored in {{ $labels.bucket }}."
+        - alert: R2BucketSizeMissing
+          expr: absent(cloudflare_r2_storage_bytes{bucket="cnpg-backups"})
+          for: 3h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No R2 size metric for cnpg-backups"
+            description: "cloudflare-exporter is down or its token cannot read R2 analytics."
     - name: sre-cert-manager
       rules:
         - alert: CertificateExpiringSoon

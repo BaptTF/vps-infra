@@ -33,6 +33,15 @@ helmCharts:
     version: 1.14.2
     valuesFile: values/alloy.yaml
     namespace: monitoring
+  - name: cloudflare-exporter
+    repo: https://lablabs.github.io/cloudflare-exporter
+    releaseName: cloudflare-exporter
+    version: 0.2.3
+    valuesFile: values/cloudflare-exporter.yaml
+    namespace: monitoring
+    # The chart only renders its ServiceMonitor when it sees this API.
+    apiVersions:
+      - monitoring.coreos.com/v1
 
 # Never prune the Prometheus Operator CRDs: deleting them would cascade to every
 # ServiceMonitor, PodMonitor and PrometheusRule in the cluster.
