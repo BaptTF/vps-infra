@@ -371,12 +371,14 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 | PVC | Namespace |
 |-----|-----------|
 | `immich-library` | `immich` |
-| `openclaw-home-pvc`, `hermes-lea-data`, `hermes-lya-data`, `kirocrew-home` | `openclaw` |
+| `openclaw-home-pvc`, `hermes-lea-data`, `hermes-lya-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` |
 | `vikunja-files` | `vikunja` |
 | `vaultwarden-data` | `vaultwarden` |
 | `vulcain-data` | `vulcain` |
+| `gowa-storage` | `gowa` |
+| `assisted-teacher-workspace` | `assisted-teacher` |
 
-Caches (Immich machine-learning, Prometheus, Loki), the Storage Box SMB volume, and the CNPG data directories are left out. Schedules run between 02:00 and 02:50 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only.
+Caches (Immich machine-learning, Prometheus, Loki), the Storage Box SMB volume, and the CNPG data directories are left out. `nullclaw-leo-data` is the Hermes Leo volume. Schedules run between 02:00 and 03:15 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only.
 
 Create these keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`, before the schedules can succeed. Secret `k8up-restic` is synced into each namespace above.
 
