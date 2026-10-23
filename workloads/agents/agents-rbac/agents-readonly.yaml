@@ -84,3 +84,15 @@ rules:
       - servicemonitors
       - podmonitors
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["k8up.io"]
+    resources:
+      - schedules
+      - backups
+      - snapshots
+      - restores
+      - checks
+      - prunes
+      - archives
+      - podconfigs
+      - prebackuppods
+    verbs: ["get", "list", "watch"]
