@@ -1,0 +1,148 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sre-agent
+  namespace: monitoring
+spec:
+  groups:
+    - name: sre-cnpg
+      rules:
+        - alert: CnpgCollectorDown
+          expr: cnpg_collector_up == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CNPG collector down on {{ $labels.pod }}"
+            description: "The CNPG metrics collector cannot query PostgreSQL on {{ $labels.pod }} ({{ $labels.cluster }})."
+        # R2 archiving is disabled on purpose: these only fire on actual failures or a growing backlog.
+        - alert: CnpgWalArchiveFailing
+          expr: increase(cnpg_pg_stat_archiver_failed_count[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "WAL archiving failing on {{ $labels.pod }}"
+            description: "{{ $value | humanize }} WAL archive failures in the last 15 minutes on {{ $labels.pod }}."
+        - alert: CnpgWalArchiveBacklog
+          expr: cnpg_collector_pg_wal_archive_status{value="ready"} > 10
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "WAL files piling up on {{ $labels.pod }}"
+            description: "{{ $value }} WAL segments waiting to be archived on {{ $labels.pod }}."
+        - alert: CnpgConnectionsNearMax
+          expr: |
+            sum by (namespace, pod) (cnpg_backends_total)
+              / on (namespace, pod) max by (namespace, pod) (cnpg_pg_settings_setting{name="max_connections"}) > 0.8
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.pod }} is near max_connections"
+            description: "{{ $value | humanizePercentage }} of max_connections in use on {{ $labels.pod }}."
+        - alert: CnpgLongRunningTransaction
+          expr: max by (namespace, pod, datname, usename) (cnpg_backends_max_tx_duration_seconds) > 1800
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Long transaction on {{ $labels.pod }}/{{ $labels.datname }}"
+            description: "A transaction by {{ $labels.usename }} has been open for {{ $value | humanizeDuration }}."
+        - alert: CnpgVolumeAlmostFull
+          expr: |
+            max by (namespace, persistentvolumeclaim) (
+              kubelet_volume_stats_used_bytes{job="kubelet", namespace="cnpg-system"}
+                / kubelet_volume_stats_capacity_bytes{job="kubelet", namespace="cnpg-system"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CNPG volume {{ $labels.persistentvolumeclaim }} is almost full"
+            description: "{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full."
+    - name: sre-cert-manager
+      rules:
+        - alert: CertificateExpiringSoon
+          expr: (certmanager_certificate_expiration_timestamp_seconds - time()) < 14 * 86400
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} expires soon"
+            description: "Expires in {{ $value | humanizeDuration }}; renewal should have happened at 30 days."
+        - alert: CertificateNotReady
+          expr: certmanager_certificate_ready_status{condition="True"} == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} is not Ready"
+            description: "cert-manager reports the certificate as not Ready for 15 minutes."
+    - name: sre-argocd
+      rules:
+        - alert: ArgoCDSyncFailed
+          expr: increase(argocd_app_sync_total{phase=~"Error|Failed"}[15m]) > 0
+          labels:
+            severity: warning
+          annotations:
+            summary: "Argo CD sync failed for {{ $labels.name }}"
+            description: "Application {{ $labels.name }} had a sync ending in {{ $labels.phase }} in the last 15 minutes."
+    - name: sre-traefik
+      rules:
+        - alert: TraefikHighLatencyP95
+          expr: |
+            histogram_quantile(0.95, sum by (exported_service, le) (rate(traefik_service_request_duration_seconds_bucket[5m]))) > 2
+            and sum by (exported_service) (rate(traefik_service_request_duration_seconds_count[5m])) > 0.05
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High p95 latency on Traefik service {{ $labels.exported_service }}"
+            description: "p95 latency is {{ $value | humanizeDuration }} over 5 minutes."
+    - name: sre-homeassistant
+      rules:
+        - alert: HomeAssistantDown
+          expr: up{job=~"homeassistant.*"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Home Assistant {{ $labels.job }} is down"
+            description: "Prometheus cannot scrape {{ $labels.job }} for 15 minutes."
+    - name: sre-containers
+      rules:
+        - alert: ContainerMemoryNearLimit
+          expr: |
+            max by (namespace, pod, container) (container_memory_working_set_bytes{job="kubelet", container!="", container!="POD"})
+              / on (namespace, pod, container) max by (namespace, pod, container) (kube_pod_container_resource_limits{resource="memory"}) > 0.9
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} near memory limit"
+            description: "Working set is {{ $value | humanizePercentage }} of the memory limit."
+        - alert: ContainerOOMKilled
+          expr: |
+            (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 15m >= 1)
+            and on (namespace, pod, container) kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} was OOMKilled"
+            description: "The container restarted after an OOMKill in the last 15 minutes."
+    - name: sre-pvc
+      rules:
+        - alert: PersistentVolumeUsageHigh
+          expr: |
+            max by (namespace, persistentvolumeclaim) (
+              kubelet_volume_stats_used_bytes{job="kubelet", namespace!="cnpg-system"}
+                / kubelet_volume_stats_capacity_bytes{job="kubelet", namespace!="cnpg-system"}
+            ) > 0.85
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} above 85%"
+            description: "{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full."

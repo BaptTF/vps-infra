@@ -9,6 +9,7 @@ resources:
   - tailscale-egress.yaml
   - grafana-datasource-loki.yaml
   - prometheusrules.yaml
+  - prometheusrules-sre.yaml
   - servicemonitors.yaml
   - snmp-exporter.yaml
 
