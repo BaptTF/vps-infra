@@ -1,0 +1,89 @@
+# Run from system/monitoring:
+#   yq '.spec' prometheusrules-sre.yaml > /tmp/sre-rules.yaml
+#   promtool test rules tests/sre-backups.test.yaml
+rule_files:
+  - /tmp/sre-rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # Immich never backed up (0) while postgres-cluster is fresh: only Immich fires.
+  - interval: 5m
+    input_series:
+      - series: 'barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{namespace="cnpg-system", pod="immich-postgres-1"}'
+        values: '0x3000'
+      - series: 'barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{namespace="cnpg-system", pod="postgres-cluster-1"}'
+        values: '0+300x3000'
+      - series: 'cnpg_collector_up{namespace="cnpg-system", pod="immich-postgres-1", cluster="immich-postgres"}'
+        values: '1x3000'
+      - series: 'cnpg_collector_up{namespace="cnpg-system", pod="postgres-cluster-1", cluster="postgres-cluster"}'
+        values: '1x3000'
+    alert_rule_test:
+      - eval_time: 9d
+        alertname: CnpgBackupTooOld
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: cnpg-system
+              cluster: immich-postgres
+            exp_annotations:
+              summary: "No recent base backup for immich-postgres"
+              description: "Last successful base backup is 9d 0h 0m 0s old; the schedule is weekly."
+      - eval_time: 9d
+        alertname: CnpgBackupMetricsMissing
+        exp_alerts: []
+
+  # A failure on one cluster is not hidden by the other cluster's success.
+  - interval: 1m
+    input_series:
+      - series: 'barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{namespace="cnpg-system", pod="immich-postgres-1"}'
+        values: '100x60'
+      - series: 'barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp{namespace="cnpg-system", pod="immich-postgres-1"}'
+        values: '200x60'
+      - series: 'barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{namespace="cnpg-system", pod="postgres-cluster-1"}'
+        values: '300x60'
+      - series: 'barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp{namespace="cnpg-system", pod="postgres-cluster-1"}'
+        values: '0x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: CnpgBackupFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: cnpg-system
+              cluster: immich-postgres
+            exp_annotations:
+              summary: "Last base backup of immich-postgres failed"
+              description: "The most recent backup attempt failed after the last successful one."
+
+  # Plugin metrics vanish for one cluster.
+  - interval: 5m
+    input_series:
+      - series: 'cnpg_collector_up{namespace="cnpg-system", pod="immich-postgres-1", cluster="immich-postgres"}'
+        values: '1x12'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: CnpgBackupMetricsMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: cnpg-system
+              cluster: immich-postgres
+            exp_annotations:
+              summary: "No Barman Cloud metrics for immich-postgres"
+              description: "The cluster is scraped but the plugin reports nothing; backup alerts cannot fire."
+
+  # Exporter target down after it had been working.
+  - interval: 5m
+    input_series:
+      - series: 'up{job="cloudflare-exporter", namespace="monitoring"}'
+        values: '1 1 0x10'
+    alert_rule_test:
+      - eval_time: 50m
+        alertname: CloudflareExporterDown
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: "cloudflare-exporter is down"
+              description: "No healthy scrape for 30 minutes; the R2 size alert is running on stale data."

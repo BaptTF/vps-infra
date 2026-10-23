@@ -52,9 +52,13 @@ spec:
             description: "A transaction by {{ $labels.usename }} has been open for {{ $value | humanizeDuration }}."
     - name: sre-backups
       rules:
-        # Plugin metrics are per instance; 0 means no backup recorded yet.
+        # Plugin metrics carry no cluster label: derive it from the pod name.
+        # A value of 0 means no backup recorded yet, so a never-backed-up cluster fires.
         - alert: CnpgBackupTooOld
-          expr: time() - max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp) > 8 * 86400
+          expr: |
+            time() - max by (namespace, cluster) (
+              label_replace(barman_cloud_cloudnative_pg_io_last_available_backup_timestamp, "cluster", "$1", "pod", "(.+)-[0-9]+")
+            ) > 8 * 86400
           for: 1h
           labels:
             severity: warning
@@ -63,8 +67,8 @@ spec:
             description: "Last successful base backup is {{ $value | humanizeDuration }} old; the schedule is weekly."
         - alert: CnpgBackupFailed
           expr: |
-            max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp)
-              > max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp)
+            max by (namespace, cluster) (label_replace(barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp, "cluster", "$1", "pod", "(.+)-[0-9]+"))
+              > max by (namespace, cluster) (label_replace(barman_cloud_cloudnative_pg_io_last_available_backup_timestamp, "cluster", "$1", "pod", "(.+)-[0-9]+"))
           for: 10m
           labels:
             severity: warning
@@ -73,23 +77,48 @@ spec:
             description: "The most recent backup attempt failed after the last successful one."
         # 14d retention plus one weekly cycle: anything older means retention is not pruning R2.
         - alert: CnpgRecoveryPointTooOld
-          expr: time() - max by (namespace, cluster) (barman_cloud_cloudnative_pg_io_first_recoverability_point > 0) > 23 * 86400
+          expr: |
+            time() - max by (namespace, cluster) (
+              label_replace(barman_cloud_cloudnative_pg_io_first_recoverability_point, "cluster", "$1", "pod", "(.+)-[0-9]+") > 0
+            ) > 23 * 86400
           for: 6h
           labels:
             severity: warning
           annotations:
             summary: "Retention not applied for {{ $labels.cluster }}"
             description: "First recoverability point is {{ $value | humanizeDuration }} old, beyond the 14d policy."
+        # Without plugin metrics the alerts above stay silent.
+        - alert: CnpgBackupMetricsMissing
+          expr: |
+            max by (namespace, cluster) (cnpg_collector_up)
+              unless on (namespace, cluster)
+            max by (namespace, cluster) (label_replace(barman_cloud_cloudnative_pg_io_last_available_backup_timestamp, "cluster", "$1", "pod", "(.+)-[0-9]+"))
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "No Barman Cloud metrics for {{ $labels.cluster }}"
+            description: "The cluster is scraped but the plugin reports nothing; backup alerts cannot fire."
+        # -1 means the archiver stats were reset or nothing was ever archived.
         - alert: CnpgWalArchiveStalled
           expr: |
-            cnpg_pg_stat_archiver_seconds_since_last_archival > 3600
+            (cnpg_pg_stat_archiver_seconds_since_last_archival > 3600 or cnpg_pg_stat_archiver_seconds_since_last_archival < 0)
               and on (namespace, pod) cnpg_collector_pg_wal_archive_status{value="ready"} > 0
           for: 15m
           labels:
             severity: critical
           annotations:
             summary: "WAL archiving stalled on {{ $labels.pod }}"
-            description: "WAL segments are waiting and nothing was archived for {{ $value | humanizeDuration }}."
+            description: "WAL segments are waiting and nothing was archived recently."
+        # Direct guard for the node disk: local-path does not enforce the PVC size.
+        - alert: CnpgWalDirectoryLarge
+          expr: cnpg_collector_pg_wal{value="size"} > 2 * 1024 * 1024 * 1024
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "pg_wal is large on {{ $labels.pod }}"
+            description: "{{ $value | humanize1024 }}B in pg_wal. If R2 is unreachable, removing `plugins:` from the Cluster frees it."
         # The bucket is capped at 10 GB; R2 analytics lag by up to an hour.
         - alert: R2BackupBucketNearFull
           expr: max by (bucket) (cloudflare_r2_storage_bytes{bucket="cnpg-backups"}) > 9e9
@@ -106,7 +135,16 @@ spec:
             severity: warning
           annotations:
             summary: "No R2 size metric for cnpg-backups"
-            description: "cloudflare-exporter is down or its token cannot read R2 analytics."
+            description: "cloudflare-exporter never reported the bucket; check its token."
+        # The exporter keeps its last value when Cloudflare fails, so watch the target itself.
+        - alert: CloudflareExporterDown
+          expr: absent(up{job="cloudflare-exporter"} == 1)
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "cloudflare-exporter is down"
+            description: "No healthy scrape for 30 minutes; the R2 size alert is running on stale data."
     - name: sre-cert-manager
       rules:
         - alert: CertificateExpiringSoon
