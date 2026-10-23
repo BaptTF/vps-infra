@@ -1,11 +1,17 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
-  name: immich-postgres-daily-backup
+  name: immich-postgres-weekly-backup
   namespace: cnpg-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   cluster:
     name: immich-postgres
-  schedule: "0 30 4 * * *"
+  # Weekly, 30 minutes after postgres-cluster. Same retention reasoning.
+  schedule: "0 30 4 * * 0"
   backupOwnerReference: self
   immediate: true
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

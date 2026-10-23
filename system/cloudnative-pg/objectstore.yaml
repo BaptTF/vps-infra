@@ -1,0 +1,45 @@
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: cnpg-r2
+  namespace: cnpg-system
+spec:
+  retentionPolicy: 14d
+  instanceSidecarConfiguration:
+    env:
+      # R2 rejects the default AWS SDK checksum headers.
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required
+      - name: AWS_REGION
+        value: auto
+      - name: AWS_DEFAULT_REGION
+        value: auto
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 512Mi
+  configuration:
+    destinationPath: s3://cnpg-backups/
+    endpointURL: https://e16df4d29f7d54d2f57456402bebd130.r2.cloudflarestorage.com
+    s3Credentials:
+      accessKeyId:
+        name: cnpg-r2-credentials
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: cnpg-r2-credentials
+        key: AWS_SECRET_ACCESS_KEY
+    # zstd level 3 keeps WAL archiving cheap.
+    # Base backups use --zstd through extra args: Barman 3.20 supports it, but
+    # this plugin's compression field does not, and barman-cloud-backup has no
+    # compression level (it falls back to zstd's medium, level 4).
+    wal:
+      compression: zstd
+      archiveAdditionalCommandArgs:
+        - "--compression-level=3"
+    data:
+      additionalCommandArgs:
+        - "--zstd"

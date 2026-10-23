@@ -1,11 +1,18 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
-  name: postgres-cluster-daily-backup
+  name: postgres-cluster-weekly-backup
   namespace: cnpg-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   cluster:
     name: postgres-cluster
-  schedule: "0 0 4 * * *"
+  # Weekly. A 14d recovery window keeps every backup inside the window,
+  # so a daily copy of Immich would be about 14 full backups.
+  schedule: "0 0 4 * * 0"
   backupOwnerReference: self
   immediate: true
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
