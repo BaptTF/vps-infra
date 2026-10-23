@@ -119,6 +119,8 @@ grafana:
     limits:
       memory: 512Mi
   sidecar:
+    dashboards:
+      searchNamespace: ALL
     resources:
       requests:
         cpu: 10m
