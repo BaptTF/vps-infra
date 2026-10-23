@@ -418,7 +418,7 @@ sudo /usr/local/bin/tailscale serve --bg --yes --tcp 8000 127.0.0.1:8000
 The serve config is kept by tailscaled across reboots. The rest-server process itself is not: the DSM boot task above is what starts it again.
 
 - Append-only, for k8up: `127.0.0.1:8000`, published by `tailscale serve`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. The path `/k3s` is required by `--private-repos`.
-- Prune, on the NAS: `127.0.0.1:8001`, not published. `sshd` sets `AllowTcpForwarding no`, so this port stays local.
+- Prune, for the Pi: `127.0.0.1:8001`, not published. The NAS does not run `restic`. Reach the listener with `ssh -N -L 8001:127.0.0.1:8001 dsplay`. `sshd` currently sets `AllowTcpForwarding no`, so that forward is refused until the NAS sshd allows it.
 
 Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster currently reaches the NAS through DERP.
 
@@ -433,11 +433,13 @@ The repository `e10bfe4460` already exists, so `restic init` fails if run again.
 
 ### Prune on the Pi
 
-The Home Assistant Pi already writes backups to the NAS, so it is allowed to delete snapshots. `sshd` refuses TCP forwarding, so the Pi cannot tunnel to `127.0.0.1:8001`. Run `scripts/nas/prune.sh` on the NAS, weekly. It talks to the local prune listener, keeps 14 daily and 8 weekly snapshots, then runs `restic check`. k8up's Prometheus rules alert when a backup job fails, which is also how an unreachable rest-server shows up.
+The Home Assistant Pi already writes backups to the NAS, so it is allowed to delete snapshots. The NAS does not run `restic`: it does not have the RAM. Weekly, from the Pi, with the SSH tunnel above:
 
 ```bash
 REST_PASSWORD=... RESTIC_PASSWORD=... ./scripts/nas/prune.sh
 ```
+
+That keeps 14 daily and 8 weekly snapshots, then runs `restic check`. k8up's Prometheus rules alert when a backup job fails, which is also how an unreachable rest-server shows up.
 
 ---
 
