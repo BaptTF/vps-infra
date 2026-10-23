@@ -1,17 +1,17 @@
-# Only used for R2 bucket size; zone analytics are filtered out.
+# Only used for R2 bucket size. Release 0.2.3 needs a user API token (it calls
+# /user/tokens/verify at start), lists accounts itself and polls every 60s.
 image:
-  # 0.0.16 (chart default) predates R2 metrics.
+  repository: ghcr.io/lablabs/cloudflare_exporter
+  # The chart default (0.0.16) predates R2 metrics.
   tag: "0.2.3"
   pullPolicy: IfNotPresent
 secretRef: cloudflare-exporter
 env:
   - name: FREE_TIER
     value: "true"
+  # Skip zone analytics; zones are still listed each cycle.
   - name: CF_ZONES
     value: "none"
-  # R2 storage analytics refresh slowly; no need to poll every minute.
-  - name: SCRAPE_INTERVAL
-    value: "300"
 deploymentAnnotations:
   secrets.infisical.com/auto-reload: "true"
 service:
@@ -26,9 +26,13 @@ resources:
     memory: 32Mi
   limits:
     memory: 64Mi
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
 securityContext:
   runAsNonRoot: true
   runAsUser: 65534
+  runAsGroup: 65534
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
