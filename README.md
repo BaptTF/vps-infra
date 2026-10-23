@@ -345,8 +345,8 @@ Path `/monitoring/cloudflare` -> Secret `cloudflare-exporter` (cloudflare-export
 
 | Key | Used by |
 |-----|---------|
-| `CF_API_TOKEN` | Cloudflare API token scoped to the account, with Account Analytics Read and Account Settings Read. |
-| `CF_ACCOUNTS` | Cloudflare account ID. |
+| `CF_API_TOKEN` | Cloudflare **user** API token (My Profile > API Tokens, not an account-owned token: release 0.2.3 verifies it through `/user/tokens/verify` and crashloops otherwise), with Account Analytics Read and Account Settings Read. |
+| `CF_ACCOUNTS` | Cloudflare account ID. Unused by release 0.2.3, which reports every account the token can read; kept for newer releases. |
 
 SearXNG `/metrics` stays off until path `/agents/searxng` also has `OPEN_METRICS` (the basic-auth password; the username is ignored).
 
@@ -354,9 +354,13 @@ Nothing uses the host network. Off-cluster targets (the three Home Assistants an
 
 ### CNPG backups
 
-Both clusters (`postgres-cluster`, `immich-postgres`) archive WAL and take base backups through the Barman Cloud plugin (`plugin-barman-cloud` chart in `system/cloudnative-pg/`). The `ObjectStore` `cnpg-r2` writes to the R2 bucket `cnpg-backups` (10 GB) under `<serverName>/`, keeps 14 days, and reads its keys from Infisical path `/r2` (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`). A full backup runs every Sunday (04:00 and 04:30 UTC); WAL fills the gap.
+Both clusters (`postgres-cluster`, `immich-postgres`) archive WAL and take base backups through the Barman Cloud plugin (`plugin-barman-cloud` chart in `system/cloudnative-pg/`). The `ObjectStore` `cnpg-r2` writes to the R2 bucket `cnpg-backups` (10 GB) under `<serverName>/`, keeps 14 days, and reads its keys from Infisical path `/r2` (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`). A full backup runs every Sunday (04:00 and 04:30 UTC); WAL fills the gap. With a 14-day window, Barman keeps three weekly copies (four until the next purge) and the WAL since the oldest, about 21 to 28 days.
 
-The `sre-backups` group in `system/monitoring/prometheusrules-sre.yaml` alerts on a base backup older than 8 days, a failed backup, a recovery point older than 23 days (retention not pruning), stalled WAL archiving, and the bucket above 9 GB or its size metric missing. Plugin metrics (`barman_cloud_cloudnative_pg_io_*`) come through the instance metrics port, scraped by `enablePodMonitor`.
+The `sre-backups` group in `system/monitoring/prometheusrules-sre.yaml` alerts per cluster on a base backup older than 8 days (or none at all), a failed backup, a recovery point older than 23 days (retention not pruning), missing plugin metrics, stalled WAL archiving, `pg_wal` above 2 GiB, the bucket above 9 GB, and cloudflare-exporter down or never reporting. Plugin metrics (`barman_cloud_cloudnative_pg_io_*`) have no cluster label; the rules derive it from the pod name. They come through the instance metrics port, scraped by `enablePodMonitor`. Rule tests: `system/monitoring/tests/sre-backups.test.yaml` (`promtool test rules`, command in the file header).
+
+Emergency stop, if R2 is unreachable and `pg_wal` grows: remove the `plugins:` block from the affected `Cluster`. CNPG then turns `archive_command` into a no-op and Postgres recycles WAL at the next checkpoint.
+
+To remove backups, revert in two commits: first drop `plugins:` from both Clusters and the `ScheduledBackup` files, then remove the chart and `objectstore.yaml` once the pods restarted without the sidecar. The plugin resources and the `ObjectStore` carry `PruneLast=true` so a single revert still prunes them last, and the `objectstores.barmancloud.cnpg.io` CRD has `Prune=false`; delete it by hand once nothing uses it.
 
 ---
 

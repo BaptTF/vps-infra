@@ -45,3 +45,26 @@ resources:
   - objectstore.yaml
   - scheduled-backup.yaml
   - immich-scheduled-backup.yaml
+
+# A bulk revert must drop `plugins:` from the Clusters before the plugin goes away,
+# and the CRD must never be pruned (it would cascade to the ObjectStore).
+patches:
+  - target:
+      kind: CustomResourceDefinition
+      name: objectstores.barmancloud.cnpg.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: objectstores.barmancloud.cnpg.io
+        annotations:
+          argocd.argoproj.io/sync-options: Prune=false
+  - target:
+      name: ".*barman-cloud.*"
+    patch: |-
+      apiVersion: v1
+      kind: Placeholder
+      metadata:
+        name: placeholder
+        annotations:
+          argocd.argoproj.io/sync-options: PruneLast=true
