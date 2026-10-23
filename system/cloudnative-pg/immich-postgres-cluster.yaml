@@ -25,6 +25,8 @@ spec:
       - "vchord.so"
   plugins:
     - name: barman-cloud.cloudnative-pg.io
+      # Defaulted by the CNPG webhook; set here to keep Argo CD in sync.
+      enabled: true
       isWALArchiver: true
       parameters:
         barmanObjectName: cnpg-r2
