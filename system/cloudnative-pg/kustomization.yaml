@@ -23,7 +23,6 @@ helmCharts:
 
 resources:
   - cnpg-cluster.yaml
-  - podmonitors.yaml
   - immich-postgres-cluster.yaml
   - immich-database.yaml
   - databases.yaml
