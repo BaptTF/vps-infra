@@ -37,9 +37,9 @@ spec:
         name: cnpg-r2-credentials
         key: AWS_SECRET_ACCESS_KEY
     # zstd level 3 keeps WAL archiving cheap.
-    # Base backups use --zstd through extra args: Barman 3.20 supports it, but
-    # this plugin's compression field does not, and barman-cloud-backup has no
-    # compression level (it falls back to zstd's medium, level 4).
+    # Base backups use gzip: tar compresses it and writes 64 KiB blocks, so
+    # multipart parts stay the same size, which R2 requires. zstd, lz4 and
+    # snappy are compressed outside tar and give uneven parts (InvalidPart).
     wal:
       compression: zstd
       # Drains a backlog faster after an outage.
@@ -47,5 +47,4 @@ spec:
       archiveAdditionalCommandArgs:
         - "--compression-level=3"
     data:
-      additionalCommandArgs:
-        - "--zstd"
+      compression: gzip
