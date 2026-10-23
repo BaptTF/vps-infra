@@ -1,0 +1,35 @@
+# Lets the SRE agent (SA openclaw/grokbot) trigger on-demand CNPG backups and
+# restore into a NEW Cluster bootstrapped from the ObjectStore. Scoped to cnpg-system.
+# No Secrets, no exec, no patch/update, and no delete on the live Clusters.
+# RBAC can't restrict `create` by resourceNames: any new Cluster name can be created.
+# `delete` is limited to the agreed restore names below.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: grokbot-cnpg-backup-restore
+  namespace: cnpg-system
+rules:
+  - apiGroups: ["postgresql.cnpg.io"]
+    resources: ["backups"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["postgresql.cnpg.io"]
+    resources: ["clusters"]
+    verbs: ["create"]
+  - apiGroups: ["postgresql.cnpg.io"]
+    resources: ["clusters"]
+    resourceNames: ["postgres-cluster-restore", "immich-postgres-restore"]
+    verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: grokbot-cnpg-backup-restore
+  namespace: cnpg-system
+subjects:
+  - kind: ServiceAccount
+    name: grokbot
+    namespace: openclaw
+roleRef:
+  kind: Role
+  name: grokbot-cnpg-backup-restore
+  apiGroup: rbac.authorization.k8s.io

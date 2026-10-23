@@ -45,6 +45,7 @@ resources:
   - objectstore.yaml
   - scheduled-backup.yaml
   - immich-scheduled-backup.yaml
+  - grokbot-backup-restore-rbac.yaml
 
 # A bulk revert must drop `plugins:` from the Clusters before the plugin goes away,
 # and the CRD must never be pruned (it would cascade to the ObjectStore).

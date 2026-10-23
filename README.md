@@ -314,6 +314,8 @@ Tailscale is the only access path. The SRE agent (service account `grokbot`) can
 - Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences
 - Loki: no Tailscale ingress. Query logs through Grafana (Explore, Loki datasource). Loki's delete API is disabled; logs only expire through the 14-day retention.
 
+In `cnpg-system` only, `grokbot` can also create/delete CNPG `Backup`s and create a new `Cluster` to restore from the ObjectStore (`system/cloudnative-pg/grokbot-backup-restore-rbac.yaml`). It can delete only the restore clusters `postgres-cluster-restore` and `immich-postgres-restore`, and cannot patch or delete `postgres-cluster`/`immich-postgres`. A restored Cluster not committed to git is pruned by ArgoCD.
+
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That is what wakes the SRE agent. `Watchdog` (always firing) and `InfoInhibitor` are dropped and never sent, so they do not spend tokens. A real alert that stays firing is repeated every 4 hours.
 
 Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Grafana, Prometheus and Alertmanager each only see their own credentials.
