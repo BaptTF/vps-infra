@@ -9,6 +9,8 @@ helmCharts:
     releaseName: cnpg
     namespace: cnpg-system
     valuesInline:
+      monitoring:
+        podMonitorEnabled: true
       resources:
         requests:
           cpu: 10m
@@ -19,6 +21,7 @@ helmCharts:
 
 resources:
   - cnpg-cluster.yaml
+  - podmonitors.yaml
   - immich-postgres-cluster.yaml
   - immich-database.yaml
   - databases.yaml
