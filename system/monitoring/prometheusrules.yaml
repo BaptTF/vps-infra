@@ -40,14 +40,14 @@ spec:
         - alert: TraefikService5xx
           expr: |
             (
-              sum by (service) (rate(traefik_service_requests_total{code=~"5.."}[5m]))
+              sum by (exported_service) (rate(traefik_service_requests_total{code=~"5.."}[5m]))
               /
-              sum by (service) (rate(traefik_service_requests_total[5m]))
+              sum by (exported_service) (rate(traefik_service_requests_total[5m]))
             ) > 0.05
             and
-            sum by (service) (rate(traefik_service_requests_total[5m])) > 0.05
+            sum by (exported_service) (rate(traefik_service_requests_total[5m])) > 0.05
           for: 10m
           labels:
             severity: warning
           annotations:
-            summary: "Traefik service {{ $labels.service }} is returning 5xx"
+            summary: "Traefik service {{ $labels.exported_service }} is returning 5xx"
