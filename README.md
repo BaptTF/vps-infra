@@ -341,9 +341,22 @@ Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth` (mounted in Prometh
 | `HA_EYG_TOKEN` | Prometheus scrape of `homeassistant-eyg` (120s, the Pi 3) |
 | `SNMP_COMMUNITY` | snmp-exporter read of `dsplay` (`100.75.160.28`). Read-only community, no quotes, backslashes or spaces. |
 
+Path `/monitoring/cloudflare` -> Secret `cloudflare-exporter` (cloudflare-exporter only, for the R2 bucket size):
+
+| Key | Used by |
+|-----|---------|
+| `CF_API_TOKEN` | Cloudflare API token scoped to the account, with Account Analytics Read and Account Settings Read. |
+| `CF_ACCOUNTS` | Cloudflare account ID. |
+
 SearXNG `/metrics` stays off until path `/agents/searxng` also has `OPEN_METRICS` (the basic-auth password; the username is ignored).
 
-Nothing uses the host network. Off-cluster targets (the three Home Assistants and the NAS over SNMP/UDP 161) are reached through Tailscale egress Services in `system/monitoring/tailscale-egress.yaml` (`ha-home`, `ha-cam`, `ha-eyg`, `nas-snmp`), the same pattern as `nas-proxy`. Prometheus stays pinned to Contabo only because its local-path PVC must not land on Hetzner. App metrics that are enabled in-cluster: Traefik, Argo CD, cert-manager, sealed-secrets, CNPG, Authelia (`:9959`), Immich (`8081` and `8082`), Vikunja (`/api/v1/metrics`, denied on the public ingress), Bifrost, Camille, and the image updater. Vaultwarden and LLDAP have no metrics endpoint.
+Nothing uses the host network. Off-cluster targets (the three Home Assistants and the NAS over SNMP/UDP 161) are reached through Tailscale egress Services in `system/monitoring/tailscale-egress.yaml` (`ha-home`, `ha-cam`, `ha-eyg`, `nas-snmp`), the same pattern as `nas-proxy`. Prometheus stays pinned to Contabo only because its local-path PVC must not land on Hetzner. App metrics that are enabled in-cluster: Traefik, Argo CD, cert-manager, sealed-secrets, CNPG, Authelia (`:9959`), Immich (`8081` and `8082`), Vikunja (`/api/v1/metrics`, denied on the public ingress), Bifrost, Camille, the image updater, and R2 storage through cloudflare-exporter. Vaultwarden and LLDAP have no metrics endpoint.
+
+### CNPG backups
+
+Both clusters (`postgres-cluster`, `immich-postgres`) archive WAL and take base backups through the Barman Cloud plugin (`plugin-barman-cloud` chart in `system/cloudnative-pg/`). The `ObjectStore` `cnpg-r2` writes to the R2 bucket `cnpg-backups` (10 GB) under `<serverName>/`, keeps 14 days, and reads its keys from Infisical path `/r2` (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`). A full backup runs every Sunday (04:00 and 04:30 UTC); WAL fills the gap.
+
+The `sre-backups` group in `system/monitoring/prometheusrules-sre.yaml` alerts on a base backup older than 8 days, a failed backup, a recovery point older than 23 days (retention not pruning), stalled WAL archiving, and the bucket above 9 GB or its size metric missing. Plugin metrics (`barman_cloud_cloudnative_pg_io_*`) come through the instance metrics port, scraped by `enablePodMonitor`.
 
 ---
 
