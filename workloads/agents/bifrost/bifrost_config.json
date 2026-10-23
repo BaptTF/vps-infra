@@ -1,6 +1,7 @@
 {
   "client": {
     "enforce_auth_on_inference": false,
+    "whitelisted_routes": ["/metrics"],
     "compat": {
       "convert_text_to_chat": false,
       "convert_chat_to_responses": false,
