@@ -63,6 +63,7 @@ rules:
       - tlsoptions
       - tlsstores
       - traefikservices
+      - serverstransporttcps
     verbs: ["get", "list", "watch"]
   - apiGroups: ["cert-manager.io"]
     resources: ["certificates", "certificaterequests", "issuers", "clusterissuers"]
@@ -71,7 +72,18 @@ rules:
     resources: ["orders", "challenges"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["postgresql.cnpg.io"]
-    resources: ["clusters", "backups", "scheduledbackups", "poolers", "databases"]
+    resources:
+      - clusters
+      - backups
+      - scheduledbackups
+      - poolers
+      - databases
+      - databaseroles
+      - publications
+      - subscriptions
+      - imagecatalogs
+      - clusterimagecatalogs
+      - failoverquorums
     verbs: ["get", "list", "watch"]
   - apiGroups: ["secrets.infisical.com"]
     resources: ["infisicalsecrets"]
@@ -83,6 +95,11 @@ rules:
       - prometheusrules
       - servicemonitors
       - podmonitors
+      - probes
+      - scrapeconfigs
+      - alertmanagerconfigs
+      - prometheusagents
+      - thanosrulers
     verbs: ["get", "list", "watch"]
   - apiGroups: ["k8up.io"]
     resources:
@@ -95,4 +112,27 @@ rules:
       - archives
       - podconfigs
       - prebackuppods
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["barmancloud.cnpg.io"]
+    resources: ["objectstores"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["tailscale.com"]
+    resources:
+      - proxyclasses
+      - proxygroups
+      - proxygrouppolicies
+      - connectors
+      - dnsconfigs
+      - recorders
+      - tailnets
+      - peerrelays
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["helm.cattle.io"]
+    resources: ["helmcharts", "helmchartconfigs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["k3s.cattle.io"]
+    resources: ["addons", "etcdsnapshotfiles"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["argocd-image-updater.argoproj.io"]
+    resources: ["imageupdaters"]
     verbs: ["get", "list", "watch"]
