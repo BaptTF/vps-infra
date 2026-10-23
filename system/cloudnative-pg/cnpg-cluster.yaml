@@ -3,6 +3,8 @@ kind: Cluster
 metadata:
   name: postgres-cluster
   namespace: cnpg-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   instances: 1
   monitoring:
@@ -16,9 +18,12 @@ spec:
     limits:
       cpu: 250m
       memory: 512Mi
-  # backup/WAL archiving to R2 disabled: same R2 403 as immich-postgres,
-  # ~5.7Gi unreclaimable local pg_wal. Re-enable with fixed credentials
-  # and short retention after immich-postgres is healthy again.
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: cnpg-r2
+        serverName: postgres-cluster
 
   managed:
     roles:

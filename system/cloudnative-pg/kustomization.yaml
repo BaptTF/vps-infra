@@ -20,6 +20,19 @@ helmCharts:
         limits:
           cpu: 100m
           memory: 128Mi
+  - name: plugin-barman-cloud
+    repo: https://cloudnative-pg.github.io/charts
+    version: 0.8.1
+    releaseName: plugin-barman-cloud
+    namespace: cnpg-system
+    valuesInline:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
 
 resources:
   - cnpg-cluster.yaml
@@ -29,6 +42,6 @@ resources:
   - database-infisical-secrets.yaml
   - immich-db-infisical-secret.yaml
   - backup-infisical-secret.yaml
-  # ScheduledBackup CRs parked until R2 WAL archiving is re-enabled:
-  # - scheduled-backup.yaml
-  # - immich-scheduled-backup.yaml
+  - objectstore.yaml
+  - scheduled-backup.yaml
+  - immich-scheduled-backup.yaml
