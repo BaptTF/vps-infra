@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+  - name: k8up
+    repo: https://k8up-io.github.io/k8up
+    version: 4.10.1
+    releaseName: k8up
+    namespace: k8up
+    includeCRDs: true
+    valuesInline:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+      k8up:
+        timezone: UTC
+        # Only PVCs annotated k8up.io/backup=true are copied.
+        skipWithoutAnnotation: true
+        globalResources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 2Gi
+      metrics:
+        serviceMonitor:
+          enabled: true
+        prometheusRule:
+          enabled: true
+          createDefaultRules: true
+          # Prune and check run on the Home Assistant Pi, not in the cluster.
+          jobFailedRulesFor:
+            - backup
+
+resources:
+  - infisical-secret.yaml
+  - schedules.yaml

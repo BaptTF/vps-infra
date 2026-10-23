@@ -362,6 +362,83 @@ Emergency stop, if R2 is unreachable and `pg_wal` grows: remove the `plugins:` b
 
 To remove backups, revert in two commits: first drop `plugins:` from both Clusters and the `ScheduledBackup` files, then remove the chart and `objectstore.yaml` once the pods restarted without the sidecar. The plugin resources and the `ObjectStore` carry `PruneLast=true` so a single revert still prunes them last, and the `objectstores.barmancloud.cnpg.io` CRD has `Prune=false`; delete it by hand once nothing uses it.
 
+## PVC backups (k8up)
+
+Local PVCs are copied daily to a restic repository on the NAS (`dsplay`). Postgres stays on the CNPG backups above. The Storage Box photo copy is separate and is not set up here.
+
+k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
+
+| PVC | Namespace |
+|-----|-----------|
+| `immich-library` | `immich` |
+| `openclaw-home-pvc`, `hermes-lea-data`, `hermes-lya-data`, `kirocrew-home` | `openclaw` |
+| `vikunja-files` | `vikunja` |
+| `vaultwarden-data` | `vaultwarden` |
+| `vulcain-data` | `vulcain` |
+
+Caches (Immich machine-learning, Prometheus, Loki), the Storage Box SMB volume, and the CNPG data directories are left out. Schedules run between 02:00 and 02:50 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only.
+
+Create these keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`, before the schedules can succeed. Secret `k8up-restic` is synced into each namespace above.
+
+| Key | Description |
+|-----|-------------|
+| `RESTIC_PASSWORD` | restic repository password. Not the htpasswd password. |
+| `REST_USERNAME` | `k3s` |
+| `REST_PASSWORD` | htpasswd password for user `k3s` |
+
+### rest-server on the NAS
+
+The DS218play has no Docker. `scripts/nas/rest-serve.sh` runs two `rest-server` 0.14.0 processes from Baptiste's home. DSM Task Scheduler starts it at boot, as user Baptiste, with `sh /var/services/homes/Baptiste/bin/rest-serve.sh`. The task stays in the foreground.
+
+Install the binary once over SSH. Generate the htpasswd file on a machine that has `htpasswd` (bcrypt, `-B`); DSM does not ship it.
+
+```bash
+htpasswd -nbB k3s 'the-htpasswd-password' > k3s.htpasswd
+ssh dsplay 'mkdir -p /var/services/homes/Baptiste/bin /var/services/homes/Baptiste/.config'
+ssh dsplay 'umask 077; cat > /var/services/homes/Baptiste/.config/k3s.htpasswd' < k3s.htpasswd
+ssh dsplay 'cat > /var/services/homes/Baptiste/bin/rest-serve.sh && chmod 755 /var/services/homes/Baptiste/bin/rest-serve.sh' < scripts/nas/rest-serve.sh
+ssh dsplay 'cd /var/services/homes/Baptiste
+curl -fsSL -o rest-server.tar.gz \
+  https://github.com/restic/rest-server/releases/download/v0.14.0/rest-server_0.14.0_linux_arm64.tar.gz
+echo "cef139cbe8b27b16bda731d17f093b0aa466b8c60b136c12d78b6f2bff3daf22  rest-server.tar.gz" | sha256sum -c
+tar -xzf rest-server.tar.gz --strip-components=1 -C bin rest-server_0.14.0_linux_arm64/rest-server
+chmod 755 bin/rest-server
+rm -f rest-server.tar.gz'
+rm -f k3s.htpasswd
+```
+
+`scp` cannot create `/var/services/homes/Baptiste/.config` on this NAS. Send the file over SSH instead.
+
+`--append-only` is process-wide, so k8up and prune cannot share one process. Tailscale on the DS218play runs in userspace mode, so nothing can bind the Tailscale address. The append-only process listens on `127.0.0.1:8000`, and `tailscale serve` publishes that port on the tailnet. `serve` needs root; SSH as Baptiste cannot sudo. Run this once:
+
+```bash
+sudo /usr/local/bin/tailscale serve --bg --yes --tcp 8000 127.0.0.1:8000
+```
+
+The serve config is kept by tailscaled across reboots. The rest-server process itself is not: the DSM boot task above is what starts it again.
+
+- Append-only, for k8up: `127.0.0.1:8000`, published by `tailscale serve`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. The path `/k3s` is required by `--private-repos`.
+- Prune, on the NAS: `127.0.0.1:8001`, not published. `sshd` sets `AllowTcpForwarding no`, so this port stays local.
+
+Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster currently reaches the NAS through DERP.
+
+`sshd` on the NAS sets `AllowTcpForwarding no`, so an SSH local forward cannot reach `127.0.0.1:8000`. After `tailscale serve` is active, initialize the repository once from a tailnet host:
+
+```bash
+export RESTIC_REPOSITORY="rest:http://k3s:${REST_PASSWORD}@dsplay.tail4c7c90.ts.net:8000/k3s"
+restic init
+```
+
+The repository `e10bfe4460` already exists, so `restic init` fails if run again. When the ACL is later limited to `tag:k3s`, a laptop cannot open port 8000.
+
+### Prune on the Pi
+
+The Home Assistant Pi already writes backups to the NAS, so it is allowed to delete snapshots. `sshd` refuses TCP forwarding, so the Pi cannot tunnel to `127.0.0.1:8001`. Run `scripts/nas/prune.sh` on the NAS, weekly. It talks to the local prune listener, keeps 14 daily and 8 weekly snapshots, then runs `restic check`. k8up's Prometheus rules alert when a backup job fails, which is also how an unreachable rest-server shows up.
+
+```bash
+REST_PASSWORD=... RESTIC_PASSWORD=... ./scripts/nas/prune.sh
+```
+
 ---
 
 ## Camille (camille.bapttf.com)
