@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: gowa-storage
   namespace: gowa
+  annotations:
+    k8up.io/backup: "true"
 spec:
   accessModes:
     - ReadWriteOnce

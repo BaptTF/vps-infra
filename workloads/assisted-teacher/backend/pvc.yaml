@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: assisted-teacher-workspace
   namespace: assisted-teacher
+  annotations:
+    k8up.io/backup: "true"
 spec:
   accessModes:
     - ReadWriteOnce
