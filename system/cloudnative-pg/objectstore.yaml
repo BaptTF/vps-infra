@@ -3,6 +3,10 @@ kind: ObjectStore
 metadata:
   name: cnpg-r2
   namespace: cnpg-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    # Removed after the Clusters stop referencing it.
+    argocd.argoproj.io/sync-options: PruneLast=true
 spec:
   retentionPolicy: 14d
   instanceSidecarConfiguration:
@@ -38,6 +42,8 @@ spec:
     # compression level (it falls back to zstd's medium, level 4).
     wal:
       compression: zstd
+      # Drains a backlog faster after an outage.
+      maxParallel: 2
       archiveAdditionalCommandArgs:
         - "--compression-level=3"
     data:
