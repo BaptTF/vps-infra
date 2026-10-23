@@ -50,18 +50,6 @@ spec:
           annotations:
             summary: "Long transaction on {{ $labels.pod }}/{{ $labels.datname }}"
             description: "A transaction by {{ $labels.usename }} has been open for {{ $value | humanizeDuration }}."
-        - alert: CnpgVolumeAlmostFull
-          expr: |
-            max by (namespace, persistentvolumeclaim) (
-              kubelet_volume_stats_used_bytes{job="kubelet", namespace="cnpg-system"}
-                / kubelet_volume_stats_capacity_bytes{job="kubelet", namespace="cnpg-system"}
-            ) > 0.85
-          for: 10m
-          labels:
-            severity: critical
-          annotations:
-            summary: "CNPG volume {{ $labels.persistentvolumeclaim }} is almost full"
-            description: "{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full."
     - name: sre-cert-manager
       rules:
         - alert: CertificateExpiringSoon
@@ -132,17 +120,26 @@ spec:
           annotations:
             summary: "{{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} was OOMKilled"
             description: "The container restarted after an OOMKill in the last 15 minutes."
-    - name: sre-pvc
+    - name: sre-node-disk
       rules:
-        - alert: PersistentVolumeUsageHigh
+        # local-path PVCs share the node disk and don't enforce their size, so alert on the node filesystem.
+        - alert: NodeDiskUsageHigh
           expr: |
-            max by (namespace, persistentvolumeclaim) (
-              kubelet_volume_stats_used_bytes{job="kubelet", namespace!="cnpg-system"}
-                / kubelet_volume_stats_capacity_bytes{job="kubelet", namespace!="cnpg-system"}
-            ) > 0.85
+            1 - node_filesystem_avail_bytes{job="node-exporter", fstype!~"tmpfs|overlay|squashfs", mountpoint="/"}
+              / node_filesystem_size_bytes{job="node-exporter", fstype!~"tmpfs|overlay|squashfs", mountpoint="/"} > 0.85
           for: 30m
           labels:
             severity: warning
           annotations:
-            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} above 85%"
-            description: "{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full."
+            summary: "Node {{ $labels.instance }} root disk above 85%"
+            description: "{{ $labels.instance }} root filesystem is {{ $value | humanizePercentage }} full."
+        - alert: NodeDiskUsageCritical
+          expr: |
+            1 - node_filesystem_avail_bytes{job="node-exporter", fstype!~"tmpfs|overlay|squashfs", mountpoint="/"}
+              / node_filesystem_size_bytes{job="node-exporter", fstype!~"tmpfs|overlay|squashfs", mountpoint="/"} > 0.93
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.instance }} root disk above 93%"
+            description: "{{ $labels.instance }} root filesystem is {{ $value | humanizePercentage }} full."
