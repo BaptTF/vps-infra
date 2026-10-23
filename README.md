@@ -308,7 +308,7 @@ When the original worker came back `Ready`:
 
 Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Grafana and Alertmanager have no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector.
 
-Tailscale is the only access path. The SRE agent (service account `grokbot`) can read the monitoring CRDs and call:
+Tailscale is the only access path. The SRE agent (service account `grokbot`) can read the monitoring and k8up backup CRDs and call:
 
 - Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`
 - Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences
