@@ -1,7 +1,8 @@
 #!/bin/sh
-# Run on the NAS. sshd has AllowTcpForwarding no, so the Pi cannot tunnel to
-# 127.0.0.1:8001. REST_PASSWORD is the htpasswd password. RESTIC_PASSWORD is
-# the repository password.
+# Run on the Home Assistant Pi, which already has restic. The NAS does not:
+# it has no RAM for a restic process. Reach the prune listener with
+#   ssh -N -L 8001:127.0.0.1:8001 dsplay
+# REST_PASSWORD is the htpasswd password. RESTIC_PASSWORD is the repository password.
 set -eu
 
 : "${REST_PASSWORD:?}"
