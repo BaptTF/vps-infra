@@ -5,6 +5,8 @@ metadata:
   namespace: cnpg-system
 spec:
   instances: 1
+  monitoring:
+    enablePodMonitor: true
   storage:
     size: 2Gi
   resources:
