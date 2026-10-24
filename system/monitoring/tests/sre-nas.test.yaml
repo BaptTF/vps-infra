@@ -1,0 +1,83 @@
+# Run from system/monitoring:
+#   yq '.spec' prometheusrules-sre.yaml > /tmp/sre-rules.yaml
+#   promtool test rules tests/sre-nas.test.yaml
+rule_files:
+  - /tmp/sre-rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # 24/10 incident: 1.2 GiB of 2 GiB swap used, 50% iowait, 60 MiB free.
+  - interval: 1m
+    input_series:
+      - series: 'memTotalSwap{job="snmp-dsplay", instance="dsplay"}'
+        values: '2097152x60'
+      - series: 'memAvailSwap{job="snmp-dsplay", instance="dsplay"}'
+        values: '524288x60'
+      - series: 'memAvailReal{job="snmp-dsplay", instance="dsplay"}'
+        values: '61440x60'
+      # 100 ticks/s per CPU: 10 user, 10 system, 30 idle, 50 wait.
+      - series: 'ssCpuRawUser{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+600x60'
+      - series: 'ssCpuRawSystem{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+600x60'
+      - series: 'ssCpuRawIdle{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+1800x60'
+      - series: 'ssCpuRawWait{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+3000x60'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: NasSwapHigh
+        exp_alerts: []
+      - eval_time: 40m
+        alertname: NasSwapHigh
+        exp_alerts:
+          - exp_labels: {severity: warning, job: snmp-dsplay, instance: dsplay}
+            exp_annotations:
+              summary: "NAS dsplay swap above 70%"
+              description: "dsplay uses 75% of its swap; the OOM killer may hit tailscaled."
+      - eval_time: 40m
+        alertname: NasIowaitHigh
+        exp_alerts:
+          - exp_labels: {severity: warning, job: snmp-dsplay, instance: dsplay}
+            exp_annotations:
+              summary: "NAS dsplay iowait above 40%"
+              description: "dsplay spends 50% of CPU time waiting on I/O (swap or backup pressure)."
+      - eval_time: 10m
+        alertname: NasMemoryLow
+        exp_alerts: []
+      - eval_time: 20m
+        alertname: NasMemoryLow
+        exp_alerts:
+          - exp_labels: {severity: warning, job: snmp-dsplay, instance: dsplay}
+            exp_annotations:
+              summary: "NAS dsplay has less than 64 MiB of free RAM"
+              description: "dsplay memAvailReal is 61440 kB."
+
+  # Healthy NAS: nothing fires.
+  - interval: 1m
+    input_series:
+      - series: 'memTotalSwap{job="snmp-dsplay", instance="dsplay"}'
+        values: '2097152x60'
+      - series: 'memAvailSwap{job="snmp-dsplay", instance="dsplay"}'
+        values: '1900000x60'
+      - series: 'memAvailReal{job="snmp-dsplay", instance="dsplay"}'
+        values: '200000x60'
+      - series: 'ssCpuRawUser{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+600x60'
+      - series: 'ssCpuRawSystem{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+600x60'
+      - series: 'ssCpuRawIdle{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+4500x60'
+      - series: 'ssCpuRawWait{job="snmp-dsplay", instance="dsplay"}'
+        values: '0+300x60'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: NasSwapHigh
+        exp_alerts: []
+      - eval_time: 60m
+        alertname: NasIowaitHigh
+        exp_alerts: []
+      - eval_time: 60m
+        alertname: NasMemoryLow
+        exp_alerts: []
