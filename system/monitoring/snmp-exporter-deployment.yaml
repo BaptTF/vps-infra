@@ -1,8 +1,3 @@
-# The snmp_exporter modules live in snmp-exporter-modules.yml and are turned into
-# the snmp-exporter-modules ConfigMap by the configMapGenerator in
-# kustomization.yaml. The generator appends a content hash to the ConfigMap name
-# and rewrites the reference below, so any change to the modules rolls the pod
-# (the initContainer only renders the config at start).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -101,18 +96,3 @@ spec:
                 path: SNMP_COMMUNITY
         - name: config
           emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: snmp-exporter
-  namespace: monitoring
-  labels:
-    app: snmp-exporter
-spec:
-  selector:
-    app: snmp-exporter
-  ports:
-    - name: http
-      port: 9116
-      targetPort: http

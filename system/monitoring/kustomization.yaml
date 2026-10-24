@@ -11,9 +11,9 @@ resources:
   - prometheusrules.yaml
   - prometheusrules-sre.yaml
   - servicemonitors.yaml
-  - snmp-exporter.yaml
+  - snmp-exporter-deployment.yaml
+  - snmp-exporter-service.yaml
 
-# Hash-suffixed so the snmp-exporter Deployment rolls on every modules change.
 configMapGenerator:
   - name: snmp-exporter-modules
     files:
