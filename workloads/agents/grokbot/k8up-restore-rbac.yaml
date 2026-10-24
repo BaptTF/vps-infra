@@ -1,12 +1,12 @@
-# Lets grokbot create k8up Restore objects (and delete finished ones). Nothing else writable.
-# Restores are applied imperatively, never committed to git, and only after Baptiste's explicit approval.
+# Lets grokbot create k8up Restore and Backup objects (and delete finished ones). Nothing else writable.
+# They are applied imperatively, never committed to git, and only after Baptiste's explicit approval.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: grokbot-k8up-restore
 rules:
   - apiGroups: ["k8up.io"]
-    resources: ["restores"]
+    resources: ["restores", "backups"]
     verbs: ["create", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
