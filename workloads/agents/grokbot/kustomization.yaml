@@ -5,4 +5,4 @@ resources:
   - serviceaccount.yaml
   - token-secret.yaml
   - clusterrolebinding.yaml
-  - k8up-restore-rbac.yaml
+  - k8up-rbac.yaml
