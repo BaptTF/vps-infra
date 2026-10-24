@@ -364,21 +364,22 @@ To remove backups, revert in two commits: first drop `plugins:` from both Cluste
 
 ## PVC backups (k8up)
 
-Local PVCs are copied daily to a restic repository on the NAS (`dsplay`). Postgres stays on the CNPG backups above. The Storage Box photo copy is separate and is not set up here.
+Local PVCs are copied daily to a restic repository on the NAS (`dsplay`). Postgres stays on the CNPG backups above. Immich originals on the Storage Box go to a second restic repository, `/k3s/photos`, described below.
 
 k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 
-| PVC | Namespace |
-|-----|-----------|
-| `immich-library` | `immich` |
-| `openclaw-home-pvc`, `hermes-lea-data`, `hermes-lya-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` |
-| `vikunja-files` | `vikunja` |
-| `vaultwarden-data` | `vaultwarden` |
-| `vulcain-data` | `vulcain` |
-| `gowa-storage` | `gowa` |
-| `assisted-teacher-workspace` | `assisted-teacher` |
+| PVC | Namespace | Repository |
+|-----|-----------|------------|
+| `immich-library` | `immich` | `/k3s` |
+| `immich-storagebox` | `immich` | `/k3s/photos` |
+| `openclaw-home-pvc`, `hermes-lea-data`, `hermes-lya-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
+| `vikunja-files` | `vikunja` | `/k3s` |
+| `vaultwarden-data` | `vaultwarden` | `/k3s` |
+| `vulcain-data` | `vulcain` | `/k3s` |
+| `gowa-storage` | `gowa` | `/k3s` |
+| `assisted-teacher-workspace` | `assisted-teacher` | `/k3s` |
 
-Caches (Immich machine-learning, Prometheus, Loki), the Storage Box SMB volume, and the CNPG data directories are left out. `nullclaw-leo-data` is the Hermes Leo volume. Schedules run between 02:00 and 03:15 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only.
+Caches (Immich machine-learning, Prometheus, Loki) and the CNPG data directories are left out. `nullclaw-leo-data` is the Hermes Leo volume. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
 
 Create these keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`, before the schedules can succeed. Secret `k8up-restic` is synced into each namespace above.
 
@@ -387,6 +388,14 @@ Create these keys in Infisical project `infrastructure`, environment `prod`, pat
 | `RESTIC_PASSWORD` | restic repository password. Not the htpasswd password. |
 | `REST_USERNAME` | `k3s` |
 | `REST_PASSWORD` | htpasswd password for user `k3s` |
+
+Path `/k8up/photos` feeds Secret `k8up-restic-photos` in `immich` only. It holds the encryption password of the Storage Box repository. HTTP auth stays the `k3s` user from `/k8up`.
+
+| Key | Description |
+|-----|-------------|
+| `RESTIC_PASSWORD` | password of the `/k3s/photos` repository |
+
+`--private-repos` only requires the first folder to match the username, so this repository is `http://dsplay.tail4c7c90.ts.net:8000/k3s/photos`. On disk that is `restic/k3s/photos`, a second restic repository under the `/k3s` directory. The schedule backs up the whole SMB share, including `encoded-video`. The cluster currently reaches `dsplay` through a DERP relay, so the first run is slow until that path is direct. The job asks for 512 MiB and may use up to 4 GiB. Nothing prunes `/k3s/photos`: the Pi script only forgets `/k3s`, and port 8001 is not reachable from the cluster. Unchanged photos are stored once. Snapshots of that repository accumulate until a forget can run against the prune listener.
 
 ### rest-server on the NAS
 
@@ -419,7 +428,7 @@ sudo /usr/local/bin/tailscale serve --bg --yes --tcp 8000 127.0.0.1:8000
 
 The serve config is kept by tailscaled across reboots. The rest-server process itself is not: the DSM boot task above is what starts it again.
 
-- Append-only, for k8up: `127.0.0.1:8000`, published by `tailscale serve`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. The path `/k3s` is required by `--private-repos`.
+- Append-only, for k8up: `127.0.0.1:8000`, published by `tailscale serve`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. `--private-repos` requires the first folder to be the username. A second folder is a separate repository, so Immich originals use `/k3s/photos`.
 - Prune, for the Pi: `127.0.0.1:8001`, not published. The NAS does not run `restic`. Reach the listener with `ssh -N -L 8001:127.0.0.1:8001 dsplay`. `sshd` currently sets `AllowTcpForwarding no`, so that forward is refused until the NAS sshd allows it.
 
 Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster currently reaches the NAS through DERP.
@@ -431,7 +440,7 @@ export RESTIC_REPOSITORY="rest:http://k3s:${REST_PASSWORD}@dsplay.tail4c7c90.ts.
 restic init
 ```
 
-The repository `e10bfe4460` already exists, so `restic init` fails if run again. When the ACL is later limited to `tag:k3s`, a laptop cannot open port 8000.
+The repository `e10bfe4460` already exists, so `restic init` fails if run again. The Storage Box repository `7b784aa042` is at `/k3s/photos`, created the same way with the password from `/k8up/photos`. When the ACL is later limited to `tag:k3s`, a laptop cannot open port 8000.
 
 ### Prune on the Pi
 
