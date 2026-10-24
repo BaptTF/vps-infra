@@ -238,3 +238,40 @@ spec:
           annotations:
             summary: "Node {{ $labels.instance }} root disk above 93%"
             description: "{{ $labels.instance }} root filesystem is {{ $value | humanizePercentage }} full."
+    - name: sre-nas
+      rules:
+        # DSPlay (643 MiB RAM) swapped hard and OOM-killed tailscaled during restic backups on 2026-10-24.
+        # UCD-SNMP-MIB memory values are in kB.
+        - alert: NasSwapHigh
+          expr: |
+            (memTotalSwap{job="snmp-dsplay"} - memAvailSwap{job="snmp-dsplay"})
+              / (memTotalSwap{job="snmp-dsplay"} > 0) > 0.7
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS {{ $labels.instance }} swap above 70%"
+            description: "{{ $labels.instance }} uses {{ $value | humanizePercentage }} of its swap; the OOM killer may hit tailscaled."
+        - alert: NasIowaitHigh
+          expr: |
+            rate(ssCpuRawWait{job="snmp-dsplay"}[5m])
+              / (
+                  rate(ssCpuRawUser{job="snmp-dsplay"}[5m])
+                + rate(ssCpuRawSystem{job="snmp-dsplay"}[5m])
+                + rate(ssCpuRawIdle{job="snmp-dsplay"}[5m])
+                + rate(ssCpuRawWait{job="snmp-dsplay"}[5m])
+              ) > 0.4
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS {{ $labels.instance }} iowait above 40%"
+            description: "{{ $labels.instance }} spends {{ $value | humanizePercentage }} of CPU time waiting on I/O (swap or backup pressure)."
+        - alert: NasMemoryLow
+          expr: memAvailReal{job="snmp-dsplay"} < 65536
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS {{ $labels.instance }} has less than 64 MiB of free RAM"
+            description: "{{ $labels.instance }} memAvailReal is {{ $value }} kB."
