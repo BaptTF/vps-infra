@@ -1,4 +1,12 @@
 # system/argocd/values.yaml
+
+# Disable NetworkPolicy creation (chart 10.x enables it by default).
+# Our ingress (Traefik IngressRoute + Tailscale) is not covered by the
+# upstream NP rules, so enabling them would block access to the ArgoCD UI.
+global:
+  networkPolicy:
+    create: false
+
 # Désactiver la Haute Disponibilité (comme le install.yaml)
 redis-ha:
   enabled: false
