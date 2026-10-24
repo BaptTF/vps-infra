@@ -1,5 +1,5 @@
 # Run from system/monitoring:
-#   yq '.spec' prometheusrules-sre.yaml > /tmp/sre-rules.yaml
+#   python3 -c 'import yaml,sys; yaml.safe_dump(yaml.safe_load(open("prometheusrules-sre.yaml"))["spec"], sys.stdout)' > /tmp/sre-rules.yaml
 #   promtool test rules tests/sre-nas.test.yaml
 rule_files:
   - /tmp/sre-rules.yaml
@@ -15,7 +15,9 @@ tests:
       - series: 'memAvailSwap{job="snmp-dsplay", instance="dsplay"}'
         values: '524288x60'
       - series: 'memAvailReal{job="snmp-dsplay", instance="dsplay"}'
-        values: '61440x60'
+        values: '40960x60'
+      - series: 'memCached{job="snmp-dsplay", instance="dsplay"}'
+        values: '20480x60'
       # 100 ticks/s per CPU: 10 user, 10 system, 30 idle, 50 wait.
       - series: 'ssCpuRawUser{job="snmp-dsplay", instance="dsplay"}'
         values: '0+600x60'
@@ -51,8 +53,8 @@ tests:
         exp_alerts:
           - exp_labels: {severity: warning, job: snmp-dsplay, instance: dsplay}
             exp_annotations:
-              summary: "NAS dsplay has less than 64 MiB of free RAM"
-              description: "dsplay memAvailReal is 61440 kB."
+              summary: "NAS dsplay has less than 64 MiB of available RAM"
+              description: "dsplay memAvailReal + memCached is 61440 kB."
 
   # Healthy NAS: nothing fires.
   - interval: 1m
@@ -63,6 +65,8 @@ tests:
         values: '1900000x60'
       - series: 'memAvailReal{job="snmp-dsplay", instance="dsplay"}'
         values: '200000x60'
+      - series: 'memCached{job="snmp-dsplay", instance="dsplay"}'
+        values: '300000x60'
       - series: 'ssCpuRawUser{job="snmp-dsplay", instance="dsplay"}'
         values: '0+600x60'
       - series: 'ssCpuRawSystem{job="snmp-dsplay", instance="dsplay"}'
@@ -78,6 +82,18 @@ tests:
       - eval_time: 60m
         alertname: NasIowaitHigh
         exp_alerts: []
+      - eval_time: 60m
+        alertname: NasMemoryLow
+        exp_alerts: []
+
+  # Low free RAM but a large reclaimable page cache: not a memory shortage.
+  - interval: 1m
+    input_series:
+      - series: 'memAvailReal{job="snmp-dsplay", instance="dsplay"}'
+        values: '30000x60'
+      - series: 'memCached{job="snmp-dsplay", instance="dsplay"}'
+        values: '400000x60'
+    alert_rule_test:
       - eval_time: 60m
         alertname: NasMemoryLow
         exp_alerts: []

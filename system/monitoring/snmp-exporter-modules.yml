@@ -1,0 +1,349 @@
+# Synology MIBs the NAS already loads. The community string is injected at
+# start from Infisical and is not stored in this file.
+modules:
+  synology:
+    walk:
+      - 1.3.6.1.2.1.1.3
+      - 1.3.6.1.2.1.25.2.3.1
+      - 1.3.6.1.4.1.6574.1.1
+      - 1.3.6.1.4.1.6574.1.2
+      - 1.3.6.1.4.1.6574.1.4
+      - 1.3.6.1.4.1.6574.2.1.1
+      - 1.3.6.1.4.1.6574.3.1.1
+      # CPU: hrProcessorLoad, UCD systemStats raw counters (iowait), laLoadInt.
+      - 1.3.6.1.2.1.25.3.3.1.2
+      - 1.3.6.1.4.1.2021.11.50
+      - 1.3.6.1.4.1.2021.11.52
+      - 1.3.6.1.4.1.2021.11.53
+      - 1.3.6.1.4.1.2021.11.54
+      - 1.3.6.1.4.1.2021.10.1.5
+      # UCD memory scalars (kB).
+      - 1.3.6.1.4.1.2021.4
+      # IF-MIB: ifDescr, ifOperStatus, ifName, ifHCInOctets, ifHCOutOctets.
+      - 1.3.6.1.2.1.2.2.1.2
+      - 1.3.6.1.2.1.2.2.1.8
+      - 1.3.6.1.2.1.31.1.1.1.1
+      - 1.3.6.1.2.1.31.1.1.1.6
+      - 1.3.6.1.2.1.31.1.1.1.10
+      # SYNOLOGY-STORAGEIO-MIB (per disk) and SYNOLOGY-SPACEIO-MIB (per volume).
+      - 1.3.6.1.4.1.6574.101.1.1
+      - 1.3.6.1.4.1.6574.102.1.1
+    metrics:
+      - name: sysUpTime
+        oid: 1.3.6.1.2.1.1.3
+        type: gauge
+        help: System uptime in ticks
+      - name: synologySystemStatus
+        oid: 1.3.6.1.4.1.6574.1.1
+        type: gauge
+        help: Synology system status (1 normal)
+      - name: synologyTemperatureCelsius
+        oid: 1.3.6.1.4.1.6574.1.2
+        type: gauge
+        help: Synology system temperature
+      - name: synologySystemFanStatus
+        oid: 1.3.6.1.4.1.6574.1.4.1
+        type: gauge
+        help: Synology system fan status (1 normal)
+      - name: hrStorageSize
+        oid: 1.3.6.1.2.1.25.2.3.1.5
+        type: gauge
+        help: Storage size in allocation units
+        indexes:
+          - labelname: hrStorageIndex
+            type: gauge
+        lookups:
+          - labels: [hrStorageIndex]
+            labelname: hrStorageDescr
+            oid: 1.3.6.1.2.1.25.2.3.1.3
+            type: DisplayString
+      - name: hrStorageUsed
+        oid: 1.3.6.1.2.1.25.2.3.1.6
+        type: gauge
+        help: Storage used in allocation units
+        indexes:
+          - labelname: hrStorageIndex
+            type: gauge
+        lookups:
+          - labels: [hrStorageIndex]
+            labelname: hrStorageDescr
+            oid: 1.3.6.1.2.1.25.2.3.1.3
+            type: DisplayString
+      - name: hrStorageAllocationUnits
+        oid: 1.3.6.1.2.1.25.2.3.1.4
+        type: gauge
+        help: Bytes per allocation unit
+        indexes:
+          - labelname: hrStorageIndex
+            type: gauge
+      - name: synologyDiskStatus
+        oid: 1.3.6.1.4.1.6574.2.1.1.5
+        type: gauge
+        help: Disk status (1 normal, 2 initialized, 3 not initialized, 4 system partition failed, 5 crashed)
+        indexes:
+          - labelname: synoDiskIndex
+            type: gauge
+        lookups:
+          - labels: [synoDiskIndex]
+            labelname: synoDiskID
+            oid: 1.3.6.1.4.1.6574.2.1.1.2
+            type: DisplayString
+      - name: synologyDiskTemperatureCelsius
+        oid: 1.3.6.1.4.1.6574.2.1.1.6
+        type: gauge
+        help: Disk temperature
+        indexes:
+          - labelname: synoDiskIndex
+            type: gauge
+        lookups:
+          - labels: [synoDiskIndex]
+            labelname: synoDiskID
+            oid: 1.3.6.1.4.1.6574.2.1.1.2
+            type: DisplayString
+      - name: synologyRaidStatus
+        oid: 1.3.6.1.4.1.6574.3.1.1.3
+        type: gauge
+        help: RAID status (1 normal, 2 repairing, 3 migrating, 4 expanding, 5 deleting, 6 creating, 7 raidSyncing, 8 raidParityChecking, 9 raidAssembling, 10 canceling, 11 degraded, 12 crashed)
+        indexes:
+          - labelname: synoRaidIndex
+            type: gauge
+        lookups:
+          - labels: [synoRaidIndex]
+            labelname: synoRaidName
+            oid: 1.3.6.1.4.1.6574.3.1.1.2
+            type: DisplayString
+      - name: hrProcessorLoad
+        oid: 1.3.6.1.2.1.25.3.3.1.2
+        type: gauge
+        help: Average CPU load over the last minute (percent)
+        indexes:
+          - labelname: hrDeviceIndex
+            type: gauge
+      - name: ssCpuRawUser
+        oid: 1.3.6.1.4.1.2021.11.50
+        type: counter
+        help: CPU ticks spent in user (UCD-SNMP-MIB)
+      - name: ssCpuRawSystem
+        oid: 1.3.6.1.4.1.2021.11.52
+        type: counter
+        help: CPU ticks spent in system (UCD-SNMP-MIB)
+      - name: ssCpuRawIdle
+        oid: 1.3.6.1.4.1.2021.11.53
+        type: counter
+        help: CPU ticks spent in idle (UCD-SNMP-MIB)
+      - name: ssCpuRawWait
+        oid: 1.3.6.1.4.1.2021.11.54
+        type: counter
+        help: CPU ticks spent in iowait (UCD-SNMP-MIB)
+      - name: laLoadInt
+        oid: 1.3.6.1.4.1.2021.10.1.5
+        type: gauge
+        help: Load average x100 (laIndex 1=1min, 2=5min, 3=15min)
+        indexes:
+          - labelname: laIndex
+            type: gauge
+        lookups:
+          - labels: [laIndex]
+            labelname: laNames
+            oid: 1.3.6.1.4.1.2021.10.1.2
+            type: DisplayString
+      - name: memTotalSwap
+        oid: 1.3.6.1.4.1.2021.4.3
+        type: gauge
+        help: Total swap in kB (UCD-SNMP-MIB)
+      - name: memAvailSwap
+        oid: 1.3.6.1.4.1.2021.4.4
+        type: gauge
+        help: Available swap in kB (UCD-SNMP-MIB)
+      - name: memTotalReal
+        oid: 1.3.6.1.4.1.2021.4.5
+        type: gauge
+        help: Total real memory in kB (UCD-SNMP-MIB)
+      - name: memAvailReal
+        oid: 1.3.6.1.4.1.2021.4.6
+        type: gauge
+        help: Available (free) real memory in kB (UCD-SNMP-MIB)
+      - name: memTotalFree
+        oid: 1.3.6.1.4.1.2021.4.11
+        type: gauge
+        help: Total free memory (real+swap) in kB (UCD-SNMP-MIB)
+      - name: memShared
+        oid: 1.3.6.1.4.1.2021.4.13
+        type: gauge
+        help: Shared memory in kB (UCD-SNMP-MIB)
+      - name: memBuffer
+        oid: 1.3.6.1.4.1.2021.4.14
+        type: gauge
+        help: Memory used as buffers in kB (UCD-SNMP-MIB)
+      - name: memCached
+        oid: 1.3.6.1.4.1.2021.4.15
+        type: gauge
+        help: Memory used as cache in kB (UCD-SNMP-MIB)
+      - name: ifOperStatus
+        oid: 1.3.6.1.2.1.2.2.1.8
+        type: gauge
+        help: Interface operational status (1 up, 2 down, 7 lowerLayerDown)
+        indexes:
+          - labelname: ifIndex
+            type: gauge
+        lookups:
+          - labels: [ifIndex]
+            labelname: ifDescr
+            oid: 1.3.6.1.2.1.2.2.1.2
+            type: DisplayString
+          - labels: [ifIndex]
+            labelname: ifName
+            oid: 1.3.6.1.2.1.31.1.1.1.1
+            type: DisplayString
+      - name: ifHCInOctets
+        oid: 1.3.6.1.2.1.31.1.1.1.6
+        type: counter
+        help: Bytes received on the interface
+        indexes:
+          - labelname: ifIndex
+            type: gauge
+        lookups:
+          - labels: [ifIndex]
+            labelname: ifDescr
+            oid: 1.3.6.1.2.1.2.2.1.2
+            type: DisplayString
+          - labels: [ifIndex]
+            labelname: ifName
+            oid: 1.3.6.1.2.1.31.1.1.1.1
+            type: DisplayString
+      - name: ifHCOutOctets
+        oid: 1.3.6.1.2.1.31.1.1.1.10
+        type: counter
+        help: Bytes sent on the interface
+        indexes:
+          - labelname: ifIndex
+            type: gauge
+        lookups:
+          - labels: [ifIndex]
+            labelname: ifDescr
+            oid: 1.3.6.1.2.1.2.2.1.2
+            type: DisplayString
+          - labels: [ifIndex]
+            labelname: ifName
+            oid: 1.3.6.1.2.1.31.1.1.1.1
+            type: DisplayString
+      - name: synologyDiskIONReadX
+        oid: 1.3.6.1.4.1.6574.101.1.1.12
+        type: counter
+        help: Bytes read from the disk since boot (64-bit)
+        indexes:
+          - labelname: storageIOIndex
+            type: gauge
+        lookups:
+          - labels: [storageIOIndex]
+            labelname: storageIODevice
+            oid: 1.3.6.1.4.1.6574.101.1.1.2
+            type: DisplayString
+      - name: synologyDiskIONWrittenX
+        oid: 1.3.6.1.4.1.6574.101.1.1.13
+        type: counter
+        help: Bytes written to the disk since boot (64-bit)
+        indexes:
+          - labelname: storageIOIndex
+            type: gauge
+        lookups:
+          - labels: [storageIOIndex]
+            labelname: storageIODevice
+            oid: 1.3.6.1.4.1.6574.101.1.1.2
+            type: DisplayString
+      - name: synologyDiskIOReads
+        oid: 1.3.6.1.4.1.6574.101.1.1.5
+        type: counter
+        help: Read accesses to the disk since boot
+        indexes:
+          - labelname: storageIOIndex
+            type: gauge
+        lookups:
+          - labels: [storageIOIndex]
+            labelname: storageIODevice
+            oid: 1.3.6.1.4.1.6574.101.1.1.2
+            type: DisplayString
+      - name: synologyDiskIOWrites
+        oid: 1.3.6.1.4.1.6574.101.1.1.6
+        type: counter
+        help: Write accesses to the disk since boot
+        indexes:
+          - labelname: storageIOIndex
+            type: gauge
+        lookups:
+          - labels: [storageIOIndex]
+            labelname: storageIODevice
+            oid: 1.3.6.1.4.1.6574.101.1.1.2
+            type: DisplayString
+      - name: synologyDiskIOLoad
+        oid: 1.3.6.1.4.1.6574.101.1.1.8
+        type: gauge
+        help: Disk load (percent busy)
+        indexes:
+          - labelname: storageIOIndex
+            type: gauge
+        lookups:
+          - labels: [storageIOIndex]
+            labelname: storageIODevice
+            oid: 1.3.6.1.4.1.6574.101.1.1.2
+            type: DisplayString
+      - name: synologySpaceIONReadX
+        oid: 1.3.6.1.4.1.6574.102.1.1.12
+        type: counter
+        help: Bytes read from the volume since boot (64-bit)
+        indexes:
+          - labelname: spaceIOIndex
+            type: gauge
+        lookups:
+          - labels: [spaceIOIndex]
+            labelname: spaceIODevice
+            oid: 1.3.6.1.4.1.6574.102.1.1.2
+            type: DisplayString
+      - name: synologySpaceIONWrittenX
+        oid: 1.3.6.1.4.1.6574.102.1.1.13
+        type: counter
+        help: Bytes written to the volume since boot (64-bit)
+        indexes:
+          - labelname: spaceIOIndex
+            type: gauge
+        lookups:
+          - labels: [spaceIOIndex]
+            labelname: spaceIODevice
+            oid: 1.3.6.1.4.1.6574.102.1.1.2
+            type: DisplayString
+      - name: synologySpaceIOReads
+        oid: 1.3.6.1.4.1.6574.102.1.1.5
+        type: counter
+        help: Read accesses to the volume since boot
+        indexes:
+          - labelname: spaceIOIndex
+            type: gauge
+        lookups:
+          - labels: [spaceIOIndex]
+            labelname: spaceIODevice
+            oid: 1.3.6.1.4.1.6574.102.1.1.2
+            type: DisplayString
+      - name: synologySpaceIOWrites
+        oid: 1.3.6.1.4.1.6574.102.1.1.6
+        type: counter
+        help: Write accesses to the volume since boot
+        indexes:
+          - labelname: spaceIOIndex
+            type: gauge
+        lookups:
+          - labels: [spaceIOIndex]
+            labelname: spaceIODevice
+            oid: 1.3.6.1.4.1.6574.102.1.1.2
+            type: DisplayString
+      - name: synologySpaceIOLoad
+        oid: 1.3.6.1.4.1.6574.102.1.1.8
+        type: gauge
+        help: Volume load (percent busy)
+        indexes:
+          - labelname: spaceIOIndex
+            type: gauge
+        lookups:
+          - labels: [spaceIOIndex]
+            labelname: spaceIODevice
+            oid: 1.3.6.1.4.1.6574.102.1.1.2
+            type: DisplayString
