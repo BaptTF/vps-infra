@@ -50,6 +50,7 @@ access_control:
       subject:
         - - "group:family"
         - - "group:agent"
+        - - "group:voyage"
     - domain: drive.bapttf.com
       policy: one_factor
       subject: "group:family"
