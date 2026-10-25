@@ -27,9 +27,9 @@ spec:
               mountPath: /data
           resources:
             requests:
-              memory: 64Mi
+              memory: 96Mi
             limits:
-              memory: 128Mi
+              memory: 256Mi
       volumes:
         - name: data
           persistentVolumeClaim:
