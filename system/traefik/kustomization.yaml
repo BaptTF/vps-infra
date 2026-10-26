@@ -6,7 +6,7 @@ namespace: traefik
 helmCharts:
   - name: traefik
     repo: https://helm.traefik.io/traefik
-    version: 42.1.1
+    version: 42.1.2
     releaseName: traefik
     namespace: traefik
     includeCRDs: true
