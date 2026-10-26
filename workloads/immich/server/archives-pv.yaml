@@ -1,5 +1,5 @@
 # NAS photo import (/nas on Storage Box u619007), sub-account u619007-sub3 (base dir /nas).
-# Read-write on purpose: photos are sorted/deleted from Immich external libraries.
+# Read-write: photos are sorted/deleted from Immich.
 apiVersion: v1
 kind: PersistentVolume
 metadata:
