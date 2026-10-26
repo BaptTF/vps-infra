@@ -7,6 +7,9 @@ resources:
   - library-pvc.yaml
   - storagebox-pv.yaml
   - storagebox-pvc.yaml
+  - archives-infisical-secret.yaml
+  - archives-pv.yaml
+  - archives-pvc.yaml
   - machine-learning-cache-pvc.yaml
   - valkey-deployment.yaml
   - valkey-service.yaml

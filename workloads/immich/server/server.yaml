@@ -67,6 +67,8 @@ spec:
             - name: storagebox
               mountPath: /external/family
               subPath: family
+            - name: archives
+              mountPath: /mnt/archives
           startupProbe:
             httpGet:
               path: /api/server/ping
@@ -105,3 +107,6 @@ spec:
         - name: storagebox
           persistentVolumeClaim:
             claimName: immich-storagebox
+        - name: archives
+          persistentVolumeClaim:
+            claimName: immich-archives
