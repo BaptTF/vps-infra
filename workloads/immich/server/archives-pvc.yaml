@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-archives
   namespace: immich
+  labels:
+    backup.bapttf.com/repository: archives
+  annotations:
+    k8up.io/backup: "true"
 spec:
   accessModes:
     - ReadWriteMany
