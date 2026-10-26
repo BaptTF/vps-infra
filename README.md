@@ -546,7 +546,7 @@ For the Immich sub-account, the Hetzner base directory is `/immich`, so the SMB 
 
 ### NAS archives (Immich external libraries)
 
-The imported NAS photos live under `/nas` on the Storage Box (`archives/dsplay`, `archives/diskstation`). They are mounted **read-write** in `immich-server` at `/mnt/archives` through PVC `immich-archives` (sub-account `u619007-sub3`, base directory `/nas`), so photos can be sorted and deleted from Immich: emptying the Immich trash deletes the file on the Storage Box. Credentials in Infisical `infrastructure`/`prod`, path `/immich/archives`: `username`, `password`. Import paths: `/mnt/archives/archives/dsplay` and `/mnt/archives/archives/diskstation`. Not covered by k8up backups (PVC has no `k8up.io/backup` annotation).
+The imported NAS photos live under `/nas` on the Storage Box (`archives/dsplay`, `archives/diskstation`). They are mounted **read-write** in `immich-server` at `/mnt/archives` through PVC `immich-archives` (sub-account `u619007-sub3`, base directory `/nas`), so photos can be sorted and deleted from Immich: emptying the Immich trash deletes the file on the Storage Box. Credentials in Infisical `infrastructure`/`prod`, path `/immich/archives`: `username`, `password`. Only `/nas/archives` is mounted (PV `volumeAttributes.subDir: archives`). Import paths: `/mnt/archives/dsplay` and `/mnt/archives/diskstation`. Not covered by k8up backups (PVC has no `k8up.io/backup` annotation).
 
 4. Benchmark from the VPS before migration:
 

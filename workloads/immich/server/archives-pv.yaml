@@ -27,6 +27,7 @@ spec:
     volumeHandle: immich-archives
     volumeAttributes:
       source: //u619007-sub3.your-storagebox.de/u619007-sub3
+      subDir: archives
     nodeStageSecretRef:
       name: immich-archives-secret
       namespace: immich
