@@ -1,0 +1,32 @@
+# NAS photo import (/nas on Storage Box u619007), sub-account u619007-sub3 (base dir /nas).
+# Read-write on purpose: photos are sorted/deleted from Immich external libraries.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-archives
+  annotations:
+    pv.kubernetes.io/provisioned-by: smb.csi.k8s.io
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: immich-archives
+  mountOptions:
+    - dir_mode=0775
+    - file_mode=0664
+    - uid=1000
+    - gid=1000
+    - vers=3.1.1
+    - cache=strict
+    - noserverino
+    - mfsymlinks
+  csi:
+    driver: smb.csi.k8s.io
+    volumeHandle: immich-archives
+    volumeAttributes:
+      source: //u619007-sub3.your-storagebox.de/u619007-sub3
+    nodeStageSecretRef:
+      name: immich-archives-secret
+      namespace: immich
