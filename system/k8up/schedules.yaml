@@ -222,10 +222,7 @@ spec:
       limits:
         memory: 4Gi
 ---
-# NAS archives (/nas/archives, ~800 GB over SMB). Own repository and weekly
-# schedule: a full re-read takes ~1 day at ~8 MB/s (photos repo: 459 GB in
-# 16.5 h), so a daily run would overlap every other backup on the 1 GB NAS.
-# Saturday 18:00 UTC, after storagebox-backup (05:30, ~12 h) has finished.
+# NAS archives (immich-archives PVC), own repository.
 apiVersion: k8up.io/v1
 kind: Schedule
 metadata:
