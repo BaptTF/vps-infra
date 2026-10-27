@@ -8,7 +8,7 @@ metadata:
     # Removed after the Clusters stop referencing it.
     argocd.argoproj.io/sync-options: PruneLast=true
 spec:
-  retentionPolicy: 14d
+  retentionPolicy: 2d
   instanceSidecarConfiguration:
     env:
       # R2 rejects the default AWS SDK checksum headers.
