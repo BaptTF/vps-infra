@@ -212,7 +212,7 @@ spec:
     labelSelectors:
       - matchLabels:
           backup.bapttf.com/repository: photos
-    schedule: "30 5 * * *"
+    schedule: "30 5 * * 3"
     failedJobsHistoryLimit: 2
     successfulJobsHistoryLimit: 1
     resources:
