@@ -7,7 +7,7 @@ metadata:
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: vaultwarden
@@ -24,6 +24,18 @@ spec:
           env:
             - name: DOMAIN
               value: "https://vault.bapttf.com"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-db-secret
+                  key: password
+            - name: DATABASE_URL
+              value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/vaultwarden"
             - name: SMTP_HOST
               value: smtp.resend.com
             - name: SMTP_PORT
@@ -46,7 +58,7 @@ spec:
               mountPath: /data
           resources:
             requests:
-              memory: 96Mi
+              memory: 128Mi
             limits:
               memory: 256Mi
       volumes:
