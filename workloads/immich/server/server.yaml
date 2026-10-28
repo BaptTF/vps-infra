@@ -156,7 +156,7 @@ spec:
             medium: Memory
         - name: jq
           image:
-            reference: ghcr.io/jqlang/jq:1.8.1
+            reference: ghcr.io/jqlang/jq:1.8.2
             pullPolicy: IfNotPresent
         - name: oauth-secret
           secret:
