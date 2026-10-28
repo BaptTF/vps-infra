@@ -8,8 +8,6 @@ metadata:
 spec:
   cluster:
     name: postgres-cluster
-  # Weekly. A 14d recovery window keeps every backup inside the window,
-  # so a daily copy of Immich would be about 15 full backups.
   schedule: "0 0 4 * * *"
   backupOwnerReference: self
   immediate: true

@@ -8,7 +8,6 @@ metadata:
 spec:
   cluster:
     name: immich-postgres
-  # Weekly, 30 minutes after postgres-cluster. Same retention reasoning.
   schedule: "0 30 4 * * *"
   backupOwnerReference: self
   immediate: true
