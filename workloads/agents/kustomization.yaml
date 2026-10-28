@@ -3,12 +3,9 @@ kind: Kustomization
 namespace: openclaw
 
 resources:
-  - agents-rbac
-  - openclaw
+  - rbac
+  - nas-proxy
   - hermes
-  - grokbot
-  - hermes-lya
-  - hermes-lya-filebrowser
   - kirocrew
   - bifrost
   - camofox

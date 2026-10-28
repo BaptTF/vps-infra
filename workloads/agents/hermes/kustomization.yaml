@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - leo
   - lea
+  - lya
+  - lya-filebrowser
 
 # Single source for the skills init script used by hermes-leo and hermes-lea.
 configMapGenerator:
