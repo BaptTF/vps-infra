@@ -99,3 +99,10 @@ spec:
         login: true
         passwordSecret:
           name: vikunja-db-secret
+      - connectionLimit: -1
+        ensure: present
+        inherit: true
+        name: vaultwarden
+        login: true
+        passwordSecret:
+          name: vaultwarden-db-secret

@@ -107,3 +107,14 @@ spec:
   owner: vikunja
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: vaultwarden-db
+  namespace: cnpg-system
+spec:
+  name: vaultwarden
+  owner: vaultwarden
+  cluster:
+    name: postgres-cluster
