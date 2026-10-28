@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   applicationRefs:
-    - namePattern: tripkit-backend
+    - namePattern: tripkit
       images:
         - alias: tripkit-backend
           imageName: ghcr.io/rjullien/tripkit-backend
