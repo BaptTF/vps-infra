@@ -29,8 +29,10 @@ spec:
 
   managed:
     roles:
-      - name: forgejo
+      - connectionLimit: -1
         ensure: absent
+        inherit: true
+        name: forgejo
       - connectionLimit: -1
         ensure: present
         inherit: true
@@ -38,10 +40,14 @@ spec:
         login: true
         passwordSecret:
           name: jujudb-db-secret
-      - name: lacoope
+      - connectionLimit: -1
         ensure: absent
-      - name: openwebui
+        inherit: true
+        name: lacoope
+      - connectionLimit: -1
         ensure: absent
+        inherit: true
+        name: openwebui
       - connectionLimit: -1
         ensure: present
         inherit: true
@@ -63,10 +69,14 @@ spec:
         login: true
         passwordSecret:
           name: tripkit-db-secret
-      - name: sickgnal
+      - connectionLimit: -1
         ensure: absent
-      - name: compreface
+        inherit: true
+        name: sickgnal
+      - connectionLimit: -1
         ensure: absent
+        inherit: true
+        name: compreface
       - connectionLimit: -1
         ensure: present
         inherit: true
