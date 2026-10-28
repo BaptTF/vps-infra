@@ -1,8 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - infisical-secret.yaml
-  - openwebui-deployment.yaml
-  - openwebui-service.yaml
-  - ingressroute.yaml
