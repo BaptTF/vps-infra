@@ -640,7 +640,6 @@ In project `infrastructure`, environment `prod`, path `/authelia`, add:
 |---|---|
 | `oidc-hmac-secret` | Random 64+ char string (`authelia crypto rand --length 64 --charset rfc3986`) |
 | `oidc-jwks-private-key` | RSA 2048 private key PEM (`openssl genrsa 2048`) |
-| `immich-oidc-client-secret` | Plaintext OAuth client secret (for Immich admin UI) |
 | `immich-oidc-client-secret-hash` | pbkdf2 hash of the Immich client secret (for Authelia) |
 | `vikunja-oidc-client-secret-hash` | pbkdf2 hash of the Vikunja client secret (for Authelia) |
 
@@ -659,7 +658,7 @@ echo "Plaintext: $CLIENT_SECRET"
 authelia crypto hash generate pbkdf2 --password "$CLIENT_SECRET"
 ```
 
-Immich: store plaintext in `immich-oidc-client-secret` and the hash in `immich-oidc-client-secret-hash` (both `/authelia`).  
+Immich: store the plaintext in `/immich` as `oauth-client-secret` (injected into the Immich config file) and the hash in `/authelia` as `immich-oidc-client-secret-hash`. Authelia only reads the hash.  
 Vikunja: store plaintext in `/vikunja` `oidc-client-secret` and the hash in `/authelia` `vikunja-oidc-client-secret-hash`.
 
 After ArgoCD syncs, Authelia reads hashes from the `authelia-secrets` Kubernetes secret via the template filter.
@@ -672,7 +671,7 @@ In Immich admin → **Administration → OAuth**:
 |---|---|
 | Issuer URL | `https://auth.bapttf.com/.well-known/openid-configuration` |
 | Client ID | `immich` |
-| Client Secret | value from Infisical `immich-oidc-client-secret` |
+| Client Secret | value from Infisical `/immich` `oauth-client-secret` |
 | Scope | `openid profile email` |
 | Auto Register | enabled |
 
