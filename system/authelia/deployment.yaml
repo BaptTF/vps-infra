@@ -63,10 +63,6 @@ spec:
             - name: oidc-secrets
               mountPath: /config/secrets
               readOnly: true
-            - name: resend-smtp
-              mountPath: /config/secrets/notifier-smtp-password
-              subPath: api-key
-              readOnly: true
           resources:
             requests:
               memory: 32Mi
@@ -90,18 +86,23 @@ spec:
         - name: config
           configMap:
             name: authelia-config
-        - name: resend-smtp
-          secret:
-            secretName: resend
+        # Single projected volume: no subPath nested inside a read-only secret volume
         - name: oidc-secrets
-          secret:
-            secretName: authelia-secrets
-            items:
-              - key: oidc-hmac-secret
-                path: oidc-hmac-secret
-              - key: oidc-jwks-private-key
-                path: oidc-jwks-private-key
-              - key: immich-oidc-client-secret-hash
-                path: immich-oidc-client-secret-hash
-              - key: vikunja-oidc-client-secret-hash
-                path: vikunja-oidc-client-secret-hash
+          projected:
+            sources:
+              - secret:
+                  name: authelia-secrets
+                  items:
+                    - key: oidc-hmac-secret
+                      path: oidc-hmac-secret
+                    - key: oidc-jwks-private-key
+                      path: oidc-jwks-private-key
+                    - key: immich-oidc-client-secret-hash
+                      path: immich-oidc-client-secret-hash
+                    - key: vikunja-oidc-client-secret-hash
+                      path: vikunja-oidc-client-secret-hash
+              - secret:
+                  name: resend
+                  items:
+                    - key: api-key
+                      path: notifier-smtp-password
