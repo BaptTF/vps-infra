@@ -5,6 +5,8 @@ metadata:
   namespace: authelia
   labels:
     app: authelia
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   selector:
@@ -61,6 +63,10 @@ spec:
             - name: oidc-secrets
               mountPath: /config/secrets
               readOnly: true
+            - name: resend-smtp
+              mountPath: /config/secrets/notifier-smtp-password
+              subPath: api-key
+              readOnly: true
           resources:
             requests:
               memory: 32Mi
@@ -84,6 +90,9 @@ spec:
         - name: config
           configMap:
             name: authelia-config
+        - name: resend-smtp
+          secret:
+            secretName: resend
         - name: oidc-secrets
           secret:
             secretName: authelia-secrets

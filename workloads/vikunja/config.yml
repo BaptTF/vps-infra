@@ -26,3 +26,12 @@ auth:
 
 metrics:
   enabled: true
+
+mailer:
+  enabled: true
+  host: smtp.resend.com
+  port: 587
+  forcessl: false
+  skiptlsverify: false
+  username: resend
+  fromemail: vikunja@bapttf.com

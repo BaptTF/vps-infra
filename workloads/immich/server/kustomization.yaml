@@ -20,6 +20,9 @@ resources:
   - ingressroute.yaml
 
 configMapGenerator:
+  - name: immich-config-file
+    files:
+      - immich-config.json
   - name: immich-config
     literals:
       - TZ=Etc/UTC

@@ -39,8 +39,15 @@ storage:
       skip_verify: true
 
 notifier:
-  filesystem:
-    filename: /tmp/notification.txt
+  smtp:
+    address: smtp://smtp.resend.com:587
+    timeout: 10s
+    username: resend
+    password: '{{ secret "/config/secrets/notifier-smtp-password" }}'
+    sender: "Authelia <authelia@bapttf.com>"
+    identifier: bapttf.com
+    subject: "[Authelia] {title}"
+    startup_check_address: baptiste.jullien06@gmail.com
 
 access_control:
   default_policy: deny

@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: vaultwarden
 
 resources:
+  - infisical-secret.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml

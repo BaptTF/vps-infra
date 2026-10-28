@@ -4,6 +4,8 @@ metadata:
   name: vaultwarden
   labels:
     app: vaultwarden
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   selector:
@@ -22,6 +24,23 @@ spec:
           env:
             - name: DOMAIN
               value: "https://vault.bapttf.com"
+            - name: SMTP_HOST
+              value: smtp.resend.com
+            - name: SMTP_PORT
+              value: "587"
+            - name: SMTP_SECURITY
+              value: starttls
+            - name: SMTP_USERNAME
+              value: resend
+            - name: SMTP_FROM
+              value: vaultwarden@bapttf.com
+            - name: SMTP_FROM_NAME
+              value: Vaultwarden
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resend
+                  key: api-key
           volumeMounts:
             - name: data
               mountPath: /data

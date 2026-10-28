@@ -44,6 +44,11 @@ spec:
                 secretKeyRef:
                   name: vikunja-secrets
                   key: oidc-client-secret
+            - name: VIKUNJA_MAILER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resend
+                  key: api-key
           volumeMounts:
             - name: config
               mountPath: /etc/vikunja/config.yml

@@ -23,6 +23,48 @@ spec:
         app: immich
         component: server
     spec:
+      initContainers:
+        - name: render-config
+          image: busybox:1.38.0
+          command: ["/bin/sh", "-eu", "-c"]
+          args:
+            - |
+              test -s /secrets/oauth/oauth-client-secret
+              test -s /secrets/smtp/api-key
+              /tools/jq --rawfile oauth /secrets/oauth/oauth-client-secret \
+                --rawfile smtp /secrets/smtp/api-key \
+                '
+                  def trim: sub("\n+$"; "");
+                  ($oauth | trim) as $oauth
+                  | ($smtp | trim) as $smtp
+                  | if ($oauth | length) == 0 or ($smtp | length) == 0 then
+                      error("oauth client secret and smtp password are required")
+                    else
+                      .oauth.clientSecret = $oauth
+                      | .notifications.smtp.transport.password = $smtp
+                    end
+                ' /template/immich-config.json > /config/immich-config.json
+          volumeMounts:
+            - name: config-template
+              mountPath: /template
+              readOnly: true
+            - name: rendered-config
+              mountPath: /config
+            - name: jq
+              mountPath: /tools
+              readOnly: true
+            - name: oauth-secret
+              mountPath: /secrets/oauth
+              readOnly: true
+            - name: smtp-secret
+              mountPath: /secrets/smtp
+              readOnly: true
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
       containers:
         - name: immich-server
           image: ghcr.io/immich-app/immich-server:v3.3.5@sha256:485d546a2e31d6a8b4db8423fcba5c109de8c218d93410af115fd1ccfc4352a6
@@ -39,6 +81,8 @@ spec:
           env:
             - name: IMMICH_TELEMETRY_INCLUDE
               value: all
+            - name: IMMICH_CONFIG_FILE
+              value: /config/immich-config.json
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -50,6 +94,9 @@ spec:
                   name: immich-db-secret
                   key: password
           volumeMounts:
+            - name: rendered-config
+              mountPath: /config
+              readOnly: true
             - name: library
               mountPath: /data
             - name: storagebox
@@ -101,6 +148,28 @@ spec:
               cpu: "4"
               memory: 5Gi
       volumes:
+        - name: config-template
+          configMap:
+            name: immich-config-file
+        - name: rendered-config
+          emptyDir:
+            medium: Memory
+        - name: jq
+          image:
+            reference: ghcr.io/jqlang/jq:1.8.1
+            pullPolicy: IfNotPresent
+        - name: oauth-secret
+          secret:
+            secretName: immich-oauth
+            items:
+              - key: oauth-client-secret
+                path: oauth-client-secret
+        - name: smtp-secret
+          secret:
+            secretName: resend
+            items:
+              - key: api-key
+                path: api-key
         - name: library
           persistentVolumeClaim:
             claimName: immich-library
