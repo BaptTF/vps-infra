@@ -1,7 +1,6 @@
 # system/cert-manager/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: cert-manager
 
 helmCharts:
   - name: cert-manager
@@ -42,4 +41,5 @@ helmCharts:
           enabled: true
 
 resources:
+  - 01-clusterissuer.yaml
   - 02-cloudflare-infisical-secret.yaml
