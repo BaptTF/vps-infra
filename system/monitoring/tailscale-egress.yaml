@@ -1,5 +1,5 @@
 # Tailscale egress Services for off-cluster scrape targets (same pattern as
-# workloads/agents/openclaw/egress-tailscale.yaml). The operator rewrites
+# workloads/agents/nas-proxy/egress-tailscale.yaml). The operator rewrites
 # spec.externalName, which apps/monitoring.yaml ignores.
 apiVersion: v1
 kind: Service
@@ -52,7 +52,7 @@ metadata:
   name: nas-snmp
   namespace: monitoring
   annotations:
-    tailscale.com/tailnet-ip: "100.75.160.28"
+    tailscale.com/tailnet-fqdn: dsplay.tail4c7c90.ts.net
 spec:
   type: ExternalName
   externalName: placeholder
