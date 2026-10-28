@@ -151,17 +151,6 @@ kubectl create secret generic infisical-universal-auth \
   git commit -m "chore: create infisical univ auth"
 ```
 
-### Step 7: Migrate data
-
-```bash
-./scripts/migrate-vaultwarden.sh
-./scripts/migrate-couchdb.sh
-./scripts/migrate-forgejo.sh
-./scripts/migrate-garage.sh
-./scripts/migrate-meilisearch.sh
-./scripts/migrate-openclaw.sh
-```
-
 ---
 
 ## Adding a Worker Node
@@ -259,23 +248,7 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 > **Historical context:** This incident happened when the old worker `bapt-debian` (a friend's VM, 8Gi RAM) went `NotReady`. Its pods rescheduled onto the then-control-plane (`vmi2735515`, Contabo, ~6.9Gi allocatable), which hit 99% memory and started evicting critical workloads (`bifrost`, `openclaw`).
 >
-> This is no longer the current topology, but the procedure and warnings about manual scaling vs ArgoCD pruning remain valid.
-
-The following were scaled to 0 manually with `kubectl` to free RAM and unblock bifrost + openclaw:
-
-| Workload | Namespace | RAM freed | Notes |
-|----------|-----------|-----------|-------|
-| minio | minio | ~160Mi | Scaled via `kubectl scale deploy minio -n minio --replicas=0`. PVC `minio` (20Gi, local-path, reclaim `Delete`) left `Bound` — data intact. Do **not** move `apps/minio.yaml` to `disable-apps/` to pause it: the app has the cascade finalizer and the PVC carries the ArgoCD tracking-id, so pruning would delete the PVC and the data. |
-| argocd-image-updater | argocd | ~512Mi | `kubectl scale deploy argocd-image-updater-controller -n argocd --replicas=0` |
-| lacoope-backend | lacoope | ~64Mi | `kubectl scale deploy lacoope-backend -n lacoope --replicas=0` |
-| lacoope-frontend | lacoope | ~64Mi | `kubectl scale deploy lacoope-frontend -n lacoope --replicas=0` |
-| meilisearch | meilisearch | ~128Mi | `kubectl scale statefulset meilisearch -n meilisearch --replicas=0` (stateful, PVC safe) |
-
-Git state: `system/minio/values.yaml` has `replicas: 0` (committed), but the MinIO Helm chart ignores `replicas: 0` in standalone mode — the manual `kubectl scale` is what actually keeps the pod down. If ArgoCD does a full re-sync it may bring minio back to 1 replica; re-run the `kubectl scale` if that happens.
-
-When the original worker came back `Ready`:
-1. Revert `system/minio/values.yaml` to `replicas: 1` and push
-2. Scale the rest back up: `kubectl scale deploy argocd-image-updater-controller -n argocd --replicas=1`, `kubectl scale deploy lacoope-backend lacoope-frontend -n lacoope --replicas=1`, `kubectl scale statefulset meilisearch -n meilisearch --replicas=1`
+> This is no longer the current topology. MinIO, LaCoope and Meilisearch, which were scaled to 0 during the incident, have been removed. The image updater was scaled back up. A manual `kubectl scale` does not survive the next ArgoCD sync unless the replica count is also committed.
 
 ---
 
@@ -288,17 +261,10 @@ When the original worker came back `Ready`:
 | Prometheus | https://prometheus (Tailscale) | Tailscale VPN |
 | Alertmanager | https://alertmanager (Tailscale) | Tailscale VPN |
 | Vaultwarden | https://vault.bapttf.com | Public |
-| CouchDB (Obsidian LiveSync) | https://obsidian-livesync.bapttf.com | Public |
-| Meilisearch | https://meilisearch.bapttf.com | Public |
 | JujuDB | https://jujudb.bapttf.com | Public |
-| LaCoope | https://lacoope.bapttf.com | Public |
-| LaCoope API | https://lacoope-api.bapttf.com | Public |
-| OpenCLAW | https://openclaw.bapttf.com | Public |
 | Vulcain | https://vulcain.bapttf.com | Public (Authelia) |
 | Hermes Leo dashboard | https://hermes-leo.bapttf.com | Public (Authelia) |
 | Hermes Lya dashboard | https://hermes-lya.bapttf.com | Public (Authelia) |
-| OpenWebUI | https://openwebui.bapttf.com | Public |
-| MinIO | https://minio (Tailscale) | Tailscale VPN |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
 
@@ -339,7 +305,7 @@ Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth` (mounted in Prometh
 | `HA_TOKEN` | Prometheus scrape of `homeassistant` (`/api/prometheus`, 60s) |
 | `HA_CAM_TOKEN` | Prometheus scrape of `homeassistant-cam` (60s) |
 | `HA_EYG_TOKEN` | Prometheus scrape of `homeassistant-eyg` (120s, the Pi 3) |
-| `SNMP_COMMUNITY` | snmp-exporter read of `dsplay` (`100.75.160.28`). Read-only community, no quotes, backslashes or spaces. |
+| `SNMP_COMMUNITY` | snmp-exporter read of `dsplay.tail4c7c90.ts.net`. Read-only community, no quotes, backslashes or spaces. |
 
 Path `/monitoring/cloudflare` -> Secret `cloudflare-exporter` (cloudflare-exporter only, for the R2 bucket size):
 
@@ -372,7 +338,7 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 |-----|-----------|------------|
 | `immich-library` | `immich` | `/k3s` |
 | `immich-storagebox` | `immich` | `/k3s/photos` |
-| `openclaw-home-pvc`, `hermes-lea-data`, `hermes-lya-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
+| `hermes-lea-data`, `hermes-lya-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
 | `vikunja-files` | `vikunja` | `/k3s` |
 | `vaultwarden-data` | `vaultwarden` | `/k3s` |
 | `vulcain-data` | `vulcain` | `/k3s` |
@@ -702,10 +668,10 @@ OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifr
 
 | Who | Session | Where |
 |---|---|---|
-| Default (Nullclaw, curl, Open WebUI, any OpenAI-compat app) | `ses_bifrost_default_YYYYMMDD` | `workloads/agents/bifrost/bifrost_config.json` → `providers.opencode-go.network_config.extra_headers.x-opencode-session` |
+| Default (curl, any OpenAI-compat app) | `ses_bifrost_default_YYYYMMDD` | `workloads/agents/bifrost/bifrost_config.json` → `providers.opencode-go.network_config.extra_headers.x-opencode-session` |
 | Hermes Leo | `ses_hermesleo_YYYYMMDD` | `workloads/agents/hermes/leo/config.yaml` → `model.extra_headers` and `auxiliary.vision.extra_headers` (`x-bf-eh-x-opencode-session`) |
 | Hermes Lea | `ses_hermeslea_YYYYMMDD` | `workloads/agents/hermes/lea/config.yaml` (same keys) |
-| Hermes Lya | `ses_hermeslya_YYYYMMDD` | `workloads/agents/hermes-lya/config.yaml` (same keys) |
+| Hermes Lya | `ses_hermeslya_YYYYMMDD` | `workloads/agents/hermes/lya/config.yaml` (same keys) |
 
 `x-bf-eh-x-opencode-session` from a client **overrides** the Bifrost default. A bare `x-opencode-session` from a client is dropped; that caller falls back to the default. Never reuse a dead ID (`ses_hermesleo` is pinned to a dead `blackbox-dsv4flash` upstream).
 
@@ -722,7 +688,7 @@ curl -skS -m 45 -H "Authorization: Bearer $KEY" -H "Content-Type: application/js
 
 Then bump **only** the stuck ID (`ses_<name>_YYYYMMDDTHHMMSS`) and push. Hashed ConfigMaps restart the touched workload (Hermes init copies `config.yaml` onto the PVC at pod start). Bifrost SQLite is pod-local: a live `PUT /api/providers/opencode-go` unsticks the default immediately, but git must follow or the next Bifrost restart reloads the old ID. Rotating the default does not affect Hermes overrides; rotating a Hermes ID does not bounce the other agents.
 
-The Bedrock provider (`bedrock` in `bifrost_config.json`) does not reference a key `value` — Bifrost's Bedrock provider resolves AWS credentials via the standard SDK chain (env vars / IAM), so the AWS credentials for Bedrock are also stored in this Infisical path under the conventional `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names. Bedrock also backs nullclaw's vector memory embeddings (`bedrock/amazon.titan-embed-text-v2:0`).
+The Bedrock provider (`bedrock` in `bifrost_config.json`) does not reference a key `value` — Bifrost's Bedrock provider resolves AWS credentials via the standard SDK chain (env vars / IAM), so the AWS credentials for Bedrock are also stored in this Infisical path under the conventional `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names.
 
 ## Note
 

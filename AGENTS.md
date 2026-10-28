@@ -9,7 +9,7 @@ Cluster nodes communicate over Tailscale (WireGuard). Flannel VXLAN is used for 
 - `root-app.yaml` -- ArgoCD root Application, points at `apps/`
 - `apps/` -- ArgoCD Application CRs (one per service). ArgoCD prunes anything removed from here
 - `system/` -- platform services (Traefik, cert-manager, CNPG, Infisical, etc.). Mostly **Kustomize + Helm inflation** (`helmCharts:` in `kustomization.yaml`)
-- `workloads/` -- application workloads as Kustomize dirs (no Helm inflation except `obsidian-livesync`)
+- `workloads/` -- application workloads as Kustomize dirs (no Helm inflation)
 - `disable-apps/` -- parking lot for disabled apps. Move an Application CR here to disable it (prune removes it on sync). Move it back to `apps/` to re-enable
 - `argocd-bootstrap.yaml` -- pre-rendered ArgoCD install. **Regenerate after changing `system/argocd/`**: `kustomize build --enable-helm system/argocd/ > argocd-bootstrap.yaml`
 - `scripts/` -- one-shot data migration scripts (Docker Compose -> k3s). Not part of ongoing workflow
@@ -72,7 +72,7 @@ build: automatic update of voyage
 
 - `argocd-bootstrap.yaml` is a generated file (~5k lines of CRDs). Do not edit it directly. Regenerate with: `kustomize build --enable-helm system/argocd/ > argocd-bootstrap.yaml`
 - `pub-cert.pem` is the SealedSecrets public cert. Committed intentionally -- it is not a secret
-- `workloads/agents/` is a Kustomize aggregator with subdirectories per agent (openclaw, nullclaw, bifrost, etc.)
+- `workloads/agents/` is a Kustomize aggregator. Hermes (leo, lea, lya) lives under `hermes/`, next to bifrost and the other agents. ClusterRoles and the grokbot service account live under `rbac/`
 - Monitoring stack (kube-prometheus-stack: Prometheus, Grafana, node-exporter, kube-state-metrics) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
 - CNPG backups use the Barman Cloud plugin (`ObjectStore` `cnpg-r2`, `method: plugin`); the in-tree `barmanObjectStore` is not supported by the operator anymore. Keep the R2 bucket under 10 GB: weekly full backups, 14-day retention
 - OpenCode Go session: default `x-opencode-session` lives on Bifrost `extra_headers`; Hermes overrides with `x-bf-eh-x-opencode-session`. Rotate a stuck ID via git (see README "OpenCode Go session headers"). Do not put a reverse proxy in front of Bifrost for this.
