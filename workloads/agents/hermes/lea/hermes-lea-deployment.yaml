@@ -45,6 +45,9 @@ spec:
           image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.9.18
           args: ["gateway", "run"]
           env:
+            # v2026.10.29: gateway sous s6 ne démarre pas
+            - name: HERMES_GATEWAY_NO_SUPERVISE
+              value: "1"
             - name: HERMES_GATEWAY_LOCK_DIR
               value: /tmp/hermes-gateway-locks
             - name: TELEGRAM_BOT_TOKEN
