@@ -13,6 +13,8 @@ spec:
             updateStrategy: newest-build
             # Only calver release tags (vX.Y.Z[.W]); excludes sha-*, sha256-*, latest
             allowTags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
+            # v2026.10.29 cassée (gateway ne démarre pas)
+            ignoreTags: ["v2026.10.29"]
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
