@@ -1,5 +1,5 @@
 kustomize:
   images:
   - ghcr.io/rjullien/bifrost-weight-sidecar:main
-  - ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.10.27
+  - ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.10.29
   - ghcr.io/rjullien/hermes-lya-config:v2026.10.27.1
