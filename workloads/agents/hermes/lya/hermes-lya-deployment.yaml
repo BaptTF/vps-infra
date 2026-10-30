@@ -11,8 +11,7 @@ spec:
   revisionHistoryLimit: 2
   replicas: 1
   strategy:
-    # Recreate : le gateway Hermes prend un flock exclusif sur $HERMES_HOME/gateway.lock
-    # (PVC RWO partagé) ; en RollingUpdate le nouveau pod ne peut pas obtenir le lock.
+    # Recreate : flock exclusif du gateway sur le PVC RWO
     type: Recreate
   selector:
     matchLabels:
@@ -46,8 +45,6 @@ spec:
             - secretRef:
                 name: hermes-lya-secret-bifrost
           env:
-            - name: HERMES_GATEWAY_LOCK_DIR
-              value: /tmp/hermes-gateway-locks
             - name: TELEGRAM_ALLOWED_USERS
               value: "974020023,8726326688,1156623391,8761164341,8348834293,8920294477"
             - name: API_SERVER_ENABLED
