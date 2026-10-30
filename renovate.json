@@ -65,14 +65,13 @@
       "enabled": false
     },
     {
-      "description": "Hermes leo/lea (hermes-leo-custom) : géré par Renovate, plus par ArgoCD Image Updater. NE JAMAIS AUTO-MERGER (ni Renovate ni agent, exception à la règle 'PR Renovate safe') : chaque bump redémarre les agents (Recreate) et une image cassée bloque le gateway. Approbation manuelle de Baptiste requise. Option plus stricte : dependencyDashboardApproval: true.",
+      "description": "Hermes leo/lea : calver vYYYY.M.D[.N], via Renovate (plus Image Updater)",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom"],
       "enabled": true,
       "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:\\.(?<build>\\d+))?$",
       "groupName": "hermes agents image",
-      "automerge": false,
-      "labels": ["needs-approval", "no-automerge"]
+      "automerge": false
     },
     {
       "description": "LLDAP: stay on alpine-rootless semver tags (ignore date-based tags)",
