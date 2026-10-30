@@ -11,7 +11,6 @@ resources:
   - bifrost-updater.yaml
   - emma-portfolio-updater.yaml
   - jujudb-updater.yaml
-  - hermes-leo-updater.yaml
   - hermes-lya-updater.yaml
   - kirocrew-updater.yaml
   - opencode-dashboard-updater.yaml

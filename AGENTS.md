@@ -65,7 +65,7 @@ build: automatic update of voyage
 - System Helm charts are inflated via Kustomize (`helmCharts:` block), **not** Helm releases -- ArgoCD must have `--enable-helm` in its Kustomize config
 - Namespace per service, named after the service
 - TLS: one wildcard cert (`bapttf.com` + `*.bapttf.com`) as Traefik's default TLSStore, issued via DNS-01/Cloudflare. Public IngressRoutes use `tls: {}` (no secretName). Private ingress: Tailscale `Ingress` with `ingressClassName: tailscale`
-- ArgoCD Image Updater auto-commits image tag bumps to `main` for first-party images (`ghcr.io/bapttf/*`, `ghcr.io/rjullien/*`). Renovate opens PRs for third-party images, Helm charts, and other dependency updates (`renovate.json`)
+- ArgoCD Image Updater auto-commits image tag bumps to `main` for first-party images (`ghcr.io/bapttf/*`, `ghcr.io/rjullien/*`), except `hermes-leo-custom` (Hermes leo/lea) which is managed by Renovate PRs labelled `no-automerge`/`needs-approval` — NEVER auto-merge those. Renovate opens PRs for third-party images, Helm charts, and other dependency updates (`renovate.json`)
 - Resource requests must be right-sized to actual usage -- the scheduler relies on them for multi-node placement. `system-reserved` and `kube-reserved` are configured on all nodes so allocatable reflects real available memory
 
 ## Gotchas
