@@ -29,6 +29,9 @@ spec:
               value: "0.0.0.0"
             - name: APP_OS
               value: "GOWA"
+            # v9.8+ : requis sans Basic Auth sur 0.0.0.0 (accès via Tailscale uniquement)
+            - name: APP_ALLOW_UNAUTHENTICATED
+              value: "true"
           ports:
             - containerPort: 3000
               name: http
