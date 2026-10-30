@@ -9,6 +9,14 @@ server:
     - path: /srv/library
       config:
         defaultEnabled: true
+    - path: /srv/nas
+      name: NAS
+      config:
+        defaultEnabled: true
+        conditionals:
+          rules:
+            - folderPath: "/"
+              viewable: true
 auth:
   adminUsername: baptiste
   methods:

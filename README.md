@@ -485,7 +485,7 @@ This can be added directly to your service definitions in Git.
 
 ## FileBrowser drive (drive.bapttf.com)
 
-Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`, protected by Authelia (`group:family`). Uploads land in `/data/family/inbox`; sorted files go in `/data/family/library`.
+Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`, protected by Authelia (`group:family`). Uploads land in `/data/family/inbox`; sorted files go in `/data/family/library`. The `NAS` source is PVC `immich-archives` (`/nas/archives`: `dsplay` and `diskstation`), mounted at `/srv/nas`. Indexing is disabled on that source (`viewable` on `/`). Family members can create, modify, and delete files there; a delete removes the file on the Storage Box.
 
 Immich can keep generated data on the local VPS while storing cold originals on a Hetzner Storage Box over SMB:
 
@@ -512,7 +512,7 @@ For the Immich sub-account, the Hetzner base directory is `/immich`, so the SMB 
 
 ### NAS archives (Immich external libraries)
 
-The imported NAS photos live under `/nas` on the Storage Box (`archives/dsplay`, `archives/diskstation`). They are mounted **read-write** in `immich-server` at `/mnt/archives` through PVC `immich-archives` (sub-account `u619007-sub3`, base directory `/nas`), so photos can be sorted and deleted from Immich: emptying the Immich trash deletes the file on the Storage Box. Credentials in Infisical `infrastructure`/`prod`, path `/immich/archives`: `username`, `password`. Only `/nas/archives` is mounted (PV `volumeAttributes.subDir: archives`). Import paths: `/mnt/archives/dsplay` and `/mnt/archives/diskstation`. Backed up by k8up Schedule `archives-backup` to restic repo `k3s/archives`.
+The imported NAS photos live under `/nas` on the Storage Box (`archives/dsplay`, `archives/diskstation`). They are mounted **read-write** in `immich-server` at `/mnt/archives` and in FileBrowser at `/srv/nas` (source `NAS`) through PVC `immich-archives` (sub-account `u619007-sub3`, base directory `/nas`), so photos can be sorted and deleted from Immich or drive: emptying the Immich trash, or deleting a file in drive, deletes the file on the Storage Box. Credentials in Infisical `infrastructure`/`prod`, path `/immich/archives`: `username`, `password`. Only `/nas/archives` is mounted (PV `volumeAttributes.subDir: archives`). Import paths: `/mnt/archives/dsplay` and `/mnt/archives/diskstation`. Backed up by k8up Schedule `archives-backup` to restic repo `k3s/archives`.
 
 4. Benchmark from the VPS before migration:
 
