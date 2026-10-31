@@ -1,0 +1,263 @@
+# local-path PVC disk usage. One pod per node, no hostNetwork.
+# Only /var/lib/rancher/k3s/storage is mounted, read-only.
+# Image tag v0.1.0 is published by a git tag on Louclaw/local-path-exporter.
+# It does not exist until that tag is pushed. Default pull policy is IfNotPresent.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: local-path-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: local-path-exporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: local-path-exporter
+  labels:
+    app.kubernetes.io/name: local-path-exporter
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: local-path-exporter
+  labels:
+    app.kubernetes.io/name: local-path-exporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: local-path-exporter
+subjects:
+  - kind: ServiceAccount
+    name: local-path-exporter
+    namespace: monitoring
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: local-path-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: local-path-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: local-path-exporter
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: local-path-exporter
+    spec:
+      serviceAccountName: local-path-exporter
+      # Informers on PV and PVC.
+      automountServiceAccountToken: true
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false
+      # k3s taints the server with control-plane (and master on older releases).
+      # The worker is untainted. These two let the DaemonSet run on both nodes.
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: exporter
+          image: ghcr.io/louclaw/local-path-exporter:v0.1.0
+          ports:
+            - name: metrics
+              containerPort: 9100
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: STORAGE_PATH
+              value: /var/lib/rancher/k3s/storage
+            - name: METRICS_ADDR
+              value: ":9100"
+            - name: SCAN_INTERVAL
+              value: 5m
+            - name: SCAN_TIMEOUT
+              value: 2m
+            - name: SCAN_PARALLELISM
+              value: "2"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            capabilities:
+              drop: ["ALL"]
+              # stat of files owned by other UIDs in the local-path directories.
+              add: ["DAC_READ_SEARCH"]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/rancher/k3s/storage
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: metrics
+            periodSeconds: 10
+      volumes:
+        - name: storage
+          hostPath:
+            path: /var/lib/rancher/k3s/storage
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: local-path-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: local-path-exporter
+    # ServiceMonitor jobLabel reads this. Job name must not be "kubelet".
+    prometheus-job: local-path-exporter
+spec:
+  selector:
+    app.kubernetes.io/name: local-path-exporter
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: metrics
+---
+# Prometheus CR selectors are empty, so no release label is required.
+# job="local-path-exporter" keeps these series out of kubelet rules:
+# both jobs emit kubelet_volume_stats_*, with different meanings.
+# honorLabels keeps namespace, persistentvolume, and node from the exporter.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: local-path-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: local-path-exporter
+spec:
+  jobLabel: prometheus-job
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: local-path-exporter
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
+      honorLabels: true
+      relabelings:
+        # Volume series already carry node. This fills it on up and scan metrics.
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+---
+# Match job="local-path-exporter" only. The kubelet job reports the node
+# filesystem for local-path volumes, not the PVC directory.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: local-path-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: local-path-exporter
+spec:
+  groups:
+    - name: local-path-exporter
+      rules:
+        - alert: LocalPathPVCOverRequested
+          expr: |
+            (
+              kubelet_volume_stats_used_bytes{job="local-path-exporter"}
+              >
+              kubelet_volume_stats_capacity_bytes{job="local-path-exporter"}
+            )
+            and
+            kubelet_volume_stats_capacity_bytes{job="local-path-exporter"} > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} on {{ $labels.node }} exceeds its requested size"
+            description: "On-disk usage of {{ $labels.persistentvolume }} is above the PVC storage request. local-path does not enforce that request."
+        - alert: LocalPathPVCGrowingFast
+          expr: |
+            (
+              predict_linear(kubelet_volume_stats_used_bytes{job="local-path-exporter"}[6h], 24 * 3600)
+              >
+              kubelet_volume_stats_capacity_bytes{job="local-path-exporter"}
+            )
+            and
+            (
+              kubelet_volume_stats_used_bytes{job="local-path-exporter"}
+              <
+              kubelet_volume_stats_capacity_bytes{job="local-path-exporter"}
+            )
+            and
+            kubelet_volume_stats_capacity_bytes{job="local-path-exporter"} > 0
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} on {{ $labels.node }} may exceed its request within a day"
+            description: "predict_linear over 6h crosses the storage request of {{ $labels.persistentvolume }} in 24h."
+        - alert: LocalPathExporterDown
+          expr: up{job="local-path-exporter"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "local-path-exporter on {{ $labels.node }} is down"
+            description: "Scrape target {{ $labels.instance }} is down."
+        - alert: LocalPathExporterScanStale
+          expr: time() - local_path_exporter_scan_last_success_timestamp_seconds{job="local-path-exporter"} > 1200
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "local-path-exporter on {{ $labels.node }} has not finished a scan"
+            description: "No successful scan for 20m (interval is 5m). A cycle where every volume fails does not refresh this timestamp."
+        - alert: LocalPathExporterScanErrors
+          expr: increase(local_path_exporter_scan_errors_total{job="local-path-exporter"}[30m]) > 2
+          labels:
+            severity: warning
+          annotations:
+            summary: "local-path-exporter on {{ $labels.node }} is failing scans"
+            description: "Volume timeouts and I/O errors keep the previous sample and increment local_path_exporter_scan_errors_total."
+        # SCAN_TIMEOUT is 2m. A cycle still above that 15m later is past the budget
+        # on consecutive intervals (5m), not a single heavy walk.
+        - alert: LocalPathExporterScanSlow
+          expr: local_path_exporter_scan_duration_seconds{job="local-path-exporter"} > 120
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "local-path-exporter scan on {{ $labels.node }} is slow"
+            description: "Last scan cycle exceeded the 2m per-volume timeout (scan interval is 5m)."
