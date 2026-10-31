@@ -1,0 +1,132 @@
+# Run from system/monitoring:
+#   yq -y 'select(.kind == "PrometheusRule") | .spec' local-path-exporter.yaml > /tmp/local-path-rules.yaml
+#   promtool test rules tests/local-path-exporter.test.yaml
+rule_files:
+  - /tmp/local-path-rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # Usage above the PVC request fires. The kubelet job, which is the node disk, does not.
+  - interval: 1m
+    input_series:
+      - series: 'kubelet_volume_stats_used_bytes{job="local-path-exporter", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
+        values: '3000x30'
+      - series: 'kubelet_volume_stats_capacity_bytes{job="local-path-exporter", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
+        values: '1000x30'
+      - series: 'kubelet_volume_stats_used_bytes{job="local-path-exporter", namespace="monitoring", persistentvolumeclaim="prometheus", persistentvolume="pvc-prom", node="vmi2735515"}'
+        values: '500x30'
+      - series: 'kubelet_volume_stats_capacity_bytes{job="local-path-exporter", namespace="monitoring", persistentvolumeclaim="prometheus", persistentvolume="pvc-prom", node="vmi2735515"}'
+        values: '500x30'
+      - series: 'kubelet_volume_stats_used_bytes{job="kubelet", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
+        values: '9000x30'
+      - series: 'kubelet_volume_stats_capacity_bytes{job="kubelet", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
+        values: '1000x30'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: LocalPathPVCOverRequested
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: local-path-exporter
+              namespace: immich
+              persistentvolumeclaim: immich-library
+              persistentvolume: pvc-immich
+              node: debian-16gb-hel1-2
+            exp_annotations:
+              summary: "PVC immich/immich-library on debian-16gb-hel1-2 exceeds its requested size"
+              description: "On-disk usage of pvc-immich is above the PVC storage request. local-path does not enforce that request."
+
+  # Slope over 6h crosses the request inside 24h, while usage is still under it.
+  - interval: 1m
+    input_series:
+      - series: 'kubelet_volume_stats_used_bytes{job="local-path-exporter", namespace="vikunja", persistentvolumeclaim="vikunja-files", persistentvolume="pvc-vikunja", node="vmi2735515"}'
+        values: '1000+10x500'
+      - series: 'kubelet_volume_stats_capacity_bytes{job="local-path-exporter", namespace="vikunja", persistentvolumeclaim="vikunja-files", persistentvolume="pvc-vikunja", node="vmi2735515"}'
+        values: '10000x500'
+    alert_rule_test:
+      - eval_time: 7h
+        alertname: LocalPathPVCGrowingFast
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: local-path-exporter
+              namespace: vikunja
+              persistentvolumeclaim: vikunja-files
+              persistentvolume: pvc-vikunja
+              node: vmi2735515
+            exp_annotations:
+              summary: "PVC vikunja/vikunja-files on vmi2735515 may exceed its request within a day"
+              description: "predict_linear over 6h crosses the storage request of pvc-vikunja in 24h."
+
+  - interval: 1m
+    input_series:
+      - series: 'up{job="local-path-exporter", node="debian-16gb-hel1-2", instance="10.0.0.1:9100"}'
+        values: '0x20'
+      - series: 'up{job="local-path-exporter", node="vmi2735515", instance="10.0.0.2:9100"}'
+        values: '1x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: LocalPathExporterDown
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: local-path-exporter
+              node: debian-16gb-hel1-2
+              instance: 10.0.0.1:9100
+            exp_annotations:
+              summary: "local-path-exporter on debian-16gb-hel1-2 is down"
+              description: "Scrape target 10.0.0.1:9100 is down."
+
+  - interval: 1m
+    input_series:
+      - series: 'local_path_exporter_scan_last_success_timestamp_seconds{job="local-path-exporter", node="debian-16gb-hel1-2"}'
+        values: '0x40'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: LocalPathExporterScanStale
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: local-path-exporter
+              node: debian-16gb-hel1-2
+            exp_annotations:
+              summary: "local-path-exporter on debian-16gb-hel1-2 has not finished a scan"
+              description: "No successful scan for 20m (interval is 5m). A cycle where every volume fails does not refresh this timestamp."
+
+  - interval: 1m
+    input_series:
+      - series: 'local_path_exporter_scan_errors_total{job="local-path-exporter", node="vmi2735515"}'
+        values: '0+1x40'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: LocalPathExporterScanErrors
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: local-path-exporter
+              node: vmi2735515
+            exp_annotations:
+              summary: "local-path-exporter on vmi2735515 is failing scans"
+              description: "Volume timeouts and I/O errors keep the previous sample and increment local_path_exporter_scan_errors_total."
+
+  - interval: 1m
+    input_series:
+      - series: 'local_path_exporter_scan_duration_seconds{job="local-path-exporter", node="debian-16gb-hel1-2"}'
+        values: '180x30'
+      - series: 'local_path_exporter_scan_duration_seconds{job="local-path-exporter", node="vmi2735515"}'
+        values: '30x30'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: LocalPathExporterScanSlow
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: LocalPathExporterScanSlow
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: local-path-exporter
+              node: debian-16gb-hel1-2
+            exp_annotations:
+              summary: "local-path-exporter scan on debian-16gb-hel1-2 is slow"
+              description: "Last scan cycle exceeded the 2m per-volume timeout (scan interval is 5m)."

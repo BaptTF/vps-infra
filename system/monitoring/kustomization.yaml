@@ -13,6 +13,7 @@ resources:
   - servicemonitors.yaml
   - snmp-exporter-deployment.yaml
   - snmp-exporter-service.yaml
+  - local-path-exporter.yaml
 
 configMapGenerator:
   - name: snmp-exporter-modules
