@@ -196,10 +196,13 @@ spec:
             description: "Prometheus cannot scrape {{ $labels.job }} for 15 minutes."
     - name: sre-containers
       rules:
+        # House rule (not a kube-prometheus-stack default). local-path-exporter
+        # sits near 128Mi on reclaimable slab; that is not an OOM risk.
+        # LocalPathExporterMemoryHigh watches anon + unreclaimable slab.
         - alert: ContainerMemoryNearLimit
           expr: |
-            max by (namespace, pod, container) (container_memory_working_set_bytes{job="kubelet", container!="", container!="POD"})
-              / on (namespace, pod, container) max by (namespace, pod, container) (kube_pod_container_resource_limits{resource="memory"}) > 0.9
+            max by (namespace, pod, container) (container_memory_working_set_bytes{job="kubelet", container!="", container!="POD", container!="local-path-exporter"})
+              / on (namespace, pod, container) max by (namespace, pod, container) (kube_pod_container_resource_limits{resource="memory", container!="local-path-exporter"}) > 0.9
           for: 15m
           labels:
             severity: warning
