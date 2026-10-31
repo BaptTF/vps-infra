@@ -1,7 +1,8 @@
 # local-path PVC disk usage. One pod per node, no hostNetwork.
 # Only /var/lib/rancher/k3s/storage is mounted, read-only.
-# Image tag v0.1.1 is published by a git tag on Louclaw/local-path-exporter.
+# Image tag v0.1.2 is published by a git tag on Louclaw/local-path-exporter.
 # It does not exist until that tag is pushed. Default pull policy is IfNotPresent.
+# Do not merge until ghcr.io/louclaw/local-path-exporter:v0.1.2 is published.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -81,7 +82,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: exporter
-          image: ghcr.io/louclaw/local-path-exporter:v0.1.1
+          image: ghcr.io/louclaw/local-path-exporter:v0.1.2
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics
@@ -101,8 +102,18 @@ spec:
               value: 2m
             - name: SCAN_PARALLELISM
               value: "1"
-            # Soft heap cap under the 128Mi cgroup limit, so the GC
-            # runs before the OOM killer. The limit itself stays 128Mi.
+            # Volumes with at least this many walked entries wait longer
+            # between full walks. The memory limit stays 128Mi.
+            - name: SCAN_LARGE_ENTRIES
+              value: "100000"
+            - name: SCAN_LARGE_INTERVAL
+              value: 30m
+            # Bounds the Go heap only. v0.1.2 also writes the container
+            # cgroup's memory.reclaim (cgroup v2) to drop slab and page cache.
+            # k3s/containerd mounts /sys/fs/cgroup read-only for this
+            # non-privileged pod (cgroup_writable is off). The write fails
+            # with EROFS, one warning is logged, and reclaim does not run.
+            # Gauge reads still work.
             - name: GOMEMLIMIT
               value: "100MiB"
           securityContext:
@@ -163,6 +174,12 @@ spec:
 # job="local-path-exporter" keeps these series out of kubelet rules:
 # both jobs emit kubelet_volume_stats_*, with different meanings.
 # honorLabels keeps namespace, persistentvolume, and node from the exporter.
+# Endpoint and relabel fields below are the values the API or Prometheus
+# otherwise fill in (scheme http, action replace, regex (.*), separator ";",
+# replacement $1). The ServiceMonitor CRD in kube-prometheus-stack 92.14.0
+# only defaults relabelings[].action. The rest are spelled out so a live
+# object that already carries them matches git. ignoreDifferences stays
+# limited to fields a controller rewrites, such as Tailscale externalName.
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -178,12 +195,17 @@ spec:
   endpoints:
     - port: metrics
       path: /metrics
+      scheme: http
       interval: 60s
       honorLabels: true
       relabelings:
         # Volume series already carry node. This fills it on up and scan metrics.
         - sourceLabels: [__meta_kubernetes_pod_node_name]
+          separator: ";"
+          regex: "(.*)"
           targetLabel: node
+          replacement: "$1"
+          action: replace
 ---
 # Match job="local-path-exporter" only. The kubelet job reports the node
 # filesystem for local-path volumes, not the PVC directory.
