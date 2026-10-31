@@ -112,6 +112,9 @@ spec:
               mountPath: /data/encoded-video
               subPath: encoded-video
             - name: storagebox
+              mountPath: /data/thumbs
+              subPath: thumbs
+            - name: storagebox
               mountPath: /external/family
               subPath: family
             - name: archives
