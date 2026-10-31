@@ -113,7 +113,7 @@ tests:
   - interval: 1m
     input_series:
       - series: 'local_path_exporter_scan_duration_seconds{job="local-path-exporter", node="debian-16gb-hel1-2"}'
-        values: '180x30'
+        values: '300x30'
       - series: 'local_path_exporter_scan_duration_seconds{job="local-path-exporter", node="vmi2735515"}'
         values: '30x30'
     alert_rule_test:
@@ -129,4 +129,4 @@ tests:
               node: debian-16gb-hel1-2
             exp_annotations:
               summary: "local-path-exporter scan on debian-16gb-hel1-2 is slow"
-              description: "Last scan cycle exceeded the 2m per-volume timeout (scan interval is 5m)."
+              description: "The last cycle took more than 4 minutes. The interval is 5 minutes, and each PVC walk is capped by SCAN_TIMEOUT."
