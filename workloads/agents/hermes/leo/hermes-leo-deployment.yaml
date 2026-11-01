@@ -96,10 +96,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/data
-            - name: devin-credentials
-              mountPath: /opt/data/home/.local/share/devin/credentials.toml
-              subPath: credentials.toml
-              readOnly: true
           livenessProbe:
             httpGet:
               path: /health
@@ -144,7 +140,3 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: nullclaw-leo-data
-        - name: devin-credentials
-          secret:
-            secretName: nullclaw-leo-secret-devin
-            optional: true
