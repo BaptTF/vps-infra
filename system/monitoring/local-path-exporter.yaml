@@ -1,8 +1,6 @@
 # local-path PVC disk usage. One pod per node, no hostNetwork.
 # Only /var/lib/rancher/k3s/storage is mounted, read-only.
-# Image tag v0.1.3 is published by a git tag on Louclaw/local-path-exporter.
-# It does not exist until that tag is pushed. Default pull policy is IfNotPresent.
-# Do not merge until ghcr.io/louclaw/local-path-exporter:v0.1.3 is published.
+# v0.1.6, digest-pinned. Scan rate defaults to SCAN_MAX_ENTRIES_PER_SEC=4000.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -84,7 +82,7 @@ spec:
         # Name matches the kubelet container label excluded from
         # ContainerMemoryNearLimit. The image's example uses "exporter".
         - name: local-path-exporter
-          image: ghcr.io/louclaw/local-path-exporter:v0.1.3
+          image: ghcr.io/louclaw/local-path-exporter:v0.1.6@sha256:3bdc0cce34bc32f0a11677534a704c9cd7852f075cfad12ea2baa3607a83621d
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics
@@ -105,7 +103,7 @@ spec:
             - name: SCAN_PARALLELISM
               value: "1"
             # Each 50000 tracked entries adds one SCAN_INTERVAL, capped
-            # by the full-scan period. The memory limit stays 128Mi.
+            # by the full-scan period. The memory limit is 256Mi.
             - name: SCAN_ENTRIES_PER_STEP
               value: "50000"
             # Allowed range is 6h to 24h. In-place rewrites wait for this.
