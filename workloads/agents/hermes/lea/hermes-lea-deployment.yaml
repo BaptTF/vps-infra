@@ -40,7 +40,7 @@ spec:
               mountPath: /opt/data
       containers:
         - name: hermes-lea
-          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.1
+          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.1.1
           args: ["gateway", "run"]
           env:
             - name: TELEGRAM_BOT_TOKEN
