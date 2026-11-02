@@ -22,7 +22,7 @@ metadata:
   name: ha-cam
   namespace: monitoring
   annotations:
-    tailscale.com/tailnet-fqdn: homeassistant-cam.tail4c7c90.ts.net
+    tailscale.com/tailnet-fqdn: homeassistant-livebox.tail4c7c90.ts.net
 spec:
   type: ExternalName
   externalName: placeholder
