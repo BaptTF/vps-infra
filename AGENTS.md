@@ -80,3 +80,8 @@ build: automatic update of voyage
 ## Manual operations policy
 
 Any manual setup performed directly on a node (SSH, package installs, kernel config, DNS changes, etc.) **must** be documented in the README for reproducibility. This does not apply to GitOps commits or kubectl cluster operations -- those are self-documenting via Git history and manifests.
+
+<!-- entire-agent:begin -->
+Read .entire/agent-guide.md for this repository's workflow, source inspection, and verification guidance.
+@.entire/agent-guide.md
+<!-- entire-agent:end -->
