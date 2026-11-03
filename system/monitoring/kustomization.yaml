@@ -37,7 +37,7 @@ helmCharts:
   - name: alloy
     repo: https://grafana.github.io/helm-charts
     releaseName: alloy
-    version: 1.14.3
+    version: 1.14.4
     valuesFile: values/alloy.yaml
     namespace: monitoring
   - name: cloudflare-exporter
