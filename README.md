@@ -184,10 +184,13 @@ token-file: "/var/lib/rancher/k3s/agent/token"
 node-ip: "${WORKER_TS_IP}"
 flannel-iface: "tailscale0"
 kubelet-arg:
+  - "address=${WORKER_TS_IP}"
   - "system-reserved=memory=512Mi"
   - "kube-reserved=memory=256Mi"
 EOF
 ```
+
+The `address` argument makes the kubelet listen on the node's Tailscale address, port 10250. On a worker that is already in the cluster, add that line to `/etc/rancher/k3s/config.yaml` and restart the k3s agent.
 
 > **Note:** Worker agent uses lower system-reserved (512Mi vs 1800Mi for server) because the k3s agent binary is much lighter than the server.
 
