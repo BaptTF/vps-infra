@@ -78,6 +78,9 @@ access_control:
     - domain: camille.bapttf.com
       policy: one_factor
       subject: "group:family"
+    - domain: ha.bapttf.com
+      policy: one_factor
+      subject: "group:family"
     - domain: "*.bapttf.com"
       policy: one_factor
       subject: "group:lldap_admin"

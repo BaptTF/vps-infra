@@ -278,6 +278,15 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 | Hermes Lya dashboard | https://hermes-lya.bapttf.com | Public (Authelia) |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
+| Home Assistant (Roquefort) | https://ha.bapttf.com | Public (Authelia, group:family) |
+
+---
+
+## Home Assistant (ha.bapttf.com)
+
+Roquefort is published like Eyguians. Traefik reaches `homeassistant.tail4c7c90.ts.net:8123` and strips the proxy headers before they arrive. Authelia allows `group:family`. Home Assistant then asks for its own login.
+
+`ha.bapttf.com` is already covered by the wildcard DNS record and the wildcard certificate. The instance `external_url` is still `https://harjullien.duckdns.org`. After this route is synced, set it to `https://ha.bapttf.com` under Settings, System, Network. `harjullien.duckdns.org` keeps working until that name and the Livebox forward are removed.
 
 ---
 
