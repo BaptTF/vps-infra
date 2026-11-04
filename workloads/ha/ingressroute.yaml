@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ha
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`ha.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+        - name: strip-proxy-headers
+      services:
+        - name: ha
+          port: 8123
+  tls: {}
