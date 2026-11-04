@@ -32,12 +32,6 @@ ports:
       respondingTimeouts:
         readTimeout: 600s
         idleTimeout: 600s
-  ssh:
-    port: 22
-    expose:
-      default: true
-    exposedPort: 22
-    protocol: TCP
 
 providers:
   kubernetesIngress:
