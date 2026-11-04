@@ -168,6 +168,10 @@ defaultRules:
   # Two small nodes: requests exceed (total - largest node) by design.
   disabled:
     KubeMemoryOvercommit: true
+    # kubelet reports the node filesystem for local-path PVCs.
+    # Replaced in local-path-exporter.yaml (local-path) and prometheusrules.yaml (other classes).
+    KubePersistentVolumeFillingUp: true
+    KubePersistentVolumeInodesFillingUp: true
 
 prometheus-node-exporter:
   resources:
