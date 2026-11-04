@@ -24,6 +24,8 @@ spec:
           env:
             - name: DOMAIN
               value: "https://vault.bapttf.com"
+            - name: SIGNUPS_ALLOWED
+              value: "false"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
