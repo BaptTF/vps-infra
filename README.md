@@ -256,7 +256,7 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 | Service | URL | Access |
 |---------|-----|--------|
-| ArgoCD | https://argocd.bapttf.com | Public |
+| ArgoCD | https://argocd (Tailscale) | Tailscale VPN |
 | Grafana | https://grafana (Tailscale) | Tailscale VPN |
 | Prometheus | https://prometheus (Tailscale) | Tailscale VPN |
 | Alertmanager | https://alertmanager (Tailscale) | Tailscale VPN |
