@@ -18,6 +18,14 @@ rmmod algif_aead
 
 The following must be applied on **every** node (server and workers).
 
+### SSH
+
+Node access is Tailscale SSH (`tailscale set --ssh`). `sshd` stays disabled. If Tailscale is down, use the provider console.
+
+```bash
+systemctl disable --now ssh
+```
+
 ### NTP (required on every node)
 
 Every k3s node **must** have NTP enabled and running. Without NTP, the system clock drifts over time and breaks services that validate clock accuracy (e.g., Authelia checks clock sync on startup and refuses to start if the drift exceeds 3 seconds).
@@ -160,7 +168,7 @@ Worker nodes run k3s in agent mode and join the existing cluster over Tailscale.
 ### Prerequisites
 
 - Debian/Ubuntu VM with Tailscale installed and connected to the same tailnet
-- SSH access as root (Tailscale SSH or standard SSH)
+- SSH access as root through Tailscale SSH
 - The k3s server node-token (on the master at `/var/lib/rancher/k3s/server/node-token`)
 
 ### Step 1: Create the agent config
