@@ -7,17 +7,21 @@ rule_files:
 evaluation_interval: 1m
 
 tests:
-  # Usage above the PVC request fires. The kubelet job, which is the node disk, does not.
+  # Usage above 90% of the PVC request fires. The exporter capacity and the kubelet job are the node disk and are ignored.
   - interval: 1m
     input_series:
       - series: 'kubelet_volume_stats_used_bytes{job="local-path-exporter", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
         values: '3000x30'
       - series: 'kubelet_volume_stats_capacity_bytes{job="local-path-exporter", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
+        values: '1000000x30'
+      - series: 'kube_persistentvolumeclaim_resource_requests_storage_bytes{job="kube-state-metrics", namespace="immich", persistentvolumeclaim="immich-library"}'
         values: '1000x30'
       - series: 'kubelet_volume_stats_used_bytes{job="local-path-exporter", namespace="monitoring", persistentvolumeclaim="prometheus", persistentvolume="pvc-prom", node="vmi2735515"}'
         values: '500x30'
       - series: 'kubelet_volume_stats_capacity_bytes{job="local-path-exporter", namespace="monitoring", persistentvolumeclaim="prometheus", persistentvolume="pvc-prom", node="vmi2735515"}'
-        values: '500x30'
+        values: '1000000x30'
+      - series: 'kube_persistentvolumeclaim_resource_requests_storage_bytes{job="kube-state-metrics", namespace="monitoring", persistentvolumeclaim="prometheus"}'
+        values: '1000x30'
       - series: 'kubelet_volume_stats_used_bytes{job="kubelet", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
         values: '9000x30'
       - series: 'kubelet_volume_stats_capacity_bytes{job="kubelet", namespace="immich", persistentvolumeclaim="immich-library", persistentvolume="pvc-immich", node="debian-16gb-hel1-2"}'
@@ -34,8 +38,8 @@ tests:
               persistentvolume: pvc-immich
               node: debian-16gb-hel1-2
             exp_annotations:
-              summary: "PVC immich/immich-library on debian-16gb-hel1-2 exceeds its requested size"
-              description: "On-disk usage of pvc-immich is above the PVC storage request. local-path does not enforce that request."
+              summary: "PVC immich/immich-library on debian-16gb-hel1-2 is above 90% of its request"
+              description: "pvc-immich uses over 90% of the PVC request. local-path does not enforce it."
 
   # Slope over 6h crosses the request inside 24h, while usage is still under it.
   - interval: 1m
@@ -43,6 +47,8 @@ tests:
       - series: 'kubelet_volume_stats_used_bytes{job="local-path-exporter", namespace="vikunja", persistentvolumeclaim="vikunja-files", persistentvolume="pvc-vikunja", node="vmi2735515"}'
         values: '1000+10x500'
       - series: 'kubelet_volume_stats_capacity_bytes{job="local-path-exporter", namespace="vikunja", persistentvolumeclaim="vikunja-files", persistentvolume="pvc-vikunja", node="vmi2735515"}'
+        values: '1000000x500'
+      - series: 'kube_persistentvolumeclaim_resource_requests_storage_bytes{job="kube-state-metrics", namespace="vikunja", persistentvolumeclaim="vikunja-files"}'
         values: '10000x500'
     alert_rule_test:
       - eval_time: 7h
@@ -57,7 +63,7 @@ tests:
               node: vmi2735515
             exp_annotations:
               summary: "PVC vikunja/vikunja-files on vmi2735515 may exceed its request within a day"
-              description: "predict_linear over 6h crosses the storage request of pvc-vikunja in 24h."
+              description: "predict_linear over 6h crosses the PVC request of pvc-vikunja in 24h."
 
   - interval: 1m
     input_series:
