@@ -26,6 +26,26 @@ Node access is Tailscale SSH (`tailscale set --ssh`). `sshd` stays disabled. If 
 systemctl disable --now ssh
 ```
 
+### Unattended upgrades
+
+Debian and Debian Security packages are installed once a day. The node does not reboot by itself. Tailscale and other third-party archives are left alone.
+
+```bash
+apt-get install -y unattended-upgrades
+cat <<'EOF' | tee /etc/apt/apt.conf.d/20auto-upgrades
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+```
+
+`apt-daily-upgrade.timer` runs around 06:00 UTC, plus up to 60 minutes. On a node that already has a backlog, run the first pass by hand:
+
+```bash
+unattended-upgrade -v
+```
+
+When `/var/run/reboot-required` exists, kured reboots the node (see below).
+
 ### Reboots and k3s upgrades
 
 Debian package installs stay on the node (`unattended-upgrades`). What happens afterwards is in the cluster.
