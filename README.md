@@ -381,7 +381,7 @@ Path `/k8up/photos` feeds Secret `k8up-restic-photos` in `immich` only. It holds
 |-----|-------------|
 | `RESTIC_PASSWORD` | password of the `/k3s/photos` repository |
 
-`--private-repos` only requires the first folder to match the username, so this repository is `http://dsplay.tail4c7c90.ts.net:8000/k3s/photos`. On disk that is `restic/k3s/photos`, a second restic repository under the `/k3s` directory. The schedule backs up the whole SMB share, including `encoded-video`. The cluster currently reaches `dsplay` through a DERP relay, so the first run is slow until that path is direct. The job asks for 512 MiB and may use up to 4 GiB. Nothing prunes `/k3s/photos`: the Pi script only forgets `/k3s`, and port 8001 is not reachable from the cluster. Unchanged photos are stored once. Snapshots of that repository accumulate until a forget can run against the prune listener.
+`--private-repos` only requires the first folder to match the username, so this repository is `http://dsplay.tail4c7c90.ts.net:8000/k3s/photos`. On disk that is `restic/k3s/photos`, a second restic repository under the `/k3s` directory. The schedule backs up the whole SMB share, including `encoded-video`. The cluster reaches `dsplay` over a direct Tailscale path, not a DERP relay. The job asks for 512 MiB and may use up to 4 GiB. Nothing prunes `/k3s/photos`: the Pi script only forgets `/k3s`, and port 8001 is not reachable from the cluster. Unchanged photos are stored once. Snapshots of that repository accumulate until a forget can run against the prune listener.
 
 ### rest-server on the NAS
 
@@ -417,7 +417,7 @@ The serve config is kept by tailscaled across reboots. The rest-server process i
 - Append-only, for k8up: `127.0.0.1:8000`, published by `tailscale serve`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. `--private-repos` requires the first folder to be the username. A second folder is a separate repository, so Immich originals use `/k3s/photos`.
 - Prune, for the Pi: `127.0.0.1:8001`, not published. The NAS does not run `restic`. Reach the listener with `ssh -N -L 8001:127.0.0.1:8001 dsplay`. `sshd` currently sets `AllowTcpForwarding no`, so that forward is refused until the NAS sshd allows it.
 
-Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster currently reaches the NAS through DERP.
+Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster reaches the NAS over a direct Tailscale path.
 
 `sshd` on the NAS sets `AllowTcpForwarding no`, so an SSH local forward cannot reach `127.0.0.1:8000`. After `tailscale serve` is active, initialize the repository once from a tailnet host:
 

@@ -187,7 +187,7 @@ spec:
 ---
 # Originals on the Hetzner Storage Box. Sub-repository of user k3s, so the
 # Pi prune of /k3s does not load this index. Same htpasswd user. The cluster
-# reaches the NAS through a DERP relay for now.
+# reaches the NAS over a direct Tailscale path.
 apiVersion: k8up.io/v1
 kind: Schedule
 metadata:
