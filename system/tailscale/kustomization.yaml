@@ -12,3 +12,4 @@ helmCharts:
 
 resources:
   - 01-tailscale-infisical-secret.yaml
+  - hermes-egress-networkpolicy.yaml

@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: leo-ha
+  namespace: openclaw
+  annotations:
+    tailscale.com/tailnet-fqdn: homeassistant.tail4c7c90.ts.net
+    tailscale.com/tags: tag:hermes
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: http
+      port: 8123
+      protocol: TCP
+    - name: ssh
+      port: 22
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: leo-dsplay
+  namespace: openclaw
+  annotations:
+    tailscale.com/tailnet-fqdn: dsplay.tail4c7c90.ts.net
+    tailscale.com/tags: tag:hermes
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: ssh
+      port: 22
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: leo-diskstation
+  namespace: openclaw
+  annotations:
+    tailscale.com/tailnet-fqdn: diskstation.tail4c7c90.ts.net
+    tailscale.com/tags: tag:hermes
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: ssh
+      port: 22
+      protocol: TCP

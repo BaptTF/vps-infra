@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hermes-leo-egress
+spec:
+  podSelector:
+    matchExpressions:
+      - key: tailscale.com/parent-resource
+        operator: In
+        values: [leo-ha, leo-dsplay, leo-diskstation]
+      - key: tailscale.com/parent-resource-ns
+        operator: In
+        values: [openclaw]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openclaw
+          podSelector:
+            matchLabels:
+              app: hermes-leo
+      ports:
+        - protocol: TCP
+          port: 8123
+        - protocol: TCP
+          port: 22
