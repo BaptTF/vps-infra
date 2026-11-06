@@ -4,6 +4,8 @@ kind: Ingress
 metadata:
   name: hermes-leo-api
   namespace: openclaw
+  annotations:
+    tailscale.com/tags: tag:agents
 spec:
   ingressClassName: tailscale
   tls:
