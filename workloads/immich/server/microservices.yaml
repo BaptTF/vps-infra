@@ -1,0 +1,177 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-microservices
+  namespace: immich
+  labels:
+    app: immich
+    component: microservices
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: immich
+      component: microservices
+  template:
+    metadata:
+      labels:
+        app: immich
+        component: microservices
+    spec:
+      initContainers:
+        - name: render-config
+          image: busybox:1.38.0
+          command: ["/bin/sh", "-eu", "-c"]
+          args:
+            - |
+              test -s /secrets/oauth/oauth-client-secret
+              test -s /secrets/smtp/api-key
+              /tools/jq --rawfile oauth /secrets/oauth/oauth-client-secret \
+                --rawfile smtp /secrets/smtp/api-key \
+                '
+                  def trim: sub("\n+$"; "");
+                  ($oauth | trim) as $oauth
+                  | ($smtp | trim) as $smtp
+                  | if ($oauth | length) == 0 or ($smtp | length) == 0 then
+                      error("oauth client secret and smtp password are required")
+                    else
+                      .oauth.clientSecret = $oauth
+                      | .notifications.smtp.transport.password = $smtp
+                    end
+                ' /template/immich-config.json > /config/immich-config.json
+          volumeMounts:
+            - name: config-template
+              mountPath: /template
+              readOnly: true
+            - name: rendered-config
+              mountPath: /config
+            - name: jq
+              mountPath: /tools
+              readOnly: true
+            - name: oauth-secret
+              mountPath: /secrets/oauth
+              readOnly: true
+            - name: smtp-secret
+              mountPath: /secrets/smtp
+              readOnly: true
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      containers:
+        - name: immich-microservices
+          # Same digest as immich-server. Bump both together.
+          image: ghcr.io/immich-app/immich-server:v3.3.6@sha256:e1981983b1c13f6024b57d72e7ecae3342eed1581201ab09fb248932d86c593a
+          ports:
+            - containerPort: 8082
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: immich-config
+          env:
+            - name: IMMICH_WORKERS_EXCLUDE
+              value: api
+            - name: IMMICH_TELEMETRY_INCLUDE
+              value: all
+            - name: IMMICH_CONFIG_FILE
+              value: /config/immich-config.json
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: immich-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: immich-db-secret
+                  key: password
+          volumeMounts:
+            - name: rendered-config
+              mountPath: /config
+              readOnly: true
+            - name: library
+              mountPath: /data
+            - name: storagebox
+              mountPath: /data/upload
+              subPath: upload
+            - name: storagebox
+              mountPath: /data/library
+              subPath: library
+            - name: storagebox
+              mountPath: /data/family
+              subPath: family
+            - name: storagebox
+              mountPath: /data/encoded-video
+              subPath: encoded-video
+            - name: storagebox
+              mountPath: /external/family
+              subPath: family
+            - name: archives
+              mountPath: /mnt/archives
+          startupProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "4"
+              memory: 4Gi
+      volumes:
+        - name: config-template
+          configMap:
+            name: immich-config-file
+        - name: rendered-config
+          emptyDir:
+            medium: Memory
+        - name: jq
+          image:
+            reference: ghcr.io/jqlang/jq:1.8.2
+            pullPolicy: IfNotPresent
+        - name: oauth-secret
+          secret:
+            secretName: immich-oauth
+            items:
+              - key: oauth-client-secret
+                path: oauth-client-secret
+        - name: smtp-secret
+          secret:
+            secretName: resend
+            items:
+              - key: api-key
+                path: api-key
+        - name: library
+          persistentVolumeClaim:
+            claimName: immich-library
+        - name: storagebox
+          persistentVolumeClaim:
+            claimName: immich-storagebox
+        - name: archives
+          persistentVolumeClaim:
+            claimName: immich-archives
