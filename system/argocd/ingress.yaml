@@ -1,0 +1,16 @@
+# Public webhook only. UI/API stay on Tailscale (tailscale-ingress.yaml).
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-server-webhook
+  namespace: argocd
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`argocd.bapttf.com`) && Path(`/api/webhook`) && Method(`POST`)
+      kind: Rule
+      services:
+        - name: argocd-server
+          port: 80
+  tls: {}
