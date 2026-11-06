@@ -5,7 +5,7 @@ metadata:
   namespace: openclaw
   annotations:
     tailscale.com/tailnet-fqdn: homeassistant.tail4c7c90.ts.net
-    tailscale.com/tags: tag:hermes
+    tailscale.com/tags: tag:agents
 spec:
   type: ExternalName
   externalName: placeholder
@@ -24,7 +24,7 @@ metadata:
   namespace: openclaw
   annotations:
     tailscale.com/tailnet-fqdn: dsplay.tail4c7c90.ts.net
-    tailscale.com/tags: tag:hermes
+    tailscale.com/tags: tag:agents
 spec:
   type: ExternalName
   externalName: placeholder
@@ -40,7 +40,7 @@ metadata:
   namespace: openclaw
   annotations:
     tailscale.com/tailnet-fqdn: diskstation.tail4c7c90.ts.net
-    tailscale.com/tags: tag:hermes
+    tailscale.com/tags: tag:agents
 spec:
   type: ExternalName
   externalName: placeholder
