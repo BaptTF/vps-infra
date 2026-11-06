@@ -549,6 +549,13 @@ spec:
                         description: RepoURL is the URL to the repository (Git or
                           Helm) that contains the application manifests
                         type: string
+                      tagPrefix:
+                        description: |-
+                          TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                          The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                          For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                          "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                        type: string
                       targetRevision:
                         description: |-
                           TargetRevision defines the revision of the source to sync the application to.
@@ -937,6 +944,13 @@ spec:
                         repoURL:
                           description: RepoURL is the URL to the repository (Git or
                             Helm) that contains the application manifests
+                          type: string
+                        tagPrefix:
+                          description: |-
+                            TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                            The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                            For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                            "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                           type: string
                         targetRevision:
                           description: |-
@@ -1433,6 +1447,13 @@ spec:
                     description: RepoURL is the URL to the repository (Git or Helm)
                       that contains the application manifests
                     type: string
+                  tagPrefix:
+                    description: |-
+                      TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                      The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                      For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                      "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                    type: string
                   targetRevision:
                     description: |-
                       TargetRevision defines the revision of the source to sync the application to.
@@ -1838,6 +1859,11 @@ spec:
                         minLength: 1
                         pattern: ^.{2,}|[^./]$
                         type: string
+                      repoURL:
+                        description: |-
+                          RepoURL is the URL to the git repository that contains the hydrated manifests. If not set, defaults to
+                          the DrySource.RepoURL.
+                        type: string
                       targetBranch:
                         description: |-
                           TargetBranch is the branch from which hydrated manifests will be synced.
@@ -2223,6 +2249,13 @@ spec:
                     repoURL:
                       description: RepoURL is the URL to the repository (Git or Helm)
                         that contains the application manifests
+                      type: string
+                    tagPrefix:
+                      description: |-
+                        TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                        The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                        For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                        "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                       type: string
                     targetRevision:
                       description: |-
@@ -2784,6 +2817,13 @@ spec:
                           description: RepoURL is the URL to the repository (Git or
                             Helm) that contains the application manifests
                           type: string
+                        tagPrefix:
+                          description: |-
+                            TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                            The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                            For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                            "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                          type: string
                         targetRevision:
                           description: |-
                             TargetRevision defines the revision of the source to sync the application to.
@@ -3179,6 +3219,13 @@ spec:
                           repoURL:
                             description: RepoURL is the URL to the repository (Git
                               or Helm) that contains the application manifests
+                            type: string
+                          tagPrefix:
+                            description: |-
+                              TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                              The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                              For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                              "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                             type: string
                           targetRevision:
                             description: |-
@@ -3731,6 +3778,13 @@ spec:
                                 description: RepoURL is the URL to the repository
                                   (Git or Helm) that contains the application manifests
                                 type: string
+                              tagPrefix:
+                                description: |-
+                                  TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                  The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                  For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                  "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                                type: string
                               targetRevision:
                                 description: |-
                                   TargetRevision defines the revision of the source to sync the application to.
@@ -4145,6 +4199,13 @@ spec:
                                 repoURL:
                                   description: RepoURL is the URL to the repository
                                     (Git or Helm) that contains the application manifests
+                                  type: string
+                                tagPrefix:
+                                  description: |-
+                                    TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                    The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                    For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                    "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                                   type: string
                                 targetRevision:
                                   description: |-
@@ -4672,6 +4733,13 @@ spec:
                             description: RepoURL is the URL to the repository (Git
                               or Helm) that contains the application manifests
                             type: string
+                          tagPrefix:
+                            description: |-
+                              TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                              The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                              For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                              "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                            type: string
                           targetRevision:
                             description: |-
                               TargetRevision defines the revision of the source to sync the application to.
@@ -5076,6 +5144,13 @@ spec:
                             repoURL:
                               description: RepoURL is the URL to the repository (Git
                                 or Helm) that contains the application manifests
+                              type: string
+                            tagPrefix:
+                              description: |-
+                                TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                               type: string
                             targetRevision:
                               description: |-
@@ -5625,6 +5700,11 @@ spec:
                                 minLength: 1
                                 pattern: ^.{2,}|[^./]$
                                 type: string
+                              repoURL:
+                                description: |-
+                                  RepoURL is the URL to the git repository that contains the hydrated manifests. If not set, defaults to
+                                  the DrySource.RepoURL.
+                                type: string
                               targetBranch:
                                 description: |-
                                   TargetBranch is the branch from which hydrated manifests will be synced.
@@ -5647,6 +5727,11 @@ spec:
                     - message
                     - phase
                     type: object
+                  lastComparedDryRevision:
+                    description: |-
+                      LastComparedDryRevision holds the resolved revision from the most recent dry source comparison.
+                      This is updated on every evaluation, even when hydration is skipped due to no changes.
+                    type: string
                   lastSuccessfulOperation:
                     description: LastSuccessfulOperation holds info about the most
                       recent successful hydration
@@ -6078,6 +6163,11 @@ spec:
                                 minLength: 1
                                 pattern: ^.{2,}|[^./]$
                                 type: string
+                              repoURL:
+                                description: |-
+                                  RepoURL is the URL to the git repository that contains the hydrated manifests. If not set, defaults to
+                                  the DrySource.RepoURL.
+                                type: string
                               targetBranch:
                                 description: |-
                                   TargetBranch is the branch from which hydrated manifests will be synced.
@@ -6119,6 +6209,10 @@ spec:
                     items:
                       type: string
                     type: array
+                  isAppOfApps:
+                    description: IsAppOfApps holds true if the application has any
+                      application for child resource.
+                    type: boolean
                 type: object
               sync:
                 description: Sync contains information about the application's current
@@ -6567,6 +6661,13 @@ spec:
                             description: RepoURL is the URL to the repository (Git
                               or Helm) that contains the application manifests
                             type: string
+                          tagPrefix:
+                            description: |-
+                              TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                              The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                              For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                              "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                            type: string
                           targetRevision:
                             description: |-
                               TargetRevision defines the revision of the source to sync the application to.
@@ -6971,6 +7072,13 @@ spec:
                             repoURL:
                               description: RepoURL is the URL to the repository (Git
                                 or Helm) that contains the application manifests
+                              type: string
+                            tagPrefix:
+                              description: |-
+                                TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                               type: string
                             targetRevision:
                               description: |-
@@ -7394,6 +7502,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -7649,6 +7759,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -7893,6 +8005,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -8302,6 +8416,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -8557,6 +8673,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -8801,6 +8919,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -9211,6 +9331,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -9466,6 +9588,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -9710,6 +9834,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -10098,6 +10224,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -10353,6 +10481,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -10597,6 +10727,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -11010,6 +11142,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -11265,6 +11399,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -11509,6 +11645,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -11918,6 +12056,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -12173,6 +12313,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -12417,6 +12559,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -12827,6 +12971,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -13082,6 +13228,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -13326,6 +13474,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -13714,6 +13864,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -13969,6 +14121,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -14213,6 +14367,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -14609,6 +14765,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -14864,6 +15022,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -15108,6 +15268,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -15731,6 +15893,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -15986,6 +16150,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -16231,6 +16397,8 @@ spec:
                                                   type: string
                                                 repoURL:
                                                   type: string
+                                                tagPrefix:
+                                                  type: string
                                                 targetRevision:
                                                   type: string
                                               required:
@@ -16451,6 +16619,8 @@ spec:
                                         type: boolean
                                       api:
                                         type: string
+                                      excludeArchivedRepos:
+                                        type: boolean
                                       insecure:
                                         type: boolean
                                       owner:
@@ -16477,6 +16647,8 @@ spec:
                                         type: string
                                       appSecretName:
                                         type: string
+                                      excludeArchivedRepos:
+                                        type: boolean
                                       organization:
                                         type: string
                                       tokenRef:
@@ -16510,6 +16682,8 @@ spec:
                                         type: object
                                       group:
                                         type: string
+                                      includeArchivedRepos:
+                                        type: boolean
                                       includeSharedProjects:
                                         type: boolean
                                       includeSubgroups:
@@ -16844,6 +17018,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -17099,6 +17275,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -17343,6 +17521,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -17748,6 +17928,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -18003,6 +18185,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -18247,6 +18431,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -18662,6 +18848,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -18917,6 +19105,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -19161,6 +19351,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -19570,6 +19762,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -19825,6 +20019,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -20069,6 +20265,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -20479,6 +20677,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -20734,6 +20934,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -20978,6 +21180,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -21366,6 +21570,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -21621,6 +21827,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -21865,6 +22073,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -22261,6 +22471,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -22516,6 +22728,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -22760,6 +22974,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -23383,6 +23599,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -23638,6 +23856,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -23883,6 +24103,8 @@ spec:
                                                   type: string
                                                 repoURL:
                                                   type: string
+                                                tagPrefix:
+                                                  type: string
                                                 targetRevision:
                                                   type: string
                                               required:
@@ -24103,6 +24325,8 @@ spec:
                                         type: boolean
                                       api:
                                         type: string
+                                      excludeArchivedRepos:
+                                        type: boolean
                                       insecure:
                                         type: boolean
                                       owner:
@@ -24129,6 +24353,8 @@ spec:
                                         type: string
                                       appSecretName:
                                         type: string
+                                      excludeArchivedRepos:
+                                        type: boolean
                                       organization:
                                         type: string
                                       tokenRef:
@@ -24162,6 +24388,8 @@ spec:
                                         type: object
                                       group:
                                         type: string
+                                      includeArchivedRepos:
+                                        type: boolean
                                       includeSharedProjects:
                                         type: boolean
                                       includeSubgroups:
@@ -24496,6 +24724,8 @@ spec:
                                                 type: string
                                               repoURL:
                                                 type: string
+                                              tagPrefix:
+                                                type: string
                                               targetRevision:
                                                 type: string
                                             required:
@@ -24751,6 +24981,8 @@ spec:
                                                     minLength: 1
                                                     pattern: ^.{2,}|[^./]$
                                                     type: string
+                                                  repoURL:
+                                                    type: string
                                                   targetBranch:
                                                     type: string
                                                 required:
@@ -24995,6 +25227,8 @@ spec:
                                                 ref:
                                                   type: string
                                                 repoURL:
+                                                  type: string
+                                                tagPrefix:
                                                   type: string
                                                 targetRevision:
                                                   type: string
@@ -25404,6 +25638,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -25659,6 +25895,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -25903,6 +26141,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -26298,6 +26538,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -26553,6 +26795,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -26797,6 +27041,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -27420,6 +27666,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -27675,6 +27923,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -27920,6 +28170,8 @@ spec:
                                         type: string
                                       repoURL:
                                         type: string
+                                      tagPrefix:
+                                        type: string
                                       targetRevision:
                                         type: string
                                     required:
@@ -28140,6 +28392,8 @@ spec:
                               type: boolean
                             api:
                               type: string
+                            excludeArchivedRepos:
+                              type: boolean
                             insecure:
                               type: boolean
                             owner:
@@ -28166,6 +28420,8 @@ spec:
                               type: string
                             appSecretName:
                               type: string
+                            excludeArchivedRepos:
+                              type: boolean
                             organization:
                               type: string
                             tokenRef:
@@ -28199,6 +28455,8 @@ spec:
                               type: object
                             group:
                               type: string
+                            includeArchivedRepos:
+                              type: boolean
                             includeSharedProjects:
                               type: boolean
                             includeSubgroups:
@@ -28533,6 +28791,8 @@ spec:
                                       type: string
                                     repoURL:
                                       type: string
+                                    tagPrefix:
+                                      type: string
                                     targetRevision:
                                       type: string
                                   required:
@@ -28788,6 +29048,8 @@ spec:
                                           minLength: 1
                                           pattern: ^.{2,}|[^./]$
                                           type: string
+                                        repoURL:
+                                          type: string
                                         targetBranch:
                                           type: string
                                       required:
@@ -29032,6 +29294,8 @@ spec:
                                       ref:
                                         type: string
                                       repoURL:
+                                        type: string
+                                      tagPrefix:
                                         type: string
                                       targetRevision:
                                         type: string
@@ -29514,6 +29778,8 @@ spec:
                             type: string
                           repoURL:
                             type: string
+                          tagPrefix:
+                            type: string
                           targetRevision:
                             type: string
                         required:
@@ -29769,6 +30035,8 @@ spec:
                                 minLength: 1
                                 pattern: ^.{2,}|[^./]$
                                 type: string
+                              repoURL:
+                                type: string
                               targetBranch:
                                 type: string
                             required:
@@ -30013,6 +30281,8 @@ spec:
                             ref:
                               type: string
                             repoURL:
+                              type: string
+                            tagPrefix:
                               type: string
                             targetRevision:
                               type: string
@@ -30449,11 +30719,15 @@ spec:
                   type: object
                 type: array
               signatureKeys:
-                description: SignatureKeys contains a list of PGP key IDs that commits
-                  in Git must be signed with in order to be allowed for sync
+                description: |-
+                  SignatureKeys contains a list of PGP key IDs that commits in Git must be signed with in order to be allowed for sync
+
+                  Deprecated: Use SourceIntegrity instead. SignatureKeys will be removed with the next major version.
                 items:
-                  description: SignatureKey is the specification of a key required
-                    to verify commit signatures with
+                  description: |-
+                    SignatureKey is the specification of a key required to verify commit signatures with
+
+                    Deprecated: Use SourceIntegrity instead. SignatureKeys will be removed with the next major version.
                   properties:
                     keyID:
                       description: The ID of the key in hexadecimal notation
@@ -30462,6 +30736,55 @@ spec:
                   - keyID
                   type: object
                 type: array
+              sourceIntegrity:
+                description: |-
+                  SourceIntegrity represents a constraint on manifest sources integrity to be met before they can be used.
+                  Do not access directly, use EffectiveSourceIntegrity() for correct backwards compatibility handling.
+                properties:
+                  git:
+                    description: Git - policies for git source verification
+                    properties:
+                      policies:
+                        items:
+                          properties:
+                            gpg:
+                              description: Verify GPG commit/tag signatures
+                              properties:
+                                keys:
+                                  description: List of key IDs to trust. The keys
+                                    need to be in the repository server keyring.
+                                  items:
+                                    type: string
+                                  type: array
+                                mode:
+                                  type: string
+                              required:
+                              - keys
+                              - mode
+                              type: object
+                            repos:
+                              description: List of repository criteria restricting
+                                repositories the policy will apply to
+                              items:
+                                properties:
+                                  url:
+                                    description: URL specifier, glob.
+                                    type: string
+                                required:
+                                - url
+                                type: object
+                              type: array
+                          required:
+                          - gpg
+                          - repos
+                          type: object
+                        type: array
+                    required:
+                    - policies
+                    type: object
+                required:
+                - git
+                type: object
               sourceNamespaces:
                 description: SourceNamespaces defines the namespaces application resources
                   are allowed to be created in
@@ -30523,6 +30846,12 @@ spec:
                       description: Schedule is the time the window will begin, specified
                         in cron format
                       type: string
+                    syncOverrun:
+                      description: |-
+                        SyncOverrun allows ongoing syncs to continue in two scenarios:
+                        For deny windows: allows syncs that started before the deny window became active to continue running
+                        For allow windows: allows syncs that started during the allow window to continue after the window ends
+                      type: boolean
                     timeZone:
                       description: TimeZone of the sync that will be applied to the
                         schedule
@@ -30577,8 +30906,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-application-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-application-controller
   namespace: argocd
 ---
@@ -30592,8 +30921,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-applicationset-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-applicationset-controller
   namespace: argocd
 ---
@@ -30607,8 +30936,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-controller
   namespace: argocd
 ---
@@ -30625,8 +30954,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-redis-secret-init
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-redis-secret-init
   namespace: argocd
 ---
@@ -30640,8 +30969,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-repo-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-repo-server
   namespace: argocd
 ---
@@ -30655,8 +30984,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-server
   namespace: argocd
 ---
@@ -30669,8 +30998,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-application-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-application-controller
   namespace: argocd
 rules:
@@ -30722,8 +31051,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-applicationset-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-applicationset-controller
   namespace: argocd
 rules:
@@ -30822,8 +31151,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-controller
   namespace: argocd
 rules:
@@ -30875,8 +31204,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-redis-secret-init
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-redis-secret-init
   namespace: argocd
 rules:
@@ -30904,8 +31233,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-repo-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-repo-server
   namespace: argocd
 rules: null
@@ -30919,8 +31248,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-server
   namespace: argocd
 rules:
@@ -30968,8 +31297,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-application-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-application-controller
 rules:
 - apiGroups:
@@ -30992,8 +31321,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-controller
 rules:
 - apiGroups:
@@ -31041,8 +31370,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-server
 rules:
 - apiGroups:
@@ -31099,8 +31428,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-application-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-application-controller
   namespace: argocd
 roleRef:
@@ -31121,8 +31450,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-applicationset-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-applicationset-controller
   namespace: argocd
 roleRef:
@@ -31143,8 +31472,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-controller
   namespace: argocd
 roleRef:
@@ -31168,8 +31497,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-redis-secret-init
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-redis-secret-init
   namespace: argocd
 roleRef:
@@ -31190,8 +31519,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-repo-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-repo-server
   namespace: argocd
 roleRef:
@@ -31212,8 +31541,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-server
   namespace: argocd
 roleRef:
@@ -31234,8 +31563,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-application-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-application-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -31255,8 +31584,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -31276,8 +31605,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-server
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -31401,8 +31730,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-cm
   namespace: argocd
 ---
@@ -31439,8 +31768,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-cmd-params-cm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-cmd-params-cm
   namespace: argocd
 ---
@@ -31452,8 +31781,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-gpg-keys-cm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-gpg-keys-cm
   namespace: argocd
 ---
@@ -31469,8 +31798,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-cm
   namespace: argocd
 ---
@@ -31488,8 +31817,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-rbac-cm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-rbac-cm
   namespace: argocd
 ---
@@ -31529,8 +31858,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-redis
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-redis-health-configmap
   namespace: argocd
 ---
@@ -31549,6 +31878,9 @@ data:
     gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
     gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
     gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/StKDHMoX4/OKyIzuS0q/T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9
+    ssh.bitbucket.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPIQmuzMBuKdWeF4+a2sjSSpBK0iqitSQ+5BM9KhpexuGt20JpTVM7u5BDZngncgrqDMbWdxMWWOGtZ9UgbqgZE=
+    ssh.bitbucket.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIazEu89wgQZ4bqs3d63QSMzYVa0MuJ2e2gKTKqu+UUO
+    ssh.bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDQeJzhupRu0u0cdegZIa8e86EG2qOCsIsD1Xw0xSeiPDlCr7kq97NLmMbpKTX6Esc30NuoqEEHCuc7yWtwp8dI76EEEB1VqY9QJq6vk+aySyboD5QF61I/1WeTwu+deCbgKMGbUijeXhtfbxSxm6JwGrXrhBdofTsbKRUsrN1WoNgUa8uqN1Vx6WAJw1JHPhglEGGHea6QICwJOAr/6mrui/oB7pkaWKHj3z7d1IC4KWLtY47elvjbaTlkN04Kc/5LFEirorGYVbt15kAUlqGM65pk6ZBxtaO3+30LVlORZkxOh+LKL/BvbZ/iRNhItLqNyieoQj/uh/7Iv4uyH/cV/0b4WDSd3DptigWq84lJubb9t/DnZlrJazxyDCulTmKdOR7vs9gMTo+uoIrPSb8ScTtvw65+odKAlBj59dhnVp9zd7QUojOpXlL62Aw56U4oO+FALuevvMjiWeavKhJqlR7i5n9srYcrNV7ttmDw7kf/97P5zauIhxcjX+xHv4M=
     ssh.dev.azure.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
     vs-ssh.visualstudio.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
 kind: ConfigMap
@@ -31558,8 +31890,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-ssh-known-hosts-cm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-ssh-known-hosts-cm
   namespace: argocd
 ---
@@ -31571,8 +31903,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-tls-certs-cm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-tls-certs-cm
   namespace: argocd
 ---
@@ -31585,8 +31917,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-secret
   namespace: argocd
 stringData: null
@@ -31601,8 +31933,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-metrics
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
     monitoring.bapttf.com/scrape: argocd-application-controller
   name: argocd-application-controller-metrics
   namespace: argocd
@@ -31626,8 +31958,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-applicationset-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-applicationset-controller
   namespace: argocd
 spec:
@@ -31649,8 +31981,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-metrics
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
     monitoring.bapttf.com/scrape: argocd-applicationset
   name: argocd-applicationset-controller-metrics
   namespace: argocd
@@ -31674,8 +32006,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-redis
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-redis
   namespace: argocd
 spec:
@@ -31696,8 +32028,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-repo-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-repo-server
   namespace: argocd
 spec:
@@ -31719,8 +32051,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-repo-server-metrics
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
     monitoring.bapttf.com/scrape: argocd-repo-server
   name: argocd-repo-server-metrics
   namespace: argocd
@@ -31744,8 +32076,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-server
   namespace: argocd
 spec:
@@ -31773,8 +32105,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server-metrics
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
     monitoring.bapttf.com/scrape: argocd-server
   name: argocd-server-metrics
   namespace: argocd
@@ -31798,8 +32130,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-applicationset-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-applicationset-controller
   namespace: argocd
 spec:
@@ -31812,15 +32144,15 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 203a4333549af736da7c2ab70218bf64b5d1c8a725cadc5ff6be7bd252e768d0
+        checksum/cmd-params: ae528ed01abf03d379fd2259bfb23d5f041853e31c4fef20b8b058354101498b
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-applicationset-controller
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.4.4
-        helm.sh/chart: argo-cd-9.7.1
+        app.kubernetes.io/version: v3.5.6
+        helm.sh/chart: argo-cd-10.11.6
     spec:
       affinity:
         podAntiAffinity:
@@ -31843,6 +32175,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: GRPC_ENABLE_TXT_SERVICE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: applicationsetcontroller.grpc.enable.txt.service.config
+              name: argocd-cmd-params-cm
+              optional: true
         - name: ARGOCD_APPLICATIONSET_CONTROLLER_GLOBAL_PRESERVED_ANNOTATIONS
           valueFrom:
             configMapKeyRef:
@@ -32005,7 +32343,7 @@ spec:
               key: applicationsetcontroller.status.max.resources.count
               name: argocd-cmd-params-cm
               optional: true
-        image: quay.io/argoproj/argocd:v3.4.4
+        image: quay.io/argoproj/argocd:v3.5.6
         imagePullPolicy: IfNotPresent
         name: applicationset-controller
         ports:
@@ -32060,6 +32398,7 @@ spec:
         name: ssh-known-hosts
       - configMap:
           name: argocd-tls-certs-cm
+          optional: true
         name: tls-certs
       - configMap:
           name: argocd-gpg-keys-cm
@@ -32096,8 +32435,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-notifications-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-notifications-controller
   namespace: argocd
 spec:
@@ -32112,15 +32451,15 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 203a4333549af736da7c2ab70218bf64b5d1c8a725cadc5ff6be7bd252e768d0
+        checksum/cmd-params: ae528ed01abf03d379fd2259bfb23d5f041853e31c4fef20b8b058354101498b
       labels:
         app.kubernetes.io/component: notifications-controller
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-notifications-controller
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.4.4
-        helm.sh/chart: argo-cd-9.7.1
+        app.kubernetes.io/version: v3.5.6
+        helm.sh/chart: argo-cd-10.11.6
     spec:
       affinity:
         podAntiAffinity:
@@ -32176,7 +32515,7 @@ spec:
               key: notificationscontroller.repo.server.plaintext
               name: argocd-cmd-params-cm
               optional: true
-        image: quay.io/argoproj/argocd:v3.4.4
+        image: quay.io/argoproj/argocd:v3.5.6
         imagePullPolicy: IfNotPresent
         name: notifications-controller
         ports:
@@ -32213,6 +32552,7 @@ spec:
       volumes:
       - configMap:
           name: argocd-tls-certs-cm
+          optional: true
         name: tls-certs
       - name: argocd-repo-server-tls
         secret:
@@ -32235,8 +32575,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-redis
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-redis
   namespace: argocd
 spec:
@@ -32253,8 +32593,8 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-redis
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.4.4
-        helm.sh/chart: argo-cd-9.7.1
+        app.kubernetes.io/version: v3.5.6
+        helm.sh/chart: argo-cd-10.11.6
     spec:
       affinity:
         podAntiAffinity:
@@ -32279,7 +32619,7 @@ spec:
             secretKeyRef:
               key: auth
               name: argocd-redis
-        image: ecr-public.aws.com/docker/library/redis:8.2.3-alpine
+        image: ecr-public.aws.com/docker/library/redis:8.6.4-alpine
         imagePullPolicy: IfNotPresent
         name: redis
         ports:
@@ -32327,8 +32667,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-repo-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-repo-server
   namespace: argocd
 spec:
@@ -32341,16 +32681,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 55fc17af37413fd4738aa1a9c7eb83f3216264420b792912610c2cdaeb32ef2c
-        checksum/cmd-params: 203a4333549af736da7c2ab70218bf64b5d1c8a725cadc5ff6be7bd252e768d0
+        checksum/cm: ec7b1cbbdbcb20549a3a614eaad88610551089c6accef105b329908fb6f450ef
+        checksum/cmd-params: ae528ed01abf03d379fd2259bfb23d5f041853e31c4fef20b8b058354101498b
       labels:
         app.kubernetes.io/component: repo-server
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-repo-server
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.4.4
-        helm.sh/chart: argo-cd-9.7.1
+        app.kubernetes.io/version: v3.5.6
+        helm.sh/chart: argo-cd-10.11.6
     spec:
       affinity:
         podAntiAffinity:
@@ -32370,6 +32710,12 @@ spec:
         env:
         - name: ARGOCD_EXEC_TIMEOUT
           value: 5m
+        - name: GRPC_ENABLE_TXT_SERVICE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: reposerver.grpc.enable.txt.service.config
+              name: argocd-cmd-params-cm
+              optional: true
         - name: ARGOCD_REPO_SERVER_NAME
           value: argocd-repo-server
         - name: ARGOCD_RECONCILIATION_TIMEOUT
@@ -32630,7 +32976,7 @@ spec:
           value: /helm-working-dir
         - name: HELM_DATA_HOME
           value: /helm-working-dir
-        image: quay.io/argoproj/argocd:v3.4.4
+        image: quay.io/argoproj/argocd:v3.5.6
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -32699,7 +33045,7 @@ spec:
         command:
         - sh
         - -c
-        image: quay.io/argoproj/argocd:v3.4.4
+        image: quay.io/argoproj/argocd:v3.5.6
         imagePullPolicy: IfNotPresent
         name: copyutil
         resources:
@@ -32739,6 +33085,7 @@ spec:
         name: ssh-known-hosts
       - configMap:
           name: argocd-tls-certs-cm
+          optional: true
         name: tls-certs
       - configMap:
           name: argocd-gpg-keys-cm
@@ -32766,8 +33113,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-server
   namespace: argocd
 spec:
@@ -32780,16 +33127,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 55fc17af37413fd4738aa1a9c7eb83f3216264420b792912610c2cdaeb32ef2c
-        checksum/cmd-params: 203a4333549af736da7c2ab70218bf64b5d1c8a725cadc5ff6be7bd252e768d0
+        checksum/cm: ec7b1cbbdbcb20549a3a614eaad88610551089c6accef105b329908fb6f450ef
+        checksum/cmd-params: ae528ed01abf03d379fd2259bfb23d5f041853e31c4fef20b8b058354101498b
       labels:
         app.kubernetes.io/component: server
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-server
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.4.4
-        helm.sh/chart: argo-cd-9.7.1
+        app.kubernetes.io/version: v3.5.6
+        helm.sh/chart: argo-cd-10.11.6
     spec:
       affinity:
         podAntiAffinity:
@@ -32809,6 +33156,12 @@ spec:
         env:
         - name: ARGOCD_SERVER_NAME
           value: argocd-server
+        - name: GRPC_ENABLE_TXT_SERVICE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: server.grpc.enable.txt.service.config
+              name: argocd-cmd-params-cm
+              optional: true
         - name: ARGOCD_SERVER_INSECURE
           valueFrom:
             configMapKeyRef:
@@ -33115,7 +33468,7 @@ spec:
               key: server.sync.replace.allowed
               name: argocd-cmd-params-cm
               optional: true
-        image: quay.io/argoproj/argocd:v3.4.4
+        image: quay.io/argoproj/argocd:v3.5.6
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -33191,6 +33544,7 @@ spec:
         name: ssh-known-hosts
       - configMap:
           name: argocd-tls-certs-cm
+          optional: true
         name: tls-certs
       - configMap:
           name: argocd-styles-cm
@@ -33233,8 +33587,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-application-controller
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-application-controller
   namespace: argocd
 spec:
@@ -33248,16 +33602,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 55fc17af37413fd4738aa1a9c7eb83f3216264420b792912610c2cdaeb32ef2c
-        checksum/cmd-params: 203a4333549af736da7c2ab70218bf64b5d1c8a725cadc5ff6be7bd252e768d0
+        checksum/cm: ec7b1cbbdbcb20549a3a614eaad88610551089c6accef105b329908fb6f450ef
+        checksum/cmd-params: ae528ed01abf03d379fd2259bfb23d5f041853e31c4fef20b8b058354101498b
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-application-controller
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.4.4
-        helm.sh/chart: argo-cd-9.7.1
+        app.kubernetes.io/version: v3.5.6
+        helm.sh/chart: argo-cd-10.11.6
     spec:
       affinity:
         podAntiAffinity:
@@ -33274,6 +33628,12 @@ spec:
         - /usr/local/bin/argocd-application-controller
         - --metrics-port=8082
         env:
+        - name: GRPC_ENABLE_TXT_SERVICE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: controller.grpc.enable.txt.service.config
+              name: argocd-cmd-params-cm
+              optional: true
         - name: ARGOCD_CONTROLLER_REPLICAS
           value: "1"
         - name: ARGOCD_APPLICATION_CONTROLLER_NAME
@@ -33556,7 +33916,7 @@ spec:
               optional: true
         - name: KUBECACHEDIR
           value: /tmp/kubecache
-        image: quay.io/argoproj/argocd:v3.4.4
+        image: quay.io/argoproj/argocd:v3.5.6
         imagePullPolicy: IfNotPresent
         name: application-controller
         ports:
@@ -33639,8 +33999,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-redis-secret-init
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.4.4
-    helm.sh/chart: argo-cd-9.7.1
+    app.kubernetes.io/version: v3.5.6
+    helm.sh/chart: argo-cd-10.11.6
   name: argocd-redis-secret-init
   namespace: argocd
 spec:
@@ -33652,8 +34012,8 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-redis-secret-init
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v3.4.4
-        helm.sh/chart: argo-cd-9.7.1
+        app.kubernetes.io/version: v3.5.6
+        helm.sh/chart: argo-cd-10.11.6
     spec:
       affinity:
         podAntiAffinity:
@@ -33669,7 +34029,7 @@ spec:
         - argocd
         - admin
         - redis-initial-password
-        image: quay.io/argoproj/argocd:v3.4.4
+        image: quay.io/argoproj/argocd:v3.5.6
         imagePullPolicy: IfNotPresent
         name: secret-init
         resources: {}
@@ -33682,6 +34042,7 @@ spec:
           runAsNonRoot: true
           seccompProfile:
             type: RuntimeDefault
+      dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/os: linux
       restartPolicy: OnFailure
