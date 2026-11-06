@@ -15,8 +15,8 @@ resources:
   - valkey-service.yaml
   - machine-learning-deployment.yaml
   - machine-learning-service.yaml
-  - server.yaml
-  - service.yaml
+  - api.yaml
+  - api-service.yaml
   - microservices.yaml
   - microservices-service.yaml
   - ingressroute.yaml
