@@ -64,8 +64,8 @@ echo ""
 
 echo "=== Phase 1 complete ==="
 echo ""
-echo "Now push the commit with the new volumeMount in server.yaml and wait for ArgoCD to redeploy."
-read -rp "Press Enter once immich-server has been redeployed with the new mount... "
+echo "Now push the commit with the thumbs volumeMount on the API and microservices pods and wait for ArgoCD to redeploy."
+read -rp "Press Enter once both Immich pods have been redeployed with the new mount... "
 echo ""
 
 echo "=== Phase 2: Verify data integrity ==="
