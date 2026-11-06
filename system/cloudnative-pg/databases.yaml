@@ -63,3 +63,64 @@ spec:
   owner: vaultwarden
   cluster:
     name: postgres-cluster
+# Dropped apps: ensure absent drops the DB so CNPG can then drop its owner role.
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: forgejo-db
+  namespace: cnpg-system
+spec:
+  name: forgejo
+  owner: forgejo
+  ensure: absent
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lacoope-db
+  namespace: cnpg-system
+spec:
+  name: lacoope
+  owner: lacoope
+  ensure: absent
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: openwebui-db
+  namespace: cnpg-system
+spec:
+  name: openwebui
+  owner: openwebui
+  ensure: absent
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: sickgnal-db
+  namespace: cnpg-system
+spec:
+  name: sickgnal
+  owner: sickgnal
+  ensure: absent
+  cluster:
+    name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: compreface-db
+  namespace: cnpg-system
+spec:
+  name: frs
+  owner: compreface
+  ensure: absent
+  cluster:
+    name: postgres-cluster

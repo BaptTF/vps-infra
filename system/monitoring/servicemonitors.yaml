@@ -107,7 +107,21 @@ spec:
     - port: metrics-api
       path: /metrics
       interval: 30s
-    - port: metrics-ms
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: immich-microservices
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: [immich]
+  selector:
+    matchLabels:
+      app: immich
+      component: microservices
+  endpoints:
+    - port: metrics
       path: /metrics
       interval: 30s
 ---

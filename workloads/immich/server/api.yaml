@@ -67,18 +67,18 @@ spec:
               memory: 64Mi
       containers:
         - name: immich-server
-          image: ghcr.io/immich-app/immich-server:v3.3.5@sha256:485d546a2e31d6a8b4db8423fcba5c109de8c218d93410af115fd1ccfc4352a6
+          image: ghcr.io/immich-app/immich-server:v3.3.6@sha256:e1981983b1c13f6024b57d72e7ecae3342eed1581201ab09fb248932d86c593a
           ports:
             - containerPort: 2283
               name: http
             - containerPort: 8081
               name: metrics-api
-            - containerPort: 8082
-              name: metrics-ms
           envFrom:
             - configMapRef:
                 name: immich-config
           env:
+            - name: IMMICH_WORKERS_INCLUDE
+              value: api
             - name: IMMICH_TELEMETRY_INCLUDE
               value: all
             - name: IMMICH_CONFIG_FILE
@@ -142,11 +142,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: 250m
-              memory: 1Gi
+              cpu: 100m
+              memory: 512Mi
             limits:
-              cpu: "4"
-              memory: 5Gi
+              cpu: "2"
+              memory: 2Gi
       volumes:
         - name: config-template
           configMap:

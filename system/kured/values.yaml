@@ -1,0 +1,21 @@
+configuration:
+  period: 15m
+  startTime: "08:30"
+  endTime: "10:30"
+  timeZone: Europe/Paris
+  drainTimeout: 3m
+  forceReboot: true
+  concurrency: 1
+  annotateNodes: true
+  preRebootNodeLabels:
+    - kured=rebooting
+  postRebootNodeLabels:
+    - kured=done
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi

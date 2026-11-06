@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: gowa
-          image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:v9.7.0
+          image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:v9.9.0
           args: ["rest"]
           env:
             - name: APP_PORT
@@ -29,6 +29,9 @@ spec:
               value: "0.0.0.0"
             - name: APP_OS
               value: "GOWA"
+            # v9.8+ : requis sans Basic Auth sur 0.0.0.0 (accès via Tailscale uniquement)
+            - name: APP_ALLOW_UNAUTHENTICATED
+              value: "true"
           ports:
             - containerPort: 3000
               name: http

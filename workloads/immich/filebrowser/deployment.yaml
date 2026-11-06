@@ -50,6 +50,8 @@ spec:
             - name: storagebox
               mountPath: /srv/library
               subPath: family/library
+            - name: nas
+              mountPath: /srv/nas
             - name: config
               mountPath: /home/filebrowser/data
             - name: filebrowser-config
@@ -77,6 +79,9 @@ spec:
         - name: storagebox
           persistentVolumeClaim:
             claimName: immich-storagebox
+        - name: nas
+          persistentVolumeClaim:
+            claimName: immich-archives
         - name: config
           persistentVolumeClaim:
             claimName: filebrowser-data
