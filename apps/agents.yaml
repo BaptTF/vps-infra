@@ -37,3 +37,21 @@ spec:
       namespace: openclaw
       jsonPointers:
       - /spec/externalName
+    - group: ""
+      kind: Service
+      name: leo-ha
+      namespace: openclaw
+      jsonPointers:
+      - /spec/externalName
+    - group: ""
+      kind: Service
+      name: leo-dsplay
+      namespace: openclaw
+      jsonPointers:
+      - /spec/externalName
+    - group: ""
+      kind: Service
+      name: leo-diskstation
+      namespace: openclaw
+      jsonPointers:
+      - /spec/externalName
