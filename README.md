@@ -292,6 +292,25 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 ---
 
+## Webhook GitHub → ArgoCD
+
+GitHub notifies ArgoCD on every push so apps refresh without waiting for the ~25 min reconciliation poll.
+
+| Setting | Value |
+|---------|-------|
+| Payload URL | `https://argocd.bapttf.com/api/webhook` |
+| Content type | `application/json` |
+| Events | `push` |
+| Secret | Infisical `infrastructure`/`prod` path `/argocd`, key `webhook.github.secret` → Kubernetes Secret `argocd-secret` (do not commit the value) |
+
+Only `POST /api/webhook` is public (`IngressRoute` `argocd-server-webhook`). The UI and the rest of the API stay on Tailscale (`https://argocd`).
+
+**Recommended:** confirm `webhook.github.secret` exists in Infisical `/argocd` and matches the GitHub webhook secret. Without it, ArgoCD cannot verify deliveries.
+
+**Test:** GitHub → repo Settings → Webhooks → Recent Deliveries. A good push shows HTTP 200 from ArgoCD.
+
+---
+
 ## Home Assistant (ha.bapttf.com)
 
 Roquefort is published like Eyguians. Traefik reaches `homeassistant.tail4c7c90.ts.net:8123` and strips the proxy headers before they arrive. Authelia allows `group:family`. Home Assistant then asks for its own login.
