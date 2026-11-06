@@ -17,6 +17,8 @@ resources:
   - machine-learning-service.yaml
   - server.yaml
   - service.yaml
+  - microservices.yaml
+  - microservices-service.yaml
   - ingressroute.yaml
 
 configMapGenerator:

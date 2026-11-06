@@ -73,12 +73,12 @@ spec:
               name: http
             - containerPort: 8081
               name: metrics-api
-            - containerPort: 8082
-              name: metrics-ms
           envFrom:
             - configMapRef:
                 name: immich-config
           env:
+            - name: IMMICH_WORKERS_INCLUDE
+              value: api
             - name: IMMICH_TELEMETRY_INCLUDE
               value: all
             - name: IMMICH_CONFIG_FILE
@@ -142,11 +142,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: 250m
-              memory: 1Gi
+              cpu: 100m
+              memory: 512Mi
             limits:
-              cpu: "4"
-              memory: 5Gi
+              cpu: "2"
+              memory: 2Gi
       volumes:
         - name: config-template
           configMap:
