@@ -59,18 +59,6 @@ spec:
               value: "0.0.0.0"
             - name: API_SERVER_PORT
               value: "8642"
-            - name: HERMES_DASHBOARD
-              value: "1"
-            - name: HERMES_DASHBOARD_HOST
-              value: "0.0.0.0"
-            - name: HERMES_DASHBOARD_PORT
-              value: "9119"
-            - name: HERMES_DASHBOARD_OIDC_ISSUER
-              value: "https://auth.bapttf.com"
-            - name: HERMES_DASHBOARD_OIDC_CLIENT_ID
-              value: "hermes-leo-dashboard"
-            - name: HERMES_DASHBOARD_PUBLIC_URL
-              value: "https://hermes-leo.bapttf.com"
             - name: API_SERVER_KEY
               valueFrom:
                 secretKeyRef:
@@ -89,9 +77,6 @@ spec:
           ports:
             - containerPort: 8642
               name: http
-              protocol: TCP
-            - containerPort: 9119
-              name: dashboard
               protocol: TCP
           volumeMounts:
             - name: data

@@ -8,7 +8,6 @@ resources:
   - hermes-lea-pvc.yaml
   - hermes-lea-deployment.yaml
   - hermes-lea-service.yaml
-  - ingressroute.yaml
 
 configMapGenerator:
   - name: hermes-lea-config
