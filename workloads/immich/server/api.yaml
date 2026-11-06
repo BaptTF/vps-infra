@@ -83,6 +83,8 @@ spec:
               value: all
             - name: IMMICH_CONFIG_FILE
               value: /config/immich-config.json
+            - name: UV_THREADPOOL_SIZE
+              value: "64"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
