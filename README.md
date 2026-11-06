@@ -26,6 +26,16 @@ Node access is Tailscale SSH (`tailscale set --ssh`). `sshd` stays disabled. If 
 systemctl disable --now ssh
 ```
 
+### Reboots and k3s upgrades
+
+Debian package installs stay on the node (`unattended-upgrades`). What happens afterwards is in the cluster.
+
+kured watches `/var/run/reboot-required`. Between 08:30 and 10:30 Europe/Paris it drains one node, then reboots it. The single-instance Postgres budgets block that drain, so after three minutes the reboot proceeds anyway. The database stops with the node and comes back with it.
+
+The system-upgrade plans follow `https://update.k3s.io/v1-release/channels/v1.36`. They do not follow the `stable` channel, which is the next minor. Between 11:00 and 13:00 Europe/Paris the server plan upgrades the control plane, then the agent plan upgrades the worker. A plan cordons the node and restarts k3s. It does not reboot the machine.
+
+kured labels a node `kured=rebooting` while it reboots, and the plans skip that node. Deleting a plan stops further k3s upgrades.
+
 ### NTP (required on every node)
 
 Every k3s node **must** have NTP enabled and running. Without NTP, the system clock drifts over time and breaks services that validate clock accuracy (e.g., Authelia checks clock sync on startup and refuses to start if the drift exceeds 3 seconds).
