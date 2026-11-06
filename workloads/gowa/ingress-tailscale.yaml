@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: gowa
   namespace: gowa
+  annotations:
+    tailscale.com/tags: tag:gowa
 spec:
   ingressClassName: tailscale
   tls:

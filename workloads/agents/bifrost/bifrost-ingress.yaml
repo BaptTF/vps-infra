@@ -4,6 +4,8 @@ metadata:
   name: bifrost
   labels:
     app: bifrost
+  annotations:
+    tailscale.com/tags: tag:bifrost
 spec:
   ingressClassName: tailscale
   tls:
