@@ -347,7 +347,7 @@ Tailscale is the only access path. The SRE agent (service account `grokbot`) can
 
 - Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`
 - Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences
-- Loki: no Tailscale ingress. Query logs through Grafana (Explore, Loki datasource). Loki's delete API is disabled; logs only expire through the 14-day retention.
+- Loki: `https://loki` (Tailscale ingress, no authentication). Grafana (Explore, Loki datasource) is the usual way to query logs. Loki's delete API is disabled; logs only expire through the 14-day retention.
 
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That is what wakes the SRE agent. `Watchdog` (always firing) and `InfoInhibitor` are dropped and never sent, so they do not spend tokens. A real alert that stays firing is repeated every 4 hours.
 
@@ -455,31 +455,25 @@ rm -f k3s.htpasswd
 
 `scp` cannot create `/var/services/homes/Baptiste/.config` on this NAS. Send the file over SSH instead.
 
-`--append-only` is process-wide, so k8up and prune cannot share one process. Tailscale on the DS218play runs in userspace mode, so nothing can bind the Tailscale address. The append-only process listens on `127.0.0.1:8000`, and `tailscale serve` publishes that port on the tailnet. `serve` needs root; SSH as Baptiste cannot sudo. Run this once:
+`--append-only` is process-wide, so k8up and prune cannot share one process. Tailscale on the DS218play now has a `tailscale0` interface, so both processes bind the Tailscale address `100.75.160.28` directly and `tailscale serve` is not used. The script waits up to 120 s for that address before starting. The DSM boot task above is what starts it again after a reboot.
 
-```bash
-sudo /usr/local/bin/tailscale serve --bg --yes --tcp 8000 127.0.0.1:8000
-```
+- Append-only, for k8up: `100.75.160.28:8000`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. `--private-repos` requires the first folder to be the username. A second folder is a separate repository, so Immich originals use `/k3s/photos`.
+- Prune: `100.75.160.28:8001`. It shares `k3s.htpasswd` with the append-only listener, so the k8up password can also delete snapshots. Until the prune host is chosen, the default-deny tailnet policy lets only the admin reach `tcp:8001`. The prune listener gets its own htpasswd at the same time.
 
-The serve config is kept by tailscaled across reboots. The rest-server process itself is not: the DSM boot task above is what starts it again.
+The default-deny tailnet policy lets `tag:k3s` reach the NAS on `tcp:8000` only. The cluster reaches the NAS over a direct Tailscale path.
 
-- Append-only, for k8up: `127.0.0.1:8000`, published by `tailscale serve`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. `--private-repos` requires the first folder to be the username. A second folder is a separate repository, so Immich originals use `/k3s/photos`.
-- Prune, for the Pi: `127.0.0.1:8001`, not published. The NAS does not run `restic`. Reach the listener with `ssh -N -L 8001:127.0.0.1:8001 dsplay`. `sshd` currently sets `AllowTcpForwarding no`, so that forward is refused until the NAS sshd allows it.
-
-Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster reaches the NAS over a direct Tailscale path.
-
-`sshd` on the NAS sets `AllowTcpForwarding no`, so an SSH local forward cannot reach `127.0.0.1:8000`. After `tailscale serve` is active, initialize the repository once from a tailnet host:
+Initialize the repository once from a tailnet host:
 
 ```bash
 export RESTIC_REPOSITORY="rest:http://k3s:${REST_PASSWORD}@dsplay.tail4c7c90.ts.net:8000/k3s"
 restic init
 ```
 
-The repository `e10bfe4460` already exists, so `restic init` fails if run again. The Storage Box repository `7b784aa042` is at `/k3s/photos`, created the same way with the password from `/k8up/photos`. When the ACL is later limited to `tag:k3s`, a laptop cannot open port 8000.
+The repository `e10bfe4460` already exists, so `restic init` fails if run again. The Storage Box repository `7b784aa042` is at `/k3s/photos`, created the same way with the password from `/k8up/photos`.
 
-### Prune on the Pi
+### Prune
 
-The Home Assistant Pi already writes backups to the NAS, so it is allowed to delete snapshots. The NAS does not run `restic`: it does not have the RAM. Weekly, from the Pi, with the SSH tunnel above:
+The NAS does not run `restic`: it does not have the RAM. The machine that prunes is not chosen yet (the Home Assistant Pi 4 is a candidate), so nothing prunes `/k3s` today. `scripts/nas/prune.sh` still targets `127.0.0.1:8001` through an SSH tunnel; point it at `dsplay.tail4c7c90.ts.net:8001` and grant that host `tcp:8001` in the tailnet policy once it is chosen. Weekly, from that host:
 
 ```bash
 REST_PASSWORD=... RESTIC_PASSWORD=... ./scripts/nas/prune.sh
@@ -499,6 +493,8 @@ Deploy key `k3s-camille.bapttf.com` (read-only). Private key in Infisical, proje
 
 ## Tailscale VPN Setup
 
+The tailnet policy (ACL) and the inventory of machines on the tailnet are kept in a private repository, `BaptTF/infra-private`, because they list personal email addresses and home LAN ranges. The target policy is default deny and grants access by tag: `tag:k3s` for the nodes, `tag:k8s` for operator proxies, with dedicated tags for sensitive ingresses (`tag:bifrost`, `tag:gowa`, `tag:monitoring`). Until it is applied, the tailnet still allows every connection.
+
 ### 1. Configure Tailscale in Infisical
 
 After Infisical is deployed, add your Tailscale OAuth credentials:
@@ -511,12 +507,9 @@ After Infisical is deployed, add your Tailscale OAuth credentials:
 
 ### 2. Create OAuth Client (first time only)
 
-1. Go to https://login.tailscale.com/admin/settings/oauth
-2. Click "Generate new OAuth client"
-3. Set permissions:
-   - `Read devices` (for device authorization)
-   - `Write ACLs` (optional, for ACL management)
-   - `Write DNS` (optional, for DNS management)
+1. Go to the Trust credentials page of the admin console
+2. Create an OAuth credential
+3. Set permissions: `Devices Core`, `Auth Keys` and `Services` (write), with tag `tag:k8s-operator`. Nothing else: a leak of this client must not be able to rewrite the tailnet policy or DNS.
 4. Copy the Client ID and Client Secret
 5. Add them to Infisical
 
