@@ -23,6 +23,12 @@ spec:
               app: vulcain
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: opencode-dashboard
+          podSelector:
+            matchLabels:
+              app: opencode-dashboard
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: tailscale
           podSelector:
             matchLabels:
