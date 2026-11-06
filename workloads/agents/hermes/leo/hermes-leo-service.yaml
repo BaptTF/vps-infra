@@ -13,7 +13,3 @@ spec:
       port: 8642
       targetPort: http
       name: http
-    - protocol: TCP
-      port: 9119
-      targetPort: dashboard
-      name: dashboard

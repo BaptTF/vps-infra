@@ -304,8 +304,6 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 | Vaultwarden | https://vault.bapttf.com | Public |
 | JujuDB | https://jujudb.bapttf.com | Public |
 | Vulcain | https://vulcain.bapttf.com | Public (Authelia) |
-| Hermes Leo dashboard | https://hermes-leo.bapttf.com | Public (Authelia) |
-| Hermes Lya dashboard | https://hermes-lya.bapttf.com | Public (Authelia) |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
 | Home Assistant (Roquefort) | https://ha.bapttf.com | Public (Authelia, group:family) |

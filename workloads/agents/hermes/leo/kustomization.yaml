@@ -8,7 +8,6 @@ resources:
   - hermes-leo-pvc.yaml
   - hermes-leo-deployment.yaml
   - hermes-leo-service.yaml
-  - ingressroute.yaml
   - tailscale-ingress.yaml
 
 configMapGenerator:

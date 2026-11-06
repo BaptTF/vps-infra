@@ -6,7 +6,6 @@ resources:
   - hermes-lya-pvc.yaml
   - hermes-lya-deployment.yaml
   - hermes-lya-service.yaml
-  - ingressroute.yaml
 
 configMapGenerator:
   - name: hermes-lya-config
