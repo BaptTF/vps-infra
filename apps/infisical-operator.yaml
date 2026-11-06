@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts
     chart: secrets-operator
-    targetRevision: 0.11.15
+    targetRevision: 0.11.16
     helm:
       releaseName: infisical-operator
   destination:

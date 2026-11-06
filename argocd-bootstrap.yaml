@@ -33735,14 +33735,14 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: argocd-server-ingress
+  name: argocd-server-webhook
   namespace: argocd
 spec:
   entryPoints:
   - websecure
   routes:
   - kind: Rule
-    match: Host(`argocd.bapttf.com`)
+    match: Host(`argocd.bapttf.com`) && Path(`/api/webhook`) && Method(`POST`)
     services:
     - name: argocd-server
       port: 80

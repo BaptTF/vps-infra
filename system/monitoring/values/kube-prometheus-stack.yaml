@@ -48,7 +48,7 @@ prometheus:
             labels:
               instance: homeassistant
               env: home
-      - job_name: homeassistant-cam
+      - job_name: homeassistant-livebox
         scrape_interval: 60s
         metrics_path: /api/prometheus
         scheme: http
@@ -56,7 +56,7 @@ prometheus:
         static_configs:
           - targets: ["ha-cam.monitoring.svc.cluster.local:8123"]
             labels:
-              instance: homeassistant-cam
+              instance: homeassistant-livebox
               env: cam
       - job_name: homeassistant-eyg
         scrape_interval: 120s
@@ -168,6 +168,10 @@ defaultRules:
   # Two small nodes: requests exceed (total - largest node) by design.
   disabled:
     KubeMemoryOvercommit: true
+    # kubelet reports the node filesystem for local-path PVCs.
+    # Replaced in local-path-exporter.yaml (local-path) and prometheusrules.yaml (other classes).
+    KubePersistentVolumeFillingUp: true
+    KubePersistentVolumeInodesFillingUp: true
 
 prometheus-node-exporter:
   resources:

@@ -18,6 +18,44 @@ rmmod algif_aead
 
 The following must be applied on **every** node (server and workers).
 
+### SSH
+
+Node access is Tailscale SSH (`tailscale set --ssh`). `sshd` stays disabled. If Tailscale is down, use the provider console.
+
+```bash
+systemctl disable --now ssh
+```
+
+### Unattended upgrades
+
+Debian and Debian Security packages are installed once a day. The node does not reboot by itself. Tailscale and other third-party archives are left alone.
+
+```bash
+apt-get install -y unattended-upgrades
+cat <<'EOF' | tee /etc/apt/apt.conf.d/20auto-upgrades
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+```
+
+`apt-daily-upgrade.timer` runs around 06:00 UTC, plus up to 60 minutes. On a node that already has a backlog, run the first pass by hand:
+
+```bash
+unattended-upgrade -v
+```
+
+When `/var/run/reboot-required` exists, kured reboots the node (see below).
+
+### Reboots and k3s upgrades
+
+Debian package installs stay on the node (`unattended-upgrades`). What happens afterwards is in the cluster.
+
+kured watches `/var/run/reboot-required`. Between 08:30 and 10:30 Europe/Paris it drains one node, then reboots it. The single-instance Postgres budgets block that drain, so after three minutes the reboot proceeds anyway. The database stops with the node and comes back with it.
+
+The system-upgrade plans follow `https://update.k3s.io/v1-release/channels/v1.36`. They do not follow the `stable` channel, which is the next minor. Between 11:00 and 13:00 Europe/Paris the server plan upgrades the control plane, then the agent plan upgrades the worker. A plan cordons the node and restarts k3s. It does not reboot the machine.
+
+kured labels a node `kured=rebooting` while it reboots, and the plans skip that node. Deleting a plan stops further k3s upgrades.
+
 ### NTP (required on every node)
 
 Every k3s node **must** have NTP enabled and running. Without NTP, the system clock drifts over time and breaks services that validate clock accuracy (e.g., Authelia checks clock sync on startup and refuses to start if the drift exceeds 3 seconds).
@@ -160,7 +198,7 @@ Worker nodes run k3s in agent mode and join the existing cluster over Tailscale.
 ### Prerequisites
 
 - Debian/Ubuntu VM with Tailscale installed and connected to the same tailnet
-- SSH access as root (Tailscale SSH or standard SSH)
+- SSH access as root through Tailscale SSH
 - The k3s server node-token (on the master at `/var/lib/rancher/k3s/server/node-token`)
 
 ### Step 1: Create the agent config
@@ -184,10 +222,13 @@ token-file: "/var/lib/rancher/k3s/agent/token"
 node-ip: "${WORKER_TS_IP}"
 flannel-iface: "tailscale0"
 kubelet-arg:
+  - "address=${WORKER_TS_IP}"
   - "system-reserved=memory=512Mi"
   - "kube-reserved=memory=256Mi"
 EOF
 ```
+
+The `address` argument makes the kubelet listen on the node's Tailscale address, port 10250. On a worker that is already in the cluster, add that line to `/etc/rancher/k3s/config.yaml` and restart the k3s agent.
 
 > **Note:** Worker agent uses lower system-reserved (512Mi vs 1800Mi for server) because the k3s agent binary is much lighter than the server.
 
@@ -256,7 +297,7 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 | Service | URL | Access |
 |---------|-----|--------|
-| ArgoCD | https://argocd.bapttf.com | Public |
+| ArgoCD | https://argocd (Tailscale) | Tailscale VPN |
 | Grafana | https://grafana (Tailscale) | Tailscale VPN |
 | Prometheus | https://prometheus (Tailscale) | Tailscale VPN |
 | Alertmanager | https://alertmanager (Tailscale) | Tailscale VPN |
@@ -267,6 +308,34 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 | Hermes Lya dashboard | https://hermes-lya.bapttf.com | Public (Authelia) |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
+| Home Assistant (Roquefort) | https://ha.bapttf.com | Public (Authelia, group:family) |
+
+---
+
+## Webhook GitHub → ArgoCD
+
+GitHub notifies ArgoCD on every push so apps refresh without waiting for the ~25 min reconciliation poll.
+
+| Setting | Value |
+|---------|-------|
+| Payload URL | `https://argocd.bapttf.com/api/webhook` |
+| Content type | `application/json` |
+| Events | `push` |
+| Secret | Infisical `infrastructure`/`prod` path `/argocd`, key `webhook.github.secret` → Kubernetes Secret `argocd-secret` (do not commit the value) |
+
+Only `POST /api/webhook` is public (`IngressRoute` `argocd-server-webhook`). The UI and the rest of the API stay on Tailscale (`https://argocd`).
+
+**Recommended:** confirm `webhook.github.secret` exists in Infisical `/argocd` and matches the GitHub webhook secret. Without it, ArgoCD cannot verify deliveries.
+
+**Test:** GitHub → repo Settings → Webhooks → Recent Deliveries. A good push shows HTTP 200 from ArgoCD.
+
+---
+
+## Home Assistant (ha.bapttf.com)
+
+Roquefort is published like Eyguians. Traefik reaches `homeassistant.tail4c7c90.ts.net:8123` and strips the proxy headers before they arrive. Authelia allows `group:family`. Home Assistant then asks for its own login.
+
+`ha.bapttf.com` is already covered by the wildcard DNS record and the wildcard certificate. The instance `external_url` is still `https://harjullien.duckdns.org`. After this route is synced, set it to `https://ha.bapttf.com` under Settings, System, Network. `harjullien.duckdns.org` keeps working until that name and the Livebox forward are removed.
 
 ---
 
@@ -361,7 +430,7 @@ Path `/k8up/photos` feeds Secret `k8up-restic-photos` in `immich` only. It holds
 |-----|-------------|
 | `RESTIC_PASSWORD` | password of the `/k3s/photos` repository |
 
-`--private-repos` only requires the first folder to match the username, so this repository is `http://dsplay.tail4c7c90.ts.net:8000/k3s/photos`. On disk that is `restic/k3s/photos`, a second restic repository under the `/k3s` directory. The schedule backs up the whole SMB share, including `encoded-video`. The cluster currently reaches `dsplay` through a DERP relay, so the first run is slow until that path is direct. The job asks for 512 MiB and may use up to 4 GiB. Nothing prunes `/k3s/photos`: the Pi script only forgets `/k3s`, and port 8001 is not reachable from the cluster. Unchanged photos are stored once. Snapshots of that repository accumulate until a forget can run against the prune listener.
+`--private-repos` only requires the first folder to match the username, so this repository is `http://dsplay.tail4c7c90.ts.net:8000/k3s/photos`. On disk that is `restic/k3s/photos`, a second restic repository under the `/k3s` directory. The schedule backs up the whole SMB share, including `encoded-video`. The cluster reaches `dsplay` over a direct Tailscale path, not a DERP relay. The job asks for 512 MiB and may use up to 4 GiB. Nothing prunes `/k3s/photos`: the Pi script only forgets `/k3s`, and port 8001 is not reachable from the cluster. Unchanged photos are stored once. Snapshots of that repository accumulate until a forget can run against the prune listener.
 
 ### rest-server on the NAS
 
@@ -397,7 +466,7 @@ The serve config is kept by tailscaled across reboots. The rest-server process i
 - Append-only, for k8up: `127.0.0.1:8000`, published by `tailscale serve`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. `--private-repos` requires the first folder to be the username. A second folder is a separate repository, so Immich originals use `/k3s/photos`.
 - Prune, for the Pi: `127.0.0.1:8001`, not published. The NAS does not run `restic`. Reach the listener with `ssh -N -L 8001:127.0.0.1:8001 dsplay`. `sshd` currently sets `AllowTcpForwarding no`, so that forward is refused until the NAS sshd allows it.
 
-Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster currently reaches the NAS through DERP.
+Tailscale ACL: `tag:k3s` to the NAS on `tcp:8000` only. Not applied yet. The cluster reaches the NAS over a direct Tailscale path.
 
 `sshd` on the NAS sets `AllowTcpForwarding no`, so an SSH local forward cannot reach `127.0.0.1:8000`. After `tailscale serve` is active, initialize the repository once from a tailnet host:
 

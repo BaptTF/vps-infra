@@ -13,6 +13,7 @@ resources:
   - servicemonitors.yaml
   - snmp-exporter-deployment.yaml
   - snmp-exporter-service.yaml
+  - local-path-exporter.yaml
 
 configMapGenerator:
   - name: snmp-exporter-modules
@@ -23,7 +24,7 @@ helmCharts:
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
     releaseName: kps
-    version: 92.13.1
+    version: 92.17.0
     valuesFile: values/kube-prometheus-stack.yaml
     namespace: monitoring
     includeCRDs: true
@@ -36,7 +37,7 @@ helmCharts:
   - name: alloy
     repo: https://grafana.github.io/helm-charts
     releaseName: alloy
-    version: 1.14.3
+    version: 1.15.0
     valuesFile: values/alloy.yaml
     namespace: monitoring
   - name: cloudflare-exporter

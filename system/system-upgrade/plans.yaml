@@ -1,0 +1,58 @@
+# Follow the 1.36 channel. The stable channel is a newer minor and is not used here.
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: server-plan
+  namespace: system-upgrade
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  concurrency: 1
+  cordon: true
+  nodeSelector:
+    matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: In
+        values: ["true"]
+      - key: kured
+        operator: NotIn
+        values: ["rebooting"]
+  serviceAccountName: system-upgrade
+  channel: https://update.k3s.io/v1-release/channels/v1.36
+  window:
+    days: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+    startTime: "11:00"
+    endTime: "13:00"
+    timeZone: Europe/Paris
+  upgrade:
+    image: rancher/k3s-upgrade
+---
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: agent-plan
+  namespace: system-upgrade
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  concurrency: 1
+  cordon: true
+  nodeSelector:
+    matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: DoesNotExist
+      - key: kured
+        operator: NotIn
+        values: ["rebooting"]
+  prepare:
+    image: rancher/k3s-upgrade
+    args: ["prepare", "server-plan"]
+  serviceAccountName: system-upgrade
+  channel: https://update.k3s.io/v1-release/channels/v1.36
+  window:
+    days: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+    startTime: "11:00"
+    endTime: "13:00"
+    timeZone: Europe/Paris
+  upgrade:
+    image: rancher/k3s-upgrade

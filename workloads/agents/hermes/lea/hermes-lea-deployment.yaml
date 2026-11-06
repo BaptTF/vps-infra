@@ -40,7 +40,7 @@ spec:
               mountPath: /opt/data
       containers:
         - name: hermes-lea
-          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.10.30
+          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.3
           args: ["gateway", "run"]
           env:
             - name: TELEGRAM_BOT_TOKEN
@@ -87,10 +87,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/data
-            - name: devin-credentials
-              mountPath: /opt/data/home/.local/share/devin/credentials.toml
-              subPath: credentials.toml
-              readOnly: true
           livenessProbe:
             httpGet:
               path: /health
@@ -135,7 +131,3 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: hermes-lea-data
-        - name: devin-credentials
-          secret:
-            secretName: hermes-lea-secret-devin
-            optional: true
