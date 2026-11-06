@@ -39,7 +39,7 @@ spec:
               mountPath: /data
       containers:
         - name: filebrowser
-          image: ghcr.io/gtsteffaniak/filebrowser:1.5.8-stable
+          image: ghcr.io/gtsteffaniak/filebrowser:2.0.2-stable
           ports:
             - containerPort: 80
               name: http

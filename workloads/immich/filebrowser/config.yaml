@@ -1,22 +1,43 @@
 server:
-  port: 80
   cacheDir: /home/filebrowser/data/tmp
-  externalUrl: "https://drive.bapttf.com"
+  database:
+    path: /home/filebrowser/data/database.sqlite
+    # v1 BoltDB on the filebrowser-data PVC. v2 imports it on first start and
+    # leaves the file in place. Remove this key only after that import is
+    # verified, and only once database.db can be deleted.
+    migrateFrom: /home/filebrowser/data/database.db
   sources:
     - path: /srv/inbox
       config:
         defaultEnabled: true
+        defaultPermissions:
+          view: true
+          download: true
+          modify: true
+          create: true
+          delete: true
     - path: /srv/library
       config:
         defaultEnabled: true
+        defaultPermissions:
+          view: true
+          download: true
+          modify: true
+          create: true
+          delete: true
     - path: /srv/nas
       name: NAS
       config:
         defaultEnabled: true
-        conditionals:
-          rules:
-            - folderPath: "/"
-              viewable: true
+        defaultPermissions:
+          view: true
+          download: true
+          modify: true
+          create: true
+          delete: true
+        rules:
+          - folderPath: "/"
+            viewable: true
 auth:
   adminUsername: baptiste
   methods:
@@ -31,14 +52,10 @@ userDefaults:
     loginMethod: proxy
     permissions:
       admin: false
-      modify: true
       share: true
-      download: true
-      create: true
-      delete: true
       api: false
       realtime: false
 http:
-  trustedHeaders:
-    - X-Forwarded-For
-    - X-Real-IP
+  port: 80
+  externalUrl: "https://drive.bapttf.com"
+  trustProxyHeaders: true

@@ -556,6 +556,8 @@ This can be added directly to your service definitions in Git.
 
 Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`, protected by Authelia (`group:family`). Uploads land in `/data/family/inbox`; sorted files go in `/data/family/library`. The `NAS` source is PVC `immich-archives` (`/nas/archives`: `dsplay` and `diskstation`), mounted at `/srv/nas`. Indexing is disabled on that source (`viewable` on `/`). Family members can create, modify, and delete files there; a delete removes the file on the Storage Box.
 
+v2 keeps its database as SQLite at `/home/filebrowser/data/database.sqlite` on PVC `filebrowser-data`. The first start imports the v1 BoltDB file `database.db` and does not modify it. Leave that file in place while `server.database.migrateFrom` is set: v2 exits if the path is missing. Copy `database.db` off the volume before the first v2 rollout.
+
 Immich can keep generated data on the local VPS while storing cold originals on a Hetzner Storage Box over SMB:
 
 - Local PVC `immich-library`: `/data/thumbs`, `/data/encoded-video`, `/data/profile`, `/data/backups` and other generated data
