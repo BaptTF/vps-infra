@@ -343,7 +343,7 @@ Roquefort is published like Eyguians. Traefik reaches `homeassistant.tail4c7c90.
 
 Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Grafana and Alertmanager have no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector.
 
-Tailscale is the only access path. The SRE agent (service account `grokbot`) can read the monitoring and k8up backup CRDs, create and delete k8up `Restore` objects (applied by hand, never committed, only after Baptiste approves), and call:
+Tailscale is the only access path. The SRE agent (service account `grokbot`) has read-only access to the cluster (ClusterRole `agents-readonly`), including the monitoring and k8up backup CRDs. It cannot create or delete anything: when a restore is needed, it proposes the k8up `Restore` manifest and Baptiste applies it. It can call:
 
 - Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`
 - Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences
