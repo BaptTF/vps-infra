@@ -184,11 +184,14 @@ flannel-iface: "tailscale0"
 kubelet-arg:
   - "system-reserved=memory=800Mi"
   - "kube-reserved=memory=256Mi"
+egress-selector-mode: disabled
 EOF
 
 # 3. Install k3s (picks up config.yaml automatically at first boot)
 curl -sfL https://get.k3s.io | sh
 ```
+
+> **Note on egress-selector-mode:** the workers bind their kubelet to the Tailscale address (`address=` in the agent config below). With the default mode (`agent`), the API server reaches kubelets through the k3s agent tunnel, which dials `127.0.0.1:10250` on the worker and gets refused: `kubectl logs`, `kubectl exec` and `kubectl port-forward` then fail with `EOF` for every pod on that worker. `disabled` makes the API server dial each kubelet directly on its node IP over Tailscale (`tag:k3s` to `tag:k3s` is open). On an existing server, add the line to `/etc/rancher/k3s/config.yaml` and run `systemctl restart k3s`.
 
 > **Note on system-reserved:** By default k3s sets allocatable = capacity, so the scheduler thinks ALL RAM is available for pods. The `system-reserved` and `kube-reserved` kubelet args reserve memory for the k3s server process (~1.6Gi) and OS, giving the scheduler a realistic view. Adjust values based on observed `k3s server` RSS (`ps aux --sort=-rss | grep k3s`).
 
