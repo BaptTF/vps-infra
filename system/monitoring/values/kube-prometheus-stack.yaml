@@ -134,6 +134,33 @@ grafana:
 alertmanager:
   enabled: true
   config:
+    # Chart defaults, except InfoInhibitor must not swallow node pressure.
+    # kube-prometheus-stack 92.17.0 labels that pressure severity info, and
+    # InfoInhibitor inhibits every info alert in the namespace while it fires.
+    inhibit_rules:
+      - source_matchers:
+          - 'severity = critical'
+        target_matchers:
+          - 'severity =~ warning|info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'severity = warning'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'alertname = InfoInhibitor'
+        target_matchers:
+          - 'severity = info'
+          - 'alertname !~ "^(KubeNodePressure|KubeNodeEviction|NodeCPUHighUsage|KubeletTooManyPods)$"'
+        equal:
+          - 'namespace'
+      - target_matchers:
+          - 'alertname = InfoInhibitor'
     route:
       receiver: sre
       group_by: ["alertname", "namespace"]
@@ -141,11 +168,46 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 4h
       routes:
-        # Watchdog is always firing. InfoInhibitor is a synthetic rule.
-        # Neither is an incident, so they must not wake the SRE agent.
+        # Home Assistant is outside the cluster. Only these scrape jobs, and
+        # only the two public IngressRoutes. Other TargetDown and Traefik
+        # alerts stay on sre.
+        # Traefik v3.7 legacy names (SafeNaming is false) are
+        # <namespace>-<ingressroute>-<first 10 bytes of sha256(rule), 20 hex>@kubernetescrd.
+        # Today: ha-ha-0e0a439645364101a701 and
+        # ha-eyg-ha-eyg-a8da915850a92053f0a8. The regex follows the
+        # IngressRoute identity, so a Host() edit does not re-page the agent.
+        # The livebox instance has no IngressRoute.
         - receiver: "null"
           matchers:
-            - alertname =~ "Watchdog|InfoInhibitor"
+            - alertname = "HomeAssistantDown"
+        - receiver: "null"
+          matchers:
+            - alertname = "TargetDown"
+            - job =~ "^(homeassistant|homeassistant-livebox|homeassistant-eyg)$"
+        - receiver: "null"
+          matchers:
+            - alertname =~ "^(TraefikService5xx|TraefikHighLatencyP95)$"
+            - exported_service =~ "^(ha-ha|ha-eyg-ha-eyg)-[0-9a-f]{20}@kubernetescrd$"
+        # local-path does not enforce the PVC request. LocalPathPVCGrowingFast
+        # stays on sre. ScanErrors and ScanSlow stay too: the counters are one
+        # series per node and have no persistentvolumeclaim label, so they
+        # cannot be limited to immich-library without also dropping a real
+        # I/O error on another volume.
+        - receiver: "null"
+          matchers:
+            - alertname = "LocalPathPVCOverRequested"
+        # kube-prometheus-stack 92.17.0 ships node pressure and saturation at
+        # severity info. Those stay on sre. The rest of info is noise,
+        # including CPUThrottlingHigh, KubeQuotaAlmostFull and KubeQuotaFullyUsed.
+        - receiver: "null"
+          matchers:
+            - severity = "info"
+            - alertname !~ "^(KubeNodePressure|KubeNodeEviction|NodeCPUHighUsage|KubeletTooManyPods)$"
+        # Watchdog is always firing. InfoInhibitor is a synthetic rule
+        # (severity none, so the info route above does not match it).
+        - receiver: "null"
+          matchers:
+            - alertname =~ "^(Watchdog|InfoInhibitor)$"
     receivers:
       - name: "null"
       - name: sre

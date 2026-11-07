@@ -442,7 +442,22 @@ Tailscale is the only access path. The SRE agent (service account `grokbot`) has
 - Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences
 - Loki: `https://loki` (Tailscale ingress, no authentication). Grafana (Explore, Loki datasource) is the usual way to query logs. Loki's delete API is disabled; logs only expire through the 14-day retention.
 
-Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That is what wakes the SRE agent. `Watchdog` (always firing) and `InfoInhibitor` are dropped and never sent, so they do not spend tokens. A real alert that stays firing is repeated every 4 hours.
+Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That webhook is what wakes the SRE agent. A real alert that stays firing is repeated every 4 hours.
+
+Alerts the agent cannot act on go to the existing `null` receiver and are dropped. The repo has no ntfy, Discord, or email alert channel, and the Telegram blocks under `workloads/agents/hermes/` are the agents' own chats. Pointing noise at those would wake an agent, and a webhook URL must not be invented. A missing `url_file` would also fail Alertmanager's config load and take the SRE webhook down with it. Baptiste does not create a secret for this split. `ALERTMANAGER_WEBHOOK_URL` and `ALERTMANAGER_WEBHOOK_KEY` are unchanged.
+
+The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Dropped:
+
+- `HomeAssistantDown`.
+- `TargetDown` only when `job` is `homeassistant`, `homeassistant-livebox`, or `homeassistant-eyg`. Any other `TargetDown` stays on the webhook.
+- `TraefikService5xx` and `TraefikHighLatencyP95` only when `exported_service` is the Roquefort or Eyguians IngressRoute (`ha-ha-<20 hex>@kubernetescrd` or `ha-eyg-ha-eyg-<20 hex>@kubernetescrd`). Traefik errors for every other service stay on the webhook. The livebox instance has no IngressRoute.
+- `LocalPathPVCOverRequested`. local-path does not enforce the request. `LocalPathPVCGrowingFast` stays on the webhook.
+- `severity="info"`, except `KubeNodePressure`, `KubeNodeEviction`, `NodeCPUHighUsage`, and `KubeletTooManyPods`. kube-prometheus-stack 92.17.0 ships those four at info, and they are node pressure or saturation, so they stay on the webhook. The info route therefore drops `CPUThrottlingHigh`, `KubeQuotaAlmostFull`, and `KubeQuotaFullyUsed`. The chart's `InfoInhibitor` rule would still suppress those four while it is firing, so that inhibit rule excludes the same four names. A lone node-pressure alert reaches the webhook.
+- `Watchdog` and `InfoInhibitor` (severity `none`).
+
+`LocalPathExporterScanErrors` and `LocalPathExporterScanSlow` stay on the webhook. `local_path_exporter_scan_errors_total` and `local_path_exporter_scan_duration_seconds` are one series per node: they have no `persistentvolumeclaim` or volume `namespace` label. A matcher on `immich-library` would never match, and matching the alert name would also drop a real I/O error, including on the other large volume (`nullclaw-leo-data`).
+
+OOMKilled, CrashLoop, pods not ready, Argo CD out of sync or degraded, node pressure and saturation, disk and volume full, exporter down, CNPG and backup failures, the R2 bucket, certificates, and every other warning or critical alert stay on the webhook.
 
 Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Grafana, Prometheus and Alertmanager each only see their own credentials.
 
