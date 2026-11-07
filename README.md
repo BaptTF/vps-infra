@@ -371,37 +371,6 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 ---
 
-## Cloudflare in front of the origin
-
-Public hostnames are proxied by Cloudflare. The origin (Traefik on 80/443 of both nodes) only answers a proxied hostname when the client presents the Cloudflare [Authenticated Origin Pulls](https://developers.cloudflare.com/ssl/origin-configuration/authenticated-origin-pull/set-up/global/) certificate, so the node IPs cannot be used to skip Cloudflare.
-
-- The `default` TLSOption (`system/traefik/values.yaml`) requires a client certificate signed by the CA in `system/traefik/cloudflare-origin-pull-ca.yaml` (public, expires 2029-11-01). Every IngressRoute with `tls: {}` gets it.
-- `immich.bapttf.com` and `drive.bapttf.com` are DNS-only (grey cloud, A records on both node IPs): the Cloudflare free plan rejects their large uploads. Their IngressRoutes select the `direct` TLSOption, without client certificate.
-- Traefik answers `421 Misdirected Request` when the SNI is `immich` or `drive` and the `Host` header is another hostname, so the direct hostnames cannot front for the others.
-
-Cloudflare settings (SSL/TLS, zone `bapttf.com`): encryption mode **Full (strict)**, Origin Server, Authenticated Origin Pulls, **Global: On**. Turn it on before the `default` TLSOption reaches the cluster, or every proxied hostname fails the handshake (Cloudflare error 525/526). Turning it on first is harmless: an origin that does not ask for a client certificate ignores it.
-
-A new DNS-only hostname needs the `direct` option in its IngressRoute:
-
-```yaml
-  tls:
-    options:
-      name: direct
-      namespace: traefik
-```
-
-Check from outside Cloudflare (expect a handshake failure, then `421`, then `200`):
-
-```bash
-curl -sS -o /dev/null -w '%{http_code}\n' --resolve vault.bapttf.com:443:65.21.186.192 https://vault.bapttf.com/
-curl -sS -o /dev/null -w '%{http_code}\n' --resolve immich.bapttf.com:443:65.21.186.192 -H 'Host: vault.bapttf.com' https://immich.bapttf.com/
-curl -sS -o /dev/null -w '%{http_code}\n' https://vault.bapttf.com/alive
-```
-
-Rollback: remove the `clientAuth` block from the `default` TLSOption, then turn Authenticated Origin Pulls off.
-
----
-
 ## Webhook GitHub → ArgoCD
 
 GitHub notifies ArgoCD on every push so apps refresh without waiting for the ~25 min reconciliation poll.
