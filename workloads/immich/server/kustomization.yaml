@@ -20,6 +20,7 @@ resources:
   - microservices.yaml
   - microservices-service.yaml
   - ingressroute.yaml
+  - networkpolicy.yaml
 
 configMapGenerator:
   - name: immich-config-file
