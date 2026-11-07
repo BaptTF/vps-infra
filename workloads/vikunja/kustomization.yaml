@@ -9,6 +9,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingressroute.yaml
+  - networkpolicy.yaml
 
 configMapGenerator:
   - name: vikunja-config

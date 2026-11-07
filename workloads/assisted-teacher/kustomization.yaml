@@ -6,3 +6,4 @@ namespace: assisted-teacher
 resources:
   - backend
   - frontend
+  - networkpolicy.yaml

@@ -6,3 +6,4 @@ resources:
   - ingressroute.yaml
   - deployment.yaml
   - service.yaml
+  - networkpolicy.yaml
