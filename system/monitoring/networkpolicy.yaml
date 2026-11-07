@@ -1,0 +1,68 @@
+# Prometheus, Alertmanager and Loki have no authentication: only the namespace
+# itself and their Tailscale ingresses reach them. node-exporter uses the host
+# network and is not affected.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: same-namespace
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tailscale-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchExpressions:
+              - key: tailscale.com/parent-resource-ns
+                operator: In
+                values: [monitoring]
+              - key: tailscale.com/parent-resource
+                operator: In
+                values: [grafana, prometheus, alertmanager, loki]
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 9090
+        - protocol: TCP
+          port: 9093
+        - protocol: TCP
+          port: 3100
+---
+# Admission webhook of the Prometheus operator, called by the API server. Traffic
+# from the control-plane node itself is always allowed; from the other node it
+# arrives from the Hetzner flannel or Tailscale address.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: operator-webhook
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 10.42.0.0/32
+        - ipBlock:
+            cidr: 100.127.213.54/32
+      ports:
+        - protocol: TCP
+          port: 10250
