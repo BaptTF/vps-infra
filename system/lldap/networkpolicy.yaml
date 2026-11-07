@@ -1,0 +1,32 @@
+# Only Authelia binds over LDAP, and only the Tailscale ingress reaches the web UI.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: lldap
+  namespace: lldap
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authelia
+          podSelector:
+            matchLabels:
+              app: authelia
+      ports:
+        - protocol: TCP
+          port: 3890
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: lldap
+              tailscale.com/parent-resource-ns: lldap
+      ports:
+        - protocol: TCP
+          port: 17170
