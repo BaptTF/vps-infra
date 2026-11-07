@@ -69,6 +69,21 @@ tlsStore:
     defaultCertificate:
       secretName: wildcard-bapttf-tls
 
+# Only Cloudflare may reach the origin: it presents the Authenticated Origin Pulls
+# client certificate. immich and drive are DNS-only (uploads above the Cloudflare
+# free plan limit) and select the `direct` option in their IngressRoute.
+tlsOptions:
+  default:
+    minVersion: VersionTLS12
+    sniStrict: true
+    clientAuth:
+      secretNames:
+        - cloudflare-origin-pull-ca
+      clientAuthType: RequireAndVerifyClientCert
+  direct:
+    minVersion: VersionTLS12
+    sniStrict: true
+
 resources:
   requests:
     memory: "128Mi"

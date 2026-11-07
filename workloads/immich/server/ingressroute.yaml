@@ -12,4 +12,8 @@ spec:
       services:
         - name: immich-server
           port: 2283
-  tls: {}
+  # DNS-only (not proxied by Cloudflare): no origin pull certificate.
+  tls:
+    options:
+      name: direct
+      namespace: traefik
