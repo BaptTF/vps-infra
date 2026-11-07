@@ -4,8 +4,12 @@ model:
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
   api_key: dummy
   api_mode: chat_completions
-  extra_headers:
-    x-bf-eh-x-opencode-session: ses_hermesleo_20261107
+providers:
+  bifrost:
+    base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+    api_key: dummy
+    api_mode: chat_completions
+    session_affinity_header: x-bf-eh-x-opencode-session
 approvals:
   mode: false
 terminal:
