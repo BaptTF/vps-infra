@@ -1,0 +1,111 @@
+# Egress proxies relay to a fixed tailnet target. Pod traffic to the tailnet leaves
+# as the proxy's tag, so each proxy only accepts the pods that need its target:
+# Traefik for the public Home Assistant routes, Prometheus and snmp-exporter for
+# the scrapes, camofox and SearXNG for the NAS outbound proxy (Squid).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: home-assistant-egress
+spec:
+  podSelector:
+    matchExpressions:
+      - key: tailscale.com/parent-resource
+        operator: In
+        values: [ha, ha-eyg]
+      - key: tailscale.com/parent-resource-ns
+        operator: In
+        values: [ha, ha-eyg]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8123
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-egress
+spec:
+  podSelector:
+    matchExpressions:
+      - key: tailscale.com/parent-resource-ns
+        operator: In
+        values: [monitoring]
+      - key: tailscale.com/parent-resource
+        operator: In
+        values: [ha-home, ha-cam, ha-eyg, nas-snmp]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8123
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app: snmp-exporter
+      ports:
+        - protocol: UDP
+          port: 161
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nas-proxy-egress
+spec:
+  podSelector:
+    matchLabels:
+      tailscale.com/parent-resource: nas-proxy
+      tailscale.com/parent-resource-ns: openclaw
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openclaw
+          podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: [camofox, searxng]
+      ports:
+        - protocol: TCP
+          port: 3128
+---
+# WireGuard from tailnet peers lands on a random high UDP port of each proxy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-wireguard
+spec:
+  podSelector:
+    matchExpressions:
+      - key: tailscale.com/parent-resource
+        operator: In
+        values: [ha, ha-eyg, ha-home, ha-cam, nas-snmp, nas-proxy, leo-ha, leo-dsplay, leo-diskstation]
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: UDP
+          port: 1024
+          endPort: 65535
