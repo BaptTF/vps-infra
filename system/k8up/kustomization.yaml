@@ -38,3 +38,4 @@ helmCharts:
 resources:
   - infisical-secret.yaml
   - schedules.yaml
+  - networkpolicy.yaml

@@ -9,3 +9,4 @@ resources:
   - service.yaml
   - middleware.yaml
   - ingressroute.yaml
+  - networkpolicy.yaml
