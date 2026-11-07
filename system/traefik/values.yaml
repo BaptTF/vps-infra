@@ -27,6 +27,9 @@ ports:
     expose:
       default: true
     exposedPort: 443
+    http:
+      middlewares:
+        - traefik-security-headers@kubernetescrd
     # Default readTimeout is 60s; raise for slow/large uploads (e.g. Immich).
     transport:
       respondingTimeouts:
@@ -43,7 +46,8 @@ providers:
 
 ingressClass:
   enabled: true
-  isDefaultClass: true
+  # An Ingress without ingressClassName must not become public.
+  isDefaultClass: false
   name: traefik
 
 ingressRoute:

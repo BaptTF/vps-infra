@@ -15,3 +15,4 @@ helmCharts:
 resources:
   - certificate.yaml
   - cloudflare-origin-pull-ca.yaml
+  - security-headers.yaml
