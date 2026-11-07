@@ -761,6 +761,7 @@ In project `infrastructure`, environment `prod`, path `/authelia`, add:
 
 | Key | Description |
 |---|---|
+| `ldap-bind-password` | Password of the LLDAP user `authelia`, member of `lldap_strict_readonly` only. Authelia binds with it; it never gets the LLDAP admin password |
 | `oidc-hmac-secret` | Random 64+ char string (`authelia crypto rand --length 64 --charset rfc3986`) |
 | `oidc-jwks-private-key` | RSA 2048 private key PEM (`openssl genrsa 2048`) |
 | `immich-oidc-client-secret-hash` | pbkdf2 hash of the Immich client secret (for Authelia) |

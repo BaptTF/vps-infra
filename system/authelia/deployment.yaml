@@ -54,8 +54,8 @@ spec:
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: lldap-auth-secret
-                  key: ldap-user-pass
+                  name: authelia-secrets
+                  key: ldap-bind-password
           volumeMounts:
             - name: config
               mountPath: /config

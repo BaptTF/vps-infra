@@ -16,7 +16,8 @@ authentication_backend:
     implementation: lldap
     address: ldap://lldap.lldap.svc.cluster.local:3890
     base_dn: DC=bapttf,DC=com
-    user: UID=admin,OU=people,DC=bapttf,DC=com
+    # Member of lldap_strict_readonly only: Authelia never writes to LDAP.
+    user: UID=authelia,OU=people,DC=bapttf,DC=com
 
 session:
   name: authelia_session
