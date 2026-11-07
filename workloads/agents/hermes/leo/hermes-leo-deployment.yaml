@@ -62,7 +62,7 @@ spec:
             - name: API_SERVER_KEY
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-leo-secret
+                  name: nullclaw-leo-secret-api
                   key: API_SERVER_KEY
             - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
               valueFrom:

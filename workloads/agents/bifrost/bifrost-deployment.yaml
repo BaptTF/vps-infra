@@ -61,6 +61,8 @@ spec:
             - secretRef:
                 name: bifrost-secret
             - secretRef:
+                name: bifrost-secret-opencode
+            - secretRef:
                 name: hermes-lya-secret-bifrost
           volumeMounts:
             - name: config-volume
@@ -82,22 +84,22 @@ spec:
             - name: OPENCODE_GO_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: bifrost-secret
+                  name: bifrost-secret-opencode
                   key: OPENCODE_GO_API_KEY
             - name: OPENCODE_GO_API_KEY_R
               valueFrom:
                 secretKeyRef:
-                  name: bifrost-secret
+                  name: bifrost-secret-opencode
                   key: OPENCODE_GO_API_KEY_R
             - name: OPENCODE_GO_API_KEY_A
               valueFrom:
                 secretKeyRef:
-                  name: bifrost-secret
+                  name: bifrost-secret-opencode
                   key: OPENCODE_GO_API_KEY_A
             - name: OPENCODE_GO_API_KEY_N
               valueFrom:
                 secretKeyRef:
-                  name: bifrost-secret
+                  name: bifrost-secret-opencode
                   key: OPENCODE_GO_API_KEY_N
             # Bifrost >= v2.2.6 : /api verrouillé par setup token tant que l'auth dashboard est off.
             # Clé BIFROST_SETUP_TOKEN dans Infisical infrastructure/prod:/agents/bifrost
