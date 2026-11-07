@@ -1,22 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Copies thumbs to the Storage Box; pause Immich thumbnail jobs first, re-run rsync after cutover if needed.
+# Copies thumbs to the Storage Box with parallel rsync. SMB latency to the box limits each rsync to a few files per second.
+# Runs: bulk copy while Immich is live, catch-up pass with the thumbnail queue paused, cutover, pass with --update, cleanup.
 
 NAMESPACE="${NAMESPACE:-immich}"
-MIGRATE_JOB="immich-migrate-thumbs"
-VERIFY_JOB="immich-verify-thumbs"
+JOB="immich-migrate-thumbs"
 CLEANUP_JOB="immich-cleanup-thumbs"
+PARALLEL="${PARALLEL:-24}"
 
-echo "=== Phase 1: Migrate thumbs from local PVC to storagebox ==="
-echo ""
-
-kubectl -n "${NAMESPACE}" delete job "${MIGRATE_JOB}" --ignore-not-found
-
-kubectl -n "${NAMESPACE}" apply -f - <<EOF
+run_copy() {
+  local extra="$1"
+  kubectl -n "${NAMESPACE}" delete job "${JOB}" --ignore-not-found
+  sed -e "s|__JOB__|${JOB}|" -e "s|__PARALLEL__|${PARALLEL}|" -e "s|__EXTRA__|${extra}|" <<'EOF' | kubectl -n "${NAMESPACE}" apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ${MIGRATE_JOB}
+  name: __JOB__
 spec:
   backoffLimit: 0
   template:
@@ -25,21 +24,40 @@ spec:
       containers:
         - name: rsync
           image: alpine:3.22
+          env:
+            - name: PARALLEL
+              value: "__PARALLEL__"
+            - name: RSYNC_EXTRA
+              value: "__EXTRA__"
           command:
             - sh
             - -c
             - |
-              set -eux
-              apk add --no-cache rsync
+              set -u
+              apk add --no-cache rsync findutils >/dev/null
               mkdir -p /dest/thumbs
-              rsync -aH --info=progress2 /source/thumbs/ /dest/thumbs/
-              echo "=== Migration complete ==="
-              echo "Source:"
-              du -sh /source/thumbs/
-              find /source/thumbs -type f | wc -l
-              echo "Destination:"
-              du -sh /dest/thumbs/
-              find /dest/thumbs -type f | wc -l
+              cd /source/thumbs
+              rsync -rlt $RSYNC_EXTRA --exclude='*/' /source/thumbs/ /dest/thumbs/
+              for u in */; do rsync -rlt $RSYNC_EXTRA --exclude='*/' "/source/thumbs/$u" "/dest/thumbs/$u"; done
+              for u in */; do for d in "$u"*/; do echo "${d%/}"; done; done > /tmp/units
+              export TOTAL=$(wc -l < /tmp/units)
+              echo "[plan] $TOTAL units, parallel=$PARALLEL, start $(date -u +%TZ)"
+              mkdir -p /tmp/rc
+              cat > /tmp/w.sh <<'W'
+              u=$1
+              rcf=/tmp/rc/$(echo "$u" | tr / _)
+              { rsync -rlt --whole-file --inplace $RSYNC_EXTRA --stats "/source/thumbs/$u/" "/dest/thumbs/$u/" > "$rcf.stats" 2>&1; echo $? > "$rcf"; }
+              grep -v '^\(Number\|Total\|Literal\|Matched\|File list\|sent\|total\|$\)' "$rcf.stats" | sed "s|^|[$u] |"
+              n=$(sed -n 's/^Number of regular files transferred: //p' "$rcf.stats" | tr -d ,)
+              echo "$u" >> /tmp/done
+              echo "[progress] $(wc -l < /tmp/done)/$TOTAL $u exit=$(cat "$rcf") copied=${n:-?} $(date -u +%TZ)"
+              W
+              xargs -a /tmp/units -P "$PARALLEL" -n 1 sh /tmp/w.sh
+              fail=0
+              for f in /tmp/rc/*; do case "$f" in *.stats) continue ;; esac; case "$(cat "$f")" in 0|24) ;; *) fail=1; echo "[failed] $(basename "$f") exit=$(cat "$f")" ;; esac; done
+              echo "[total copied] $(sed -n 's/^Number of regular files transferred: //p' /tmp/rc/*.stats | tr -d , | awk '{t+=$1} END {print t}')"
+              echo "=== Migration finished fail=$fail $(date -u +%TZ) ==="
+              exit "$fail"
           volumeMounts:
             - name: source
               mountPath: /source
@@ -54,103 +72,43 @@ spec:
           persistentVolumeClaim:
             claimName: immich-storagebox
 EOF
+  echo "Follow with: kubectl -n ${NAMESPACE} logs -f job/${JOB} | grep -v 'copied=0'"
+  kubectl -n "${NAMESPACE}" wait --for=condition=complete "job/${JOB}" --timeout=48h
+  kubectl -n "${NAMESPACE}" logs "job/${JOB}" | grep -E '^\[(failed|total copied)\]|^==='
+}
 
-echo "Waiting for migration job to complete..."
-kubectl -n "${NAMESPACE}" wait --for=condition=complete "job/${MIGRATE_JOB}" --timeout=24h
-echo ""
-echo "Migration job logs:"
-kubectl -n "${NAMESPACE}" logs "job/${MIGRATE_JOB}" --tail=20
-echo ""
+thumbs_queue() {
+  kubectl -n "${NAMESPACE}" exec deploy/immich-valkey -- sh -c \
+    'echo "paused=$(valkey-cli hget immich_bull:thumbnailGeneration:meta paused) active=$(valkey-cli llen immich_bull:thumbnailGeneration:active)"'
+}
 
-echo "=== Phase 1 complete ==="
-echo ""
-echo "Now push the commit with the thumbs volumeMount on the API and microservices pods and wait for ArgoCD to redeploy."
-read -rp "Press Enter once both Immich pods have been redeployed with the new mount... "
-echo ""
-
-echo "=== Phase 2: Verify data integrity ==="
-echo ""
-
-kubectl -n "${NAMESPACE}" delete job "${VERIFY_JOB}" --ignore-not-found
-
-kubectl -n "${NAMESPACE}" apply -f - <<EOF
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: ${VERIFY_JOB}
-spec:
-  backoffLimit: 0
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-        - name: verify
-          image: alpine:3.22
-          command:
-            - sh
-            - -c
-            - |
-              set -eu
-              SRC_SIZE=\$(du -sb /source/thumbs/ | cut -f1)
-              DST_SIZE=\$(du -sb /dest/thumbs/ | cut -f1)
-              SRC_COUNT=\$(find /source/thumbs -type f | wc -l)
-              DST_COUNT=\$(find /dest/thumbs -type f | wc -l)
-
-              echo "Source: \${SRC_COUNT} entries, \${SRC_SIZE} bytes"
-              echo "Dest:   \${DST_COUNT} entries, \${DST_SIZE} bytes"
-
-              if [ "\${DST_COUNT}" -ge "\${SRC_COUNT}" ] && [ "\${DST_SIZE}" -ge "\${SRC_SIZE}" ]; then
-                echo "VERIFY OK: dest >= source (new thumbs may be written after cutover)"
-                exit 0
-              else
-                echo "VERIFY FAILED: mismatch detected!"
-                echo "Diff (in source but not in dest):"
-                (cd /source/thumbs && find . -type f | sort) > /tmp/src
-                (cd /dest/thumbs && find . -type f | sort) > /tmp/dst
-                comm -23 /tmp/src /tmp/dst | head -50
-                exit 1
-              fi
-          volumeMounts:
-            - name: source
-              mountPath: /source
-              readOnly: true
-            - name: dest
-              mountPath: /dest
-              readOnly: true
-      volumes:
-        - name: source
-          persistentVolumeClaim:
-            claimName: immich-library
-        - name: dest
-          persistentVolumeClaim:
-            claimName: immich-storagebox
-EOF
-
-echo "Waiting for verification job..."
-if kubectl -n "${NAMESPACE}" wait --for=condition=complete "job/${VERIFY_JOB}" --timeout=600s; then
-  echo ""
-  kubectl -n "${NAMESPACE}" logs "job/${VERIFY_JOB}"
-  echo ""
-  echo "=== Phase 2 complete: verification passed ==="
-else
-  echo ""
-  echo "Verification FAILED! Logs:"
-  kubectl -n "${NAMESPACE}" logs "job/${VERIFY_JOB}"
-  echo ""
-  echo "Aborting. Do NOT delete the source data."
-  exit 1
-fi
+echo "=== Phase 1: bulk copy while Immich runs ==="
+run_copy ""
 
 echo ""
-echo "=== Phase 3: Cleanup old data from local PVC ==="
-read -rp "Delete thumbs from local PVC? [y/N] " confirm
+echo "=== Phase 2: catch-up pass ==="
+echo "Pause 'Generate Thumbnails' in Immich (Administration > Jobs). Upload tools such as immich-go can resume it."
+read -rp "Press Enter once paused... "
+until thumbs_queue | tee /dev/stderr | grep -q 'paused=1 active=0'; do sleep 10; done
+run_copy ""
+
+echo ""
+echo "=== Phase 3: cutover ==="
+echo "Merge the commit that mounts thumbs from the Storage Box on the API and microservices pods, and wait for ArgoCD."
+read -rp "Press Enter once both Immich pods run with the new mount... "
+run_copy "--update"
+echo "Resume 'Generate Thumbnails' in Immich."
+
+echo ""
+echo "=== Phase 4: cleanup ==="
+echo "Keep the local thumbs until Immich has been checked on the Storage Box. They are the rollback."
+read -rp "Delete thumbs from the local PVC? [y/N] " confirm
 if [[ "${confirm}" != "y" && "${confirm}" != "Y" ]]; then
-  echo "Skipped cleanup. You can manually delete later."
+  echo "Skipped cleanup."
   exit 0
 fi
 
 kubectl -n "${NAMESPACE}" delete job "${CLEANUP_JOB}" --ignore-not-found
-
 kubectl -n "${NAMESPACE}" apply -f - <<EOF
 apiVersion: batch/v1
 kind: Job
@@ -169,12 +127,9 @@ spec:
             - -c
             - |
               set -eux
-              echo "Before cleanup:"
               du -sh /data/thumbs/
               rm -rf /data/thumbs/*
-              echo "After cleanup:"
               du -sh /data/thumbs/
-              echo "Cleanup complete"
           volumeMounts:
             - name: data
               mountPath: /data
@@ -183,9 +138,6 @@ spec:
           persistentVolumeClaim:
             claimName: immich-library
 EOF
-
-echo "Waiting for cleanup job..."
 kubectl -n "${NAMESPACE}" wait --for=condition=complete "job/${CLEANUP_JOB}" --timeout=600s
 kubectl -n "${NAMESPACE}" logs "job/${CLEANUP_JOB}"
-echo ""
-echo "=== Done! thumbs is now served from the storagebox ==="
+echo "=== Done: thumbs are served from the Storage Box ==="
