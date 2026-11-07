@@ -10,3 +10,4 @@ resources:
   - bifrost
   - camofox
   - searxng
+  - networkpolicy.yaml

@@ -1,0 +1,147 @@
+# Nothing reaches an agent pod unless a policy below (or bifrost's own) allows it.
+# Prompt-injected agents must not drive each other's tools: kirocrew (unsandboxed
+# shell) is only reachable from its Tailscale ingress.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hermes-leo
+spec:
+  podSelector:
+    matchLabels:
+      app: hermes-leo
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tripkit
+          podSelector:
+            matchLabels:
+              app: tripkit-backend
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: hermes-leo-api
+              tailscale.com/parent-resource-ns: openclaw
+      ports:
+        - protocol: TCP
+          port: 8642
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hermes-lya
+spec:
+  podSelector:
+    matchLabels:
+      app: hermes-lya
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: assisted-teacher
+          podSelector:
+            matchLabels:
+              app: assisted-teacher-backend
+      ports:
+        - protocol: TCP
+          port: 8642
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: camofox
+spec:
+  podSelector:
+    matchLabels:
+      app: camofox
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: [hermes-leo, hermes-lea, hermes-lya]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: camofox
+              tailscale.com/parent-resource-ns: openclaw
+      ports:
+        - protocol: TCP
+          port: 9377
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: searxng
+spec:
+  podSelector:
+    matchLabels:
+      app: searxng
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: [hermes-leo, hermes-lea, hermes-lya]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: searxng
+              tailscale.com/parent-resource-ns: openclaw
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kirocrew
+spec:
+  podSelector:
+    matchLabels:
+      app: kirocrew
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: kirocrew
+              tailscale.com/parent-resource-ns: openclaw
+      ports:
+        - protocol: TCP
+          port: 5476
