@@ -1,7 +1,7 @@
 # Egress proxies relay to a fixed tailnet target. Pod traffic to the tailnet leaves
 # as the proxy's tag, so each proxy only accepts the pods that need its target:
 # Traefik for the public Home Assistant routes, Prometheus and snmp-exporter for
-# the scrapes, camofox and SearXNG for the NAS outbound proxy (Squid).
+# the scrapes, camofox, SearXNG and Hermes Léo for the NAS outbound proxy (Squid).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -86,7 +86,7 @@ spec:
             matchExpressions:
               - key: app
                 operator: In
-                values: [camofox, searxng]
+                values: [camofox, searxng, hermes-leo]
       ports:
         - protocol: TCP
           port: 3128
