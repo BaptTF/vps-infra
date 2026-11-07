@@ -1,9 +1,7 @@
 {
   "backup": {
     "database": {
-      "cronExpression": "0 02 * * *",
-      "enabled": true,
-      "keepLastAmount": 14
+      "enabled": false
     }
   },
   "ffmpeg": {
