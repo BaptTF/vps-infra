@@ -26,6 +26,67 @@ Node access is Tailscale SSH (`tailscale set --ssh`). `sshd` stays disabled. If 
 systemctl disable --now ssh
 ```
 
+### Public interface filter
+
+Flannel's VXLAN socket listens on `0.0.0.0:8472` (the kernel cannot bind it to one interface), and kube-proxy opens Traefik's NodePorts on every address. A dedicated nftables table drops VXLAN that does not come through `tailscale0`, and new connections to the NodePort range (30000-32767) on `eth0`. Everything else is untouched: 80/443 (svclb), Tailscale (UDP 41641) and the k3s rules.
+
+The chain runs at priority -160, after conntrack and before the DNAT of kube-proxy and svclb, so a NodePort is dropped before it is rewritten. `/etc/nftables.conf` and `nftables.service` stay unused: that file starts with `flush ruleset`, which would also wipe the k3s and Tailscale rules. Replace `eth0` if the public interface has another name.
+
+```bash
+cat <<'EOF' > /etc/nftables-edge.nft
+#!/usr/sbin/nft -f
+# Public-interface filter for k3s nodes. Only this table is replaced:
+# /etc/nftables.conf flushes the whole ruleset, k3s and Tailscale rules included.
+table inet edge
+delete table inet edge
+
+table inet edge {
+	chain prerouting {
+		# After conntrack (-200), before the kube-proxy and svclb DNAT (-100).
+		type filter hook prerouting priority -160; policy accept;
+
+		# Flannel VXLAN only arrives through the Tailscale tunnel.
+		udp dport 8472 iifname != "tailscale0" counter drop
+
+		# NodePorts are not published on the Internet. Traefik is served on 80/443 by svclb.
+		iifname "eth0" ct state new tcp dport 30000-32767 counter drop
+		iifname "eth0" ct state new udp dport 30000-32767 counter drop
+	}
+}
+EOF
+
+cat <<'EOF' > /etc/systemd/system/nftables-edge.service
+[Unit]
+Description=Public-interface filter for k3s nodes
+Wants=network-pre.target
+Before=network-pre.target shutdown.target k3s.service k3s-agent.service
+Conflicts=shutdown.target
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/nftables-edge.nft
+ExecStop=/usr/sbin/nft delete table inet edge
+
+[Install]
+WantedBy=sysinit.target
+EOF
+
+nft -c -f /etc/nftables-edge.nft
+systemctl daemon-reload
+systemctl enable --now nftables-edge.service
+```
+
+Check: `nft list table inet edge` shows the drop counters. From outside, the NodePorts are `filtered`, and a UDP packet to 8472 raises the first counter:
+
+```bash
+nmap -Pn -p 80,443,30685,32305 <public-ip>
+printf x | nc -u -w1 <public-ip> 8472
+```
+
+Rollback: `systemctl disable --now nftables-edge.service` (deletes the table).
+
 ### Unattended upgrades
 
 Debian and Debian Security packages are installed once a day. The node does not reboot by itself. Tailscale and other third-party archives are left alone.
