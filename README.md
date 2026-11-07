@@ -428,7 +428,7 @@ Path `/k8up/photos` feeds Secret `k8up-restic-photos` in `immich` only. It holds
 |-----|-------------|
 | `RESTIC_PASSWORD` | password of the `/k3s/photos` repository |
 
-`--private-repos` only requires the first folder to match the username, so this repository is `http://dsplay.tail4c7c90.ts.net:8000/k3s/photos`. On disk that is `restic/k3s/photos`, a second restic repository under the `/k3s` directory. The schedule backs up the whole SMB share, including `encoded-video`. The cluster reaches `dsplay` over a direct Tailscale path, not a DERP relay. The job asks for 512 MiB and may use up to 4 GiB. Nothing prunes `/k3s/photos`: the Pi script only forgets `/k3s`, and port 8001 is not reachable from the cluster. Unchanged photos are stored once. Snapshots of that repository accumulate until a forget can run against the prune listener.
+`--private-repos` only requires the first folder to match the username, so this repository is `http://dsplay.tail4c7c90.ts.net:8000/k3s/photos`. On disk that is `restic/k3s/photos`, a second restic repository under the `/k3s` directory. The schedule backs up the whole SMB share, including `encoded-video`, except `thumbs`: Immich can regenerate it, and the PVC annotation `k8up.io/backup-restic-args` passes `--exclude /data/immich-storagebox/thumbs` to restic. If that annotation is not valid JSON, k8up skips the PVC. The cluster reaches `dsplay` over a direct Tailscale path, not a DERP relay. The job asks for 512 MiB and may use up to 4 GiB. Nothing prunes `/k3s/photos`: the Pi script only forgets `/k3s`, and port 8001 is not reachable from the cluster. Unchanged photos are stored once. Snapshots of that repository accumulate until a forget can run against the prune listener.
 
 ### rest-server on the NAS
 
