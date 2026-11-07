@@ -12,6 +12,7 @@ spec:
           commonUpdateSettings:
             pullSecret: pullsecret:argocd/tripkit-ghcr-login-secret
             updateStrategy: newest-build
+            allowTags: "regexp:^sha-[0-9a-f]{7}$"
   writeBackConfig:
     method: "git:secret:argocd/argocd-image-updater-git-creds"
     gitConfig:
