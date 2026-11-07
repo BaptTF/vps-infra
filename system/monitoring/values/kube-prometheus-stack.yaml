@@ -121,6 +121,9 @@ grafana:
   sidecar:
     dashboards:
       searchNamespace: ALL
+      resource: configmap
+    datasources:
+      resource: configmap
     resources:
       requests:
         cpu: 10m
