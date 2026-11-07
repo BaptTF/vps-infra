@@ -136,7 +136,7 @@
   },
   "library": {
     "scan": {
-      "cronExpression": "0 0 * * *",
+      "cronExpression": "0 4 * * *",
       "enabled": true
     },
     "watch": {
