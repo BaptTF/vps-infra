@@ -726,12 +726,12 @@ Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in n
 
 ### OpenCode Go session headers
 
-OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifrost v2.0.0 drops the organic header and only forwards `x-bf-eh-*`. Do **not** send a per-conversation ID from every OpenAI-compat client: keep the OpenAI abstraction, with a default session on the gateway and optional per-agent overrides.
+OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifrost v2.0.0 drops the organic header and only forwards `x-bf-eh-*`. Do **not** add custom code to OpenAI-compat clients to send a per-conversation ID: keep the OpenAI abstraction, with a default session on the gateway and optional per-agent overrides. Hermes supports it natively through config (`session_affinity_header`), so it is used for Leo.
 
 | Who | Session | Where |
 |---|---|---|
 | Default (curl, any OpenAI-compat app) | `ses_bifrost_default_YYYYMMDD` | `workloads/agents/bifrost/bifrost_config.json` → `providers.opencode-go.network_config.extra_headers.x-opencode-session` |
-| Hermes Leo | `ses_hermesleo_YYYYMMDD` | `workloads/agents/hermes/leo/config.yaml` → `model.extra_headers` and `auxiliary.vision.extra_headers` (`x-bf-eh-x-opencode-session`) |
+| Hermes Leo | per conversation (Hermes conversation root id) | `workloads/agents/hermes/leo/config.yaml` → `providers.bifrost.session_affinity_header: x-bf-eh-x-opencode-session`. No static ID: a bad pin only affects one conversation, `/new` starts a fresh one. Auxiliary calls (vision, compression, titles) reuse the conversation key |
 | Hermes Lea | `ses_hermeslea_YYYYMMDD` | `workloads/agents/hermes/lea/config.yaml` (same keys) |
 | Hermes Lya | `ses_hermeslya_YYYYMMDD` | `workloads/agents/hermes/lya/config.yaml` (same keys) |
 
