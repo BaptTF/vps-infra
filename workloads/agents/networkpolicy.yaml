@@ -80,6 +80,12 @@ spec:
                 values: [hermes-leo, hermes-lea, hermes-lya]
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: vulcain
+          podSelector:
+            matchLabels:
+              app: vulcain
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: tailscale
           podSelector:
             matchLabels:
@@ -106,6 +112,12 @@ spec:
               - key: app
                 operator: In
                 values: [hermes-leo, hermes-lea, hermes-lya]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: vulcain
+          podSelector:
+            matchLabels:
+              app: vulcain
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: tailscale
