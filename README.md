@@ -117,6 +117,38 @@ The system-upgrade plans follow `https://update.k3s.io/v1-release/channels/v1.36
 
 kured labels a node `kured=rebooting` while it reboots, and the plans skip that node. Deleting a plan stops further k3s upgrades.
 
+### Restart k3s with Tailscale
+
+k3s runs entirely on `tailscale0`: `node-ip`, `flannel-iface`, and on the server `bind-address`. When tailscaled restarts (Tailscale auto-update, `systemctl restart tailscaled`, crash), `tailscale0` is deleted and recreated, and the kernel deletes `flannel.1` with it. Since k3s v1.36.6, flannel recreates `flannel.1` in place but does not restore the route, FDB and ARP entries for the other nodes (`reCreateVxlan`, still the case on flannel `master`). k3s stays `active`, and pods lose the other node and the cluster DNS. Older k3s versions crashed at that point, so systemd restarted them and the problem did not show. First seen on 2026-11-08 after the Tailscale 1.104.5 auto-update.
+
+A drop-in orders k3s after tailscaled and ties it to it with `PartOf=`: when tailscaled is stopped or restarted, systemd stops k3s first and starts it again once tailscaled is up. On startup, flannel rebuilds every route. Pods keep running (`KillMode=process`). On the server, the API is unavailable for about 15 seconds. Tailscale auto-update stays enabled.
+
+```bash
+UNIT=k3s          # k3s-agent on workers
+mkdir -p /etc/systemd/system/$UNIT.service.d
+cat <<'EOF' > /etc/systemd/system/$UNIT.service.d/10-tailscale.conf
+# k3s runs on tailscale0 (node-ip, flannel-iface). When tailscaled restarts,
+# tailscale0 and flannel.1 are recreated and flannel loses its peer routes:
+# restart k3s with it. See README "Restart k3s with Tailscale".
+[Unit]
+After=tailscaled.service
+PartOf=tailscaled.service
+EOF
+systemctl daemon-reload
+```
+
+Check: `systemctl show tailscaled -p ConsistsOf` lists the k3s unit. To test it, restart tailscaled from a timer, because the SSH session itself goes through Tailscale. After about 15 seconds, the route to the other node's pod CIDR is back:
+
+```bash
+systemd-run --on-active=3 systemctl restart tailscaled
+# reconnect, then:
+journalctl -u $UNIT -u tailscaled --since -2min | grep -E 'Stopping|Started'
+ip route | grep 'dev flannel.1'
+bridge fdb show dev flannel.1
+```
+
+If cross-node pod traffic breaks without a tailscaled restart, the same symptom (no `dev flannel.1` route) is fixed by `systemctl restart k3s` (or `k3s-agent`) on the affected node.
+
 ### NTP (required on every node)
 
 Every k3s node **must** have NTP enabled and running. Without NTP, the system clock drifts over time and breaks services that validate clock accuracy (e.g., Authelia checks clock sync on startup and refuses to start if the drift exceeds 3 seconds).
