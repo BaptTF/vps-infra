@@ -402,7 +402,8 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 | Vulcain | https://vulcain.bapttf.com | Public (Authelia) |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
-| Home Assistant (Roquefort) | https://ha.bapttf.com | Public (Authelia, group:family) |
+| Home Assistant (Roquefort) | https://ha.bapttf.com | Public (Home Assistant login) |
+| Home Assistant (Eyguians) | https://eyguians.bapttf.com | Public (Home Assistant login) |
 
 ---
 
@@ -458,9 +459,11 @@ Only `POST /api/webhook` is public (`IngressRoute` `argocd-server-webhook`). The
 
 ## Home Assistant (ha.bapttf.com)
 
-Roquefort is published like Eyguians. Traefik reaches `homeassistant.tail4c7c90.ts.net:8123` and strips the proxy headers before they arrive. Authelia allows `group:family`. Home Assistant then asks for its own login.
+Roquefort is published like Eyguians. Traefik reaches `homeassistant.tail4c7c90.ts.net:8123` and strips the proxy headers before they arrive. There is no Authelia in front: the Home Assistant companion app cannot get through a forward-auth redirect, so Home Assistant's own login (password, then TOTP for the admins) is the only gate. Cloudflare is the only way in once the Livebox forward is removed.
 
-`ha.bapttf.com` is already covered by the wildcard DNS record and the wildcard certificate. The instance `external_url` is still `https://harjullien.duckdns.org`. After this route is synced, set it to `https://ha.bapttf.com` under Settings, System, Network. `harjullien.duckdns.org` keeps working until that name and the Livebox forward are removed.
+`ha.bapttf.com` is already covered by the wildcard DNS record and the wildcard certificate. The instance `external_url` is still `https://harjullien.duckdns.org`. Set it to `https://ha.bapttf.com` under Settings, System, Network. `harjullien.duckdns.org` answers directly on the Roquefort public IP, without Cloudflare, until that name and the Livebox forward are removed.
+
+Home Assistant cannot ban brute force here: every request reaches it from the Tailscale egress proxy, so a ban would lock out everyone (`login_attempts_threshold: -1`). Prometheus watches instead. A second IngressRoute, `login`, sends `/auth/login_flow` through its own Traefik router in `ha` and `ha-eyg`. A wrong password still answers HTTP 200, so the `sre-homeassistant` rules count POSTs: `HomeAssistantLoginBurst` above 20 in 15 minutes (critical), `HomeAssistantLoginSustained` above 60 in 6 hours (warning). A normal login is 2 or 3 POSTs. Rule tests: `system/monitoring/tests/sre-homeassistant.test.yaml`.
 
 ---
 

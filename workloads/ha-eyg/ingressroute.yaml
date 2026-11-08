@@ -14,3 +14,22 @@ spec:
         - name: ha-eyg
           port: 8123
   tls: {}
+---
+# Same backend, own router: Traefik counts login submissions apart for the
+# HomeAssistantLogin* alerts. A failed login still answers HTTP 200.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: login
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`eyguians.bapttf.com`) && PathPrefix(`/auth/login_flow`)
+      kind: Rule
+      middlewares:
+        - name: strip-proxy-headers
+      services:
+        - name: ha-eyg
+          port: 8123
+  tls: {}

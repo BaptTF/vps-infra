@@ -194,6 +194,31 @@ spec:
           annotations:
             summary: "Home Assistant {{ $labels.job }} is down"
             description: "Prometheus cannot scrape {{ $labels.job }} for 15 minutes."
+        # The `login` IngressRoutes give /auth/login_flow its own router, named
+        # <namespace>-login-<hash>. HA answers a wrong password with HTTP 200, so
+        # count submissions: a normal login is 2 or 3 POSTs (flow, password, TOTP).
+        - alert: HomeAssistantLoginBurst
+          expr: |
+            sum by (site) (
+              label_replace(increase(traefik_router_requests_total{router=~"(ha|ha-eyg)-login-[0-9a-f]+@kubernetescrd", method="POST"}[15m]),
+                "site", "$1", "router", "(.+)-login-[0-9a-f]+@kubernetescrd")
+            ) > 20
+          labels:
+            severity: critical
+          annotations:
+            summary: "Possible brute force on Home Assistant {{ $labels.site }}"
+            description: "{{ $value | humanize }} login submissions in 15 minutes (a normal login is 2 or 3). Check the Traefik access logs for /auth/login_flow."
+        - alert: HomeAssistantLoginSustained
+          expr: |
+            sum by (site) (
+              label_replace(increase(traefik_router_requests_total{router=~"(ha|ha-eyg)-login-[0-9a-f]+@kubernetescrd", method="POST"}[6h]),
+                "site", "$1", "router", "(.+)-login-[0-9a-f]+@kubernetescrd")
+            ) > 60
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unusual number of logins on Home Assistant {{ $labels.site }}"
+            description: "{{ $value | humanize }} login submissions in 6 hours; a slow brute force stays under the 15-minute threshold."
     - name: sre-containers
       rules:
         # House rule (not a kube-prometheus-stack default). local-path-exporter

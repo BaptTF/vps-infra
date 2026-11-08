@@ -1,0 +1,60 @@
+# Run from system/monitoring:
+#   python3 -c 'import yaml,sys; yaml.safe_dump(yaml.safe_load(open("prometheusrules-sre.yaml"))["spec"], sys.stdout)' > /tmp/sre-rules.yaml
+#   promtool test rules tests/sre-homeassistant.test.yaml
+rule_files:
+  - /tmp/sre-rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # One POST per minute on each Traefik pod: 30 submissions in 15 minutes.
+  # The main ha router and GET requests are not counted.
+  - interval: 1m
+    input_series:
+      - series: 'traefik_router_requests_total{job="traefik-metrics", pod="traefik-a", router="ha-login-0e0a439645364101a701@kubernetescrd", method="POST", code="200"}'
+        values: '0+1x30'
+      - series: 'traefik_router_requests_total{job="traefik-metrics", pod="traefik-b", router="ha-login-0e0a439645364101a701@kubernetescrd", method="POST", code="200"}'
+        values: '0+1x30'
+      - series: 'traefik_router_requests_total{job="traefik-metrics", pod="traefik-a", router="ha-login-0e0a439645364101a701@kubernetescrd", method="GET", code="200"}'
+        values: '0+10x30'
+      - series: 'traefik_router_requests_total{job="traefik-metrics", pod="traefik-a", router="ha-ha-0e0a439645364101a701@kubernetescrd", method="POST", code="200"}'
+        values: '0+10x30'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: HomeAssistantLoginBurst
+        exp_alerts:
+          - exp_labels: {severity: critical, site: ha}
+            exp_annotations:
+              summary: "Possible brute force on Home Assistant ha"
+              description: "30 login submissions in 15 minutes (a normal login is 2 or 3). Check the Traefik access logs for /auth/login_flow."
+      - eval_time: 20m
+        alertname: HomeAssistantLoginSustained
+        exp_alerts: []
+
+  # A few family logins (3 POSTs each) on Eyguians: nothing fires.
+  - interval: 1m
+    input_series:
+      - series: 'traefik_router_requests_total{job="traefik-metrics", pod="traefik-a", router="ha-eyg-login-a8da915850a92053f0a8@kubernetescrd", method="POST", code="200"}'
+        values: '0 1 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 5 6 6 6 6 6 6 6 6'
+    alert_rule_test:
+      - eval_time: 29m
+        alertname: HomeAssistantLoginBurst
+        exp_alerts: []
+
+  # Slow brute force on Eyguians, one attempt every 5 minutes: under the burst
+  # threshold, caught over 6 hours. The site label keeps the dash.
+  - interval: 5m
+    input_series:
+      - series: 'traefik_router_requests_total{job="traefik-metrics", pod="traefik-a", router="ha-eyg-login-a8da915850a92053f0a8@kubernetescrd", method="POST", code="200"}'
+        values: '0+1x80'
+    alert_rule_test:
+      - eval_time: 6h
+        alertname: HomeAssistantLoginBurst
+        exp_alerts: []
+      - eval_time: 6h
+        alertname: HomeAssistantLoginSustained
+        exp_alerts:
+          - exp_labels: {severity: warning, site: ha-eyg}
+            exp_annotations:
+              summary: "Unusual number of logins on Home Assistant ha-eyg"
+              description: "72 login submissions in 6 hours; a slow brute force stays under the 15-minute threshold."
