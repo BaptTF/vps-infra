@@ -889,7 +889,7 @@ Values live in Infisical `/agents/bifrost/virtual-keys` (keys `BIFROST_VK_<ID>`,
 
 - Hermes: `api_key: ${BIFROST_API_KEY}` in `config.yaml` (Hermes expands `${VAR}`)
 - Vulcain: `llm.provider.apiKey: "${BIFROST_API_KEY}"` in `/data/.vulcain/config/config.json` on the PVC (pi expands `${VAR}`). Set once with `kubectl -n vulcain exec`, it is not in git
-- OpenCode (laptops): `providers.bifrost.settings.apiKey: "{file:~/.config/opencode/bifrost-vk}"` in `~/.config/opencode/opencode.jsonc`, the key in `~/.config/opencode/bifrost-vk` (mode 600)
+- OpenCode v2 (laptops): the key goes in the OpenCode credential store, not in `opencode.jsonc` (v2 ignores `settings.apiKey` and sends the stored credential, even an empty one). Replace the `bifrost` credential: `opencode auth export` → set `.value.key` on the `bifrost` entry → `opencode auth logout bifrost <id>` → `opencode auth import <file>` → `opencode reload` (the background service caches credentials and config)
 
 Add a key: create `BIFROST_VK_<ID>` in Infisical (`echo "sk-bf-$(openssl rand -hex 24)"`), add the VK to `governance.virtual_keys`, push. Rotate: change the value in Infisical; the auto-reload annotation restarts Bifrost and the agent.
 
