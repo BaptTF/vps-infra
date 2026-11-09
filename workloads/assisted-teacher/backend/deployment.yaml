@@ -57,6 +57,8 @@ spec:
               name: http
               protocol: TCP
           env:
+            - name: HOME
+              value: /tmp
             - name: PORT
               value: "9847"
             - name: WORKSPACE_DIR
