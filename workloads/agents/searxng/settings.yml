@@ -12,6 +12,10 @@ search:
   safe_search: 2
 
 engines:
+  - name: google
+    disabled: false
+  - name: bing
+    disabled: false
   - name: startpage
     inactive: false
     disabled: false
