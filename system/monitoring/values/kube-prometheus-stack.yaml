@@ -178,8 +178,8 @@ alertmanager:
         # IngressRoute identity, so a Host() edit does not re-page the agent.
         # The livebox instance has no IngressRoute.
         # These routes are not actionable by the SRE agent. Discord gets them,
-        # repeated every 4h, same as the webhook. Watchdog and InfoInhibitor
-        # stay on null below.
+        # repeated every 4h, same as the webhook. Watchdog goes to Healthchecks
+        # below. InfoInhibitor stays on null.
         - receiver: discord
           repeat_interval: 4h
           matchers:
@@ -211,21 +211,33 @@ alertmanager:
           matchers:
             - severity = "info"
             - alertname !~ "^(KubeNodePressure|KubeNodeEviction|NodeCPUHighUsage|KubeletTooManyPods)$"
-        # Watchdog is always firing. InfoInhibitor is a synthetic rule
-        # (severity none, so the info route above does not match it).
-        # Both stay on null. Watchdog is not a Discord message.
+        # Watchdog is always firing. Ping Healthchecks.io every minute as a
+        # dead man's switch (period 1m, grace 10m on the check). continue
+        # false so it never falls through to sre. InfoInhibitor stays on null.
+        - receiver: watchdog-hc
+          continue: false
+          group_wait: 0s
+          group_interval: 1m
+          repeat_interval: 1m
+          matchers:
+            - alertname = "Watchdog"
         - receiver: "null"
           matchers:
-            - alertname =~ "^(Watchdog|InfoInhibitor)$"
+            - alertname = "InfoInhibitor"
     receivers:
       - name: "null"
-      # ALERTMANAGER_DISCORD_WEBHOOK_URL is a key of Secret alertmanager-webhook,
-      # synced from Infisical infrastructure/prod path /monitoring/alertmanager.
+      # ALERTMANAGER_DISCORD_WEBHOOK_URL and ALERTMANAGER_HEALTHCHECKS_PING_URL
+      # are keys of Secret alertmanager-webhook, synced from Infisical
+      # infrastructure/prod path /monitoring/alertmanager.
       # alertmanagerSpec.secrets already mounts that Secret.
       - name: discord
         discord_configs:
           - webhook_url_file: /etc/alertmanager/secrets/alertmanager-webhook/ALERTMANAGER_DISCORD_WEBHOOK_URL
             send_resolved: true
+      - name: watchdog-hc
+        webhook_configs:
+          - url_file: /etc/alertmanager/secrets/alertmanager-webhook/ALERTMANAGER_HEALTHCHECKS_PING_URL
+            send_resolved: false
       - name: sre
         webhook_configs:
           - url_file: /etc/alertmanager/secrets/alertmanager-webhook/ALERTMANAGER_WEBHOOK_URL
