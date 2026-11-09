@@ -914,7 +914,7 @@ Regenerate when OpenCode changes the prices or the model list (`GET /v1/models?p
 
 Bifrost only sees one VK per agent. The `usage-exporter` sidecar of `hermes-leo` (`workloads/agents/hermes/leo/usage-exporter.py`, stdlib Python) reads the Hermes `state.db` on the PVC read-only at every scrape and exposes `hermes_sessions_total`, `hermes_tokens_total{type=input|output|cache_read|cache_write|reasoning}` and `hermes_cost_usd_total` (Hermes' own estimate) on port `9464`, labels `agent`, `source`, `user`. Sub-agent sessions count for the user of their root session.
 
-The `user` label is a name taken at runtime from the private contacts repo cloned on the PVC (`agent-shared-context/contacts/**/*.md`: Telegram ID line, file title as name). No name or ID is in this repo: it is public. An ID missing from the contacts shows as `telegram:<id>`; Telegram sessions recorded before Hermes stored the sender show as `inconnu`, cron/API sessions as `aucun`. The counters are recomputed from `state.db`, so pruning sessions (`sessions.auto_prune`, off) would lower them.
+The `user` label is the latest sender display name Hermes stored for that user (`origin_json.user_name` in `state.db`, e.g. the Telegram name), else `<source>:<user_id>`. The exporter reads nothing else from the PVC, and no name or ID is in this repo (it is public). Telegram sessions recorded before Hermes stored the sender show as `inconnu`, cron/API sessions as `aucun`. The counters are recomputed from `state.db`, so pruning sessions (`sessions.auto_prune`, off) would lower them.
 
 ### OpenCode Go session headers
 

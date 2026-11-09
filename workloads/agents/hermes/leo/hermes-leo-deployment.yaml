@@ -116,7 +116,7 @@ spec:
             limits:
               memory: "1.5Gi"
               cpu: "500m"
-        # Tokens par utilisateur (state.db + noms depuis agent-shared-context/contacts)
+        # Tokens par utilisateur, lus dans state.db (lecture seule)
         - name: usage-exporter
           image: python:3.13.17-alpine
           command: ["python3", "/app/usage-exporter.py"]
