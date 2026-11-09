@@ -438,6 +438,30 @@ Rollback: remove the `clientAuth` block from the `default` TLSOption, then turn 
 
 ---
 
+## Pod security
+
+Application namespaces (`assisted-teacher`, `authelia`, `bapttf-front`, `camille`, `emma-portfolio`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
+
+Every application pod sets:
+
+```yaml
+    spec:
+      automountServiceAccountToken: false   # keep only for pods with RBAC (hermes-leo, hermes-lea)
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          securityContext:
+            allowPrivilegeEscalation: false
+```
+
+A container whose image runs as a non-root user also gets `runAsNonRoot: true` and `capabilities: drop: [ALL]`. When the image `USER` is a name (`lldap`, `sws:sws`), set `runAsUser`/`runAsGroup` too, or the kubelet refuses to start it. Containers that start as root (nginx, s6-overlay in Hermes, su-exec in gowa and valkey, Immich, Vaultwarden, Authelia) keep their capabilities until they are moved to a non-root user one by one. Low ports need no capability: the pod sysctl `net.ipv4.ip_unprivileged_port_start` is `0`.
+
+`RuntimeDefault` is the same seccomp profile Docker applies by default, so images built for Docker run unchanged. Rollback is a `git revert`; a pod that breaks shows `CreateContainerConfigError` (non-numeric user) or `operation not permitted` in its logs.
+
+---
+
 ## Webhook GitHub → ArgoCD
 
 GitHub notifies ArgoCD on every push so apps refresh without waiting for the ~25 min reconciliation poll.

@@ -40,7 +40,7 @@ kubectl create secret generic infisical-universal-auth \
 ## Adding a new service
 
 1. Create manifests in `system/<name>/` (with `kustomization.yaml` if using Kustomize/Helm) or `workloads/<name>/`
-2. Add an ArgoCD `Application` CR in `apps/<name>.yaml` -- follow an existing file as template
+2. Add an ArgoCD `Application` CR in `apps/<name>.yaml` -- follow an existing file as template, including the Pod Security labels in `managedNamespaceMetadata`. Give every pod `seccompProfile: RuntimeDefault`, `allowPrivilegeEscalation: false` and `automountServiceAccountToken: false`, plus `runAsNonRoot` and `drop: [ALL]` when the image runs as non-root (README "Pod security")
 3. If the service needs secrets, add an `infisical-secret.yaml` using `universalAuth` pointed at `infisical-universal-auth` in the `infisical` namespace
 4. If publicly exposed, add a Traefik `IngressRoute` on `websecure` with `tls: {}`. TLS is the cluster default wildcard (`system/traefik/certificate.yaml`); do not add a per-app Certificate. The hostname must be proxied by Cloudflare: the default TLSOption only accepts Cloudflare's origin pull certificate. A DNS-only hostname (only `immich` and `drive` today) uses `tls.options: {name: direct, namespace: traefik}` (README "Cloudflare in front of the origin")
 
