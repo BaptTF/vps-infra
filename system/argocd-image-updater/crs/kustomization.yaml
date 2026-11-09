@@ -9,7 +9,6 @@ resources:
   - bapttf-front-updater.yaml
   - assisted-teacher-updater.yaml
   - bifrost-updater.yaml
-  - emma-portfolio-updater.yaml
   - jujudb-updater.yaml
   - hermes-lya-updater.yaml
   - kirocrew-updater.yaml

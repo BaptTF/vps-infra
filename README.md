@@ -440,7 +440,7 @@ Rollback: remove the `clientAuth` block from the `default` TLSOption, then turn 
 
 ## Pod security
 
-Application namespaces (`assisted-teacher`, `authelia`, `bapttf-front`, `camille`, `emma-portfolio`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
+Application namespaces (`assisted-teacher`, `authelia`, `bapttf-front`, `camille`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
 
 Every application pod sets:
 
