@@ -33,7 +33,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              add: [CHOWN, DAC_READ_SEARCH]
+              add: [CHOWN]
           volumeMounts:
             - name: data
               mountPath: /data
