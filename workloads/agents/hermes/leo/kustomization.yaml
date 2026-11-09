@@ -15,3 +15,6 @@ configMapGenerator:
   - name: hermes-leo-config
     files:
       - config.yaml=config.yaml
+  - name: hermes-leo-usage-exporter
+    files:
+      - usage-exporter.py=usage-exporter.py

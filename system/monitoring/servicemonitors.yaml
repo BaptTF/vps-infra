@@ -160,6 +160,22 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  name: hermes-leo
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: [openclaw]
+  selector:
+    matchLabels:
+      app: hermes-leo
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
   name: camille
   namespace: monitoring
 spec:

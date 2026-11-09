@@ -910,6 +910,12 @@ Regenerate when OpenCode changes the prices or the model list (`GET /v1/models?p
 
 `client.enforce_auth_on_inference` is on: an inference request without a valid VK gets `401`. Scripts and skills inside the agent pods must send `Authorization: Bearer $BIFROST_API_KEY`. `/metrics` stays open (`whitelisted_routes`), and `/api` uses the setup token, not a VK.
 
+### Hermes Leo usage per user
+
+Bifrost only sees one VK per agent. The `usage-exporter` sidecar of `hermes-leo` (`workloads/agents/hermes/leo/usage-exporter.py`, stdlib Python) reads the Hermes `state.db` on the PVC read-only at every scrape and exposes `hermes_sessions_total`, `hermes_tokens_total{type=input|output|cache_read|cache_write|reasoning}` and `hermes_cost_usd_total` (Hermes' own estimate) on port `9464`, labels `agent`, `source`, `user`. Sub-agent sessions count for the user of their root session.
+
+The `user` label is a name taken at runtime from the private contacts repo cloned on the PVC (`agent-shared-context/contacts/**/*.md`: Telegram ID line, file title as name). No name or ID is in this repo: it is public. An ID missing from the contacts shows as `telegram:<id>`; Telegram sessions recorded before Hermes stored the sender show as `inconnu`, cron/API sessions as `aucun`. The counters are recomputed from `state.db`, so pruning sessions (`sessions.auto_prune`, off) would lower them.
+
 ### OpenCode Go session headers
 
 OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifrost v2.0.0 drops the organic header and only forwards `x-bf-eh-*`. Do **not** add custom code to OpenAI-compat clients to send a per-conversation ID: keep the OpenAI abstraction, with a default session on the gateway and optional per-agent overrides. Hermes supports it natively through config (`session_affinity_header`), so it is used for Leo.

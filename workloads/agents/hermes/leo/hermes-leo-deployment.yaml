@@ -116,7 +116,50 @@ spec:
             limits:
               memory: "1.5Gi"
               cpu: "500m"
+        # Tokens par utilisateur (state.db + noms depuis agent-shared-context/contacts)
+        - name: usage-exporter
+          image: python:3.13.17-alpine
+          command: ["python3", "/app/usage-exporter.py"]
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: AGENT_NAME
+              value: leo
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 9464
+              name: metrics
+              protocol: TCP
+          volumeMounts:
+            - name: usage-exporter
+              mountPath: /app
+              readOnly: true
+            - name: data
+              mountPath: /data
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "24Mi"
+              cpu: "5m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
       volumes:
+        - name: usage-exporter
+          configMap:
+            name: hermes-leo-usage-exporter
         - name: config-template
           configMap:
             name: hermes-leo-config
