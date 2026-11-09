@@ -177,14 +177,20 @@ alertmanager:
         # ha-eyg-ha-eyg-a8da915850a92053f0a8. The regex follows the
         # IngressRoute identity, so a Host() edit does not re-page the agent.
         # The livebox instance has no IngressRoute.
-        - receiver: "null"
+        # These routes are not actionable by the SRE agent. Discord gets them,
+        # repeated every 4h, same as the webhook. Watchdog and InfoInhibitor
+        # stay on null below.
+        - receiver: discord
+          repeat_interval: 4h
           matchers:
             - alertname = "HomeAssistantDown"
-        - receiver: "null"
+        - receiver: discord
+          repeat_interval: 4h
           matchers:
             - alertname = "TargetDown"
             - job =~ "^(homeassistant|homeassistant-livebox|homeassistant-eyg)$"
-        - receiver: "null"
+        - receiver: discord
+          repeat_interval: 4h
           matchers:
             - alertname =~ "^(TraefikService5xx|TraefikHighLatencyP95)$"
             - exported_service =~ "^(ha-ha|ha-eyg-ha-eyg)-[0-9a-f]{20}@kubernetescrd$"
@@ -193,23 +199,33 @@ alertmanager:
         # series per node and have no persistentvolumeclaim label, so they
         # cannot be limited to immich-library without also dropping a real
         # I/O error on another volume.
-        - receiver: "null"
+        - receiver: discord
+          repeat_interval: 4h
           matchers:
             - alertname = "LocalPathPVCOverRequested"
         # kube-prometheus-stack 92.17.0 ships node pressure and saturation at
         # severity info. Those stay on sre. The rest of info is noise,
         # including CPUThrottlingHigh, KubeQuotaAlmostFull and KubeQuotaFullyUsed.
-        - receiver: "null"
+        - receiver: discord
+          repeat_interval: 4h
           matchers:
             - severity = "info"
             - alertname !~ "^(KubeNodePressure|KubeNodeEviction|NodeCPUHighUsage|KubeletTooManyPods)$"
         # Watchdog is always firing. InfoInhibitor is a synthetic rule
         # (severity none, so the info route above does not match it).
+        # Both stay on null. Watchdog is not a Discord message.
         - receiver: "null"
           matchers:
             - alertname =~ "^(Watchdog|InfoInhibitor)$"
     receivers:
       - name: "null"
+      # ALERTMANAGER_DISCORD_WEBHOOK_URL is a key of Secret alertmanager-webhook,
+      # synced from Infisical infrastructure/prod path /monitoring/alertmanager.
+      # alertmanagerSpec.secrets already mounts that Secret.
+      - name: discord
+        discord_configs:
+          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-webhook/ALERTMANAGER_DISCORD_WEBHOOK_URL
+            send_resolved: true
       - name: sre
         webhook_configs:
           - url_file: /etc/alertmanager/secrets/alertmanager-webhook/ALERTMANAGER_WEBHOOK_URL
