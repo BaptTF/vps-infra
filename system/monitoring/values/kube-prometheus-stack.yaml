@@ -1,6 +1,6 @@
 # kube-prometheus-stack. Prometheus is pinned to Contabo because its PVC is
-# local-path and must not land on Hetzner. Grafana and Alertmanager have no
-# volume, so the scheduler places them.
+# local-path and must not land on Hetzner. Alertmanager has no volume, so the
+# scheduler places it. Grafana is off: agents query Prometheus and Loki directly.
 
 prometheusOperator:
   resources:
@@ -101,35 +101,7 @@ prometheus:
               storage: 20Gi
 
 grafana:
-  enabled: true
-  testFramework:
-    enabled: false
-  persistence:
-    enabled: false
-  admin:
-    existingSecret: "grafana-auth"
-    userKey: "admin-user"
-    passwordKey: "admin-password"
-  ingress:
-    enabled: false
-  resources:
-    requests:
-      cpu: 25m
-      memory: 384Mi
-    limits:
-      memory: 1Gi
-  sidecar:
-    dashboards:
-      searchNamespace: ALL
-      resource: configmap
-    datasources:
-      resource: configmap
-    resources:
-      requests:
-        cpu: 10m
-        memory: 48Mi
-      limits:
-        memory: 128Mi
+  enabled: false
 
 alertmanager:
   enabled: true

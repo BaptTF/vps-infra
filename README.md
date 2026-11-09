@@ -394,7 +394,7 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 | Service | URL | Access |
 |---------|-----|--------|
 | ArgoCD | https://argocd (Tailscale) | Tailscale VPN |
-| Grafana | https://grafana (Tailscale) | Tailscale VPN |
+| Prometheus (1 year, application metrics) | https://prometheus-longterm (Tailscale) | Tailscale VPN |
 | Prometheus | https://prometheus (Tailscale) | Tailscale VPN |
 | Alertmanager | https://alertmanager (Tailscale) | Tailscale VPN |
 | Vaultwarden | https://vault.bapttf.com | Public |
@@ -469,13 +469,22 @@ Home Assistant cannot ban brute force here: every request reaches it from the Ta
 
 ## Monitoring
 
-Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Grafana and Alertmanager have no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector.
+Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Alertmanager has no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector and no Grafana: agents query Prometheus and Loki through their APIs.
+
+Two Prometheus instances:
+
+| Instance | Content | Retention | Tailscale |
+|---|---|---|---|
+| `kps-kube-prometheus-stack-prometheus` | every target, 30s | 30d / 18 GB (the size cap is reached after ~18 days at ~1 GB/day, 70% of it kubelet and apiserver) | `https://prometheus` |
+| `longterm` (`system/monitoring/prometheus-longterm.yaml`) | application jobs copied from the main one through `/federate`: small jobs at 30s, Home Assistant, node-exporter, Immich and Traefik every 5 minutes (`query.lookbackDelta: 15m`). No kubelet, apiserver or kube-state-metrics | 365d / 25 GB, PVC 30Gi (~16 GB/year expected) | `https://prometheus-longterm` |
+
+To keep a job for a year, add it to the `match[]` of `longterm-federate-30s` or `longterm-federate-5m`. The ScrapeConfigs have no `release: kps` label, so the main Prometheus does not pick them up. Federation only copies what the main Prometheus still has: a job added later starts its history then.
 
 Tailscale is the only access path. The SRE agent (service account `grokbot`) has read-only access to the cluster (ClusterRole `agents-readonly`), including the monitoring and k8up backup CRDs. It cannot create or delete anything: when a restore is needed, it proposes the k8up `Restore` manifest and Baptiste applies it. It can call:
 
-- Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`
+- Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`; one year of application metrics on `https://prometheus-longterm/api/v1/query_range`
 - Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences
-- Loki: `https://loki` (Tailscale ingress, no authentication). Grafana (Explore, Loki datasource) is the usual way to query logs. Loki's delete API is disabled; logs only expire through the 14-day retention.
+- Loki: `https://loki` (Tailscale ingress, no authentication), `GET /loki/api/v1/query_range` with LogQL. Loki's delete API is disabled; logs only expire through the 14-day retention.
 
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That webhook is what wakes the SRE agent. A real alert that stays firing is repeated every 4 hours.
 
@@ -499,14 +508,7 @@ The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Sent to
 
 OOMKilled, CrashLoop, pods not ready, Argo CD out of sync or degraded, node pressure and saturation, disk and volume full, exporter down, CNPG and backup failures, the R2 bucket, certificates, and every other warning or critical alert stay on the webhook.
 
-Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Grafana, Prometheus and Alertmanager each only see their own credentials.
-
-Path `/monitoring/grafana` -> Secret `grafana-auth` (move the existing keys from `/monitoring`):
-
-| Key | Used by |
-|-----|---------|
-| `admin-user` | Grafana admin user |
-| `admin-password` | Grafana admin password |
+Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Prometheus and Alertmanager each only see their own credentials.
 
 Path `/monitoring/alertmanager` -> Secret `alertmanager-webhook` (mounted in Alertmanager only):
 
@@ -879,7 +881,7 @@ Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in n
 
 ### Virtual keys
 
-Every Bifrost client authenticates with its own virtual key (VK), so cost and tokens are attributed per caller. Prometheus scrapes `bifrost_cost_total`, `bifrost_input_tokens_total` and `bifrost_output_tokens_total` with the `virtual_key_name` label (Grafana). The Bifrost log store (`logs.db`) is pod-local and lost on restart; Prometheus keeps the history.
+Every Bifrost client authenticates with its own virtual key (VK), so cost and tokens are attributed per caller. Prometheus scrapes `bifrost_cost_total`, `bifrost_input_tokens_total` and `bifrost_output_tokens_total` with the `virtual_key_name` label; `prometheus-longterm` keeps them for a year. The Bifrost log store (`logs.db`) is pod-local and lost on restart; Prometheus keeps the history.
 
 | VK (`id`) | Used by | Access |
 |---|---|---|

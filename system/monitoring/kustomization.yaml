@@ -4,10 +4,9 @@ namespace: monitoring
 
 resources:
   - infisical-secret.yaml
-  - grafana-tailscale-ingress.yaml
   - tailscale-ingress.yaml
   - tailscale-egress.yaml
-  - grafana-datasource-loki.yaml
+  - prometheus-longterm.yaml
   - prometheusrules.yaml
   - prometheusrules-sre.yaml
   - servicemonitors.yaml
@@ -61,12 +60,3 @@ patches:
       - op: add
         path: /metadata/annotations/argocd.argoproj.io~1sync-options
         value: Prune=false,ServerSideApply=true
-  # The Grafana sidecars only load ConfigMaps (dashboards, datasources). The chart
-  # still grants Secrets cluster-wide, which would hand every Secret to Grafana.
-  - target:
-      kind: ClusterRole
-      name: kps-grafana-clusterrole
-    patch: |-
-      - op: replace
-        path: /rules/0/resources
-        value: [configmaps]

@@ -1,0 +1,95 @@
+# Long-term Prometheus: one year of the application metrics, copied from the main
+# Prometheus through /federate. Small jobs keep their 30s resolution, big ones
+# (Home Assistant, node-exporter, Immich, Traefik) are copied every 5 minutes.
+# Kubernetes internals (kubelet, apiserver, kube-state-metrics) are not copied.
+# Add a job to one of the ScrapeConfigs below to keep it for a year.
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: longterm
+  namespace: monitoring
+spec:
+  replicas: 1
+  retention: 365d
+  # ~16 GB/year at the intervals below; the size cap only guards the 30Gi PVC.
+  retentionSize: 25GB
+  scrapeInterval: 5m
+  evaluationInterval: 5m
+  # The 5-minute jobs have one sample every 5 minutes: the default 5m lookback would leave gaps.
+  query:
+    lookbackDelta: 15m
+  scrapeConfigSelector:
+    matchLabels:
+      prometheus: longterm
+  # Same node as the main Prometheus: local-path PVC, Hetzner disk is short.
+  nodeSelector:
+    kubernetes.io/hostname: vmi2735515.contaboserver.net
+  resources:
+    requests:
+      cpu: 20m
+      memory: 256Mi
+    limits:
+      memory: 768Mi
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 30Gi
+---
+# The ScrapeConfigs are not selected by the main Prometheus (its scrapeConfigSelector is release=kps).
+# Small jobs (~6k series): full 30s resolution.
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: longterm-federate-30s
+  namespace: monitoring
+  labels:
+    prometheus: longterm
+spec:
+  metricsPath: /federate
+  honorLabels: true
+  scrapeInterval: 30s
+  scrapeTimeout: 25s
+  params:
+    "match[]":
+      - '{job=~"bifrost|hermes-leo|cnpg-system/.*|k8up-metrics|vikunja|authelia|camille|searxng|cloudflare-exporter|snmp-dsplay|homeassistant-livebox|local-path-exporter"}'
+  staticConfigs:
+    - targets:
+        - kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+---
+# Big jobs (~39k series): one sample every 5 minutes.
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: longterm-federate-5m
+  namespace: monitoring
+  labels:
+    prometheus: longterm
+spec:
+  metricsPath: /federate
+  honorLabels: true
+  scrapeInterval: 5m
+  scrapeTimeout: 2m
+  params:
+    "match[]":
+      - '{job=~"homeassistant|homeassistant-eyg|node-exporter|immich-server|immich-microservices|traefik-metrics"}'
+  staticConfigs:
+    - targets:
+        - kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+---
+# prometheus-operated selects every Prometheus of the namespace; the Tailscale ingress needs this one only.
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-longterm
+  namespace: monitoring
+spec:
+  selector:
+    operator.prometheus.io/name: longterm
+  ports:
+    - name: web
+      port: 9090
+      targetPort: web
