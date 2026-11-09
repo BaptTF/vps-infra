@@ -118,7 +118,7 @@ spec:
               cpu: "500m"
         # Tokens par utilisateur (state.db + noms depuis agent-shared-context/contacts)
         - name: usage-exporter
-          image: python:3.13.17-alpine
+          image: python:3.15.1-alpine
           command: ["python3", "/app/usage-exporter.py"]
           env:
             - name: PYTHONDONTWRITEBYTECODE
