@@ -20,6 +20,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        fsGroup: 65534
         seccompProfile:
           type: RuntimeDefault
       initContainers:
@@ -28,6 +29,11 @@ spec:
           command: ["/bin/sh", "/scripts/pull.sh"]
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
           env:
             - name: GIT_PULL_ONCE
               value: "1"
@@ -53,6 +59,11 @@ spec:
           command: ["/bin/sh", "/scripts/pull.sh"]
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
           volumeMounts:
             - name: deploy-key
               mountPath: /deploy-key
@@ -128,7 +139,7 @@ spec:
         - name: deploy-key
           secret:
             secretName: camille-deploy-key
-            defaultMode: 0400
+            defaultMode: 0440
             items:
               - key: id_ed25519
                 path: id_ed25519
