@@ -900,7 +900,7 @@ Values live in Infisical `/agents/bifrost/virtual-keys` (keys `BIFROST_VK_<ID>`,
 
 Add a key: create `BIFROST_VK_<ID>` in Infisical (`echo "sk-bf-$(openssl rand -hex 24)"`), add the VK to `governance.virtual_keys`, push. Rotate: change the value in Infisical; the auto-reload annotation restarts Bifrost and the agent.
 
-`client.enforce_auth_on_inference` is off: a request without a VK still goes through, unattributed and unrestricted. A request with a VK is checked against it.
+`client.enforce_auth_on_inference` is on: an inference request without a valid VK gets `401`. Scripts and skills inside the agent pods must send `Authorization: Bearer $BIFROST_API_KEY`. `/metrics` stays open (`whitelisted_routes`), and `/api` uses the setup token, not a VK.
 
 ### OpenCode Go session headers
 
