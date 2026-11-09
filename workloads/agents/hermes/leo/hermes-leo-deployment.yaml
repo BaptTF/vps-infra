@@ -64,6 +64,11 @@ spec:
                 secretKeyRef:
                   name: nullclaw-leo-secret-api
                   key: API_SERVER_KEY
+            - name: BIFROST_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-leo-secret-bifrost
+                  key: BIFROST_API_KEY
             - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
               valueFrom:
                 secretKeyRef:

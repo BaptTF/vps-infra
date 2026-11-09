@@ -61,6 +61,11 @@ spec:
                 secretKeyRef:
                   name: hermes-lea-secret
                   key: API_SERVER_KEY
+            - name: BIFROST_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-lea-secret-bifrost
+                  key: BIFROST_API_KEY
             - name: PATH
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: CAMOFOX_URL

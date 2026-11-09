@@ -63,7 +63,7 @@ spec:
             - secretRef:
                 name: bifrost-secret-opencode
             - secretRef:
-                name: hermes-lya-secret-bifrost
+                name: bifrost-secret-vk
           volumeMounts:
             - name: config-volume
               mountPath: /app/data/config.json

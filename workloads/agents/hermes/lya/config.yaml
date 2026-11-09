@@ -2,7 +2,7 @@ model:
   provider: custom
   default: opencode-go/deepseek-v4.1-flash
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
-  api_key: dummy
+  api_key: ${BIFROST_API_KEY}
   api_mode: chat_completions
   extra_headers:
     x-bf-eh-x-opencode-session: ses_hermeslya_20260920
@@ -33,7 +33,7 @@ auxiliary:
     provider: custom
     model: opencode-go/mimo-v2.6-flash
     base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
-    api_key: dummy
+    api_key: ${BIFROST_API_KEY}
     api_mode: chat_completions
     extra_headers:
       x-bf-eh-x-opencode-session: ses_hermeslya_20260920

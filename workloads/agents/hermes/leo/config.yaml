@@ -2,12 +2,12 @@ model:
   provider: custom
   default: opencode-go/deepseek-v4.1-flash
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
-  api_key: dummy
+  api_key: ${BIFROST_API_KEY}
   api_mode: chat_completions
 providers:
   bifrost:
     base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
-    api_key: dummy
+    api_key: ${BIFROST_API_KEY}
     api_mode: chat_completions
     session_affinity_header: x-bf-eh-x-opencode-session
 approvals:
@@ -39,4 +39,4 @@ stt:
   provider: openai
   model: groq-whisper
   base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
-  api_key: dummy
+  api_key: ${BIFROST_API_KEY}

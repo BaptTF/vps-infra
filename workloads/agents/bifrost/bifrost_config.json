@@ -108,17 +108,65 @@
   "governance": {
     "virtual_keys": [
       {
-        "id": "hermes-lya",
-        "name": "hermes-lya",
-        "value": "env.BIFROST_API_KEY",
+        "id": "hermes-lea",
+        "name": "hermes-lea",
+        "value": "env.BIFROST_VK_HERMES_LEA",
+        "is_active": true,
+        "allow_all_providers": true
+      },
+      {
+        "id": "hermes-leo",
+        "name": "hermes-leo",
+        "value": "env.BIFROST_VK_HERMES_LEO",
         "is_active": true,
         "provider_configs": [
-          {
-            "provider": "opencode-go",
-            "allowed_models": ["*"],
-            "key_ids": ["opencode-go-key-3"],
-            "weight": 1
-          }
+          { "provider": "gemini", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "groq", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
+        ]
+      },
+      {
+        "id": "hermes-lya",
+        "name": "hermes-lya",
+        "value": "env.BIFROST_VK_HERMES_LYA",
+        "is_active": true,
+        "provider_configs": [
+          { "provider": "gemini", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "groq", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
+        ]
+      },
+      {
+        "id": "vulcain",
+        "name": "vulcain",
+        "value": "env.BIFROST_VK_VULCAIN",
+        "is_active": true,
+        "provider_configs": [
+          { "provider": "gemini", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "groq", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
+        ]
+      },
+      {
+        "id": "tailscale-baptiste",
+        "name": "tailscale-baptiste",
+        "value": "env.BIFROST_VK_TAILSCALE_BAPTISTE",
+        "is_active": true,
+        "provider_configs": [
+          { "provider": "gemini", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "groq", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
+        ]
+      },
+      {
+        "id": "tailscale-emma",
+        "name": "tailscale-emma",
+        "value": "env.BIFROST_VK_TAILSCALE_EMMA",
+        "is_active": true,
+        "provider_configs": [
+          { "provider": "gemini", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "groq", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
         ]
       }
     ],

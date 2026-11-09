@@ -870,6 +870,31 @@ Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in n
 | `GROQ_API_KEY` | Groq API key (provider `groq`, whisper transcriptions) |
 | `OPENCODE_GO_API_KEY` | OpenCode Go subscription API key (https://opencode.ai/auth → Go). Backs two providers: `opencode-go` (OpenAI-compatible, models `glm-5.2`/`glm-5.1`/`glm-5`/`kimi-k2.7-code`/`kimi-k2.6`/`kimi-k2.5`/`deepseek-v4-pro`/`deepseek-v4-flash`/`mimo-v2.5`/`mimo-v2.5-pro`/`mimo-v2-pro`/`mimo-v2-omni`) and `opencode-go-anthropic` (Anthropic-compatible, models `minimax-m3`/`minimax-m2.7`/`minimax-m2.5`/`qwen3.7-max`/`qwen3.7-plus`/`qwen3.6-plus`/`qwen3.5-plus`). Same key used for both — Bifrost sends the right auth header per `base_provider_type`. |
 
+### Virtual keys
+
+Every Bifrost client authenticates with its own virtual key (VK), so cost and tokens are attributed per caller. Prometheus scrapes `bifrost_cost_total`, `bifrost_input_tokens_total` and `bifrost_output_tokens_total` with the `virtual_key_name` label (Grafana). The Bifrost log store (`logs.db`) is pod-local and lost on restart; Prometheus keeps the history.
+
+| VK (`id`) | Used by | Access |
+|---|---|---|
+| `hermes-lea` | Hermes Lea | every provider (`allow_all_providers`) |
+| `hermes-leo` | Hermes Leo | `gemini`, `groq`, `opencode-go` (no `bedrock`) |
+| `hermes-lya` | Hermes Lya | same as Leo |
+| `vulcain` | Vulcain | same as Leo |
+| `tailscale-baptiste` | Baptiste's OpenCode, through the Tailscale ingress | same as Leo |
+| `tailscale-emma` | Emma's OpenCode (Mac), through the Tailscale ingress | same as Leo |
+
+The "same as Leo" keys list their providers explicitly (deny by default): a provider added to `bifrost_config.json` later must be added to their `provider_configs` to be reachable.
+
+Values live in Infisical `/agents/bifrost/virtual-keys` (keys `BIFROST_VK_<ID>`, value `sk-bf-<random>`). Bifrost loads the whole folder (`bifrost-secret-vk`, referenced as `env.BIFROST_VK_*` in `bifrost_config.json`). Each agent has its own InfisicalSecret on the same folder that templates only its key into `BIFROST_API_KEY`:
+
+- Hermes: `api_key: ${BIFROST_API_KEY}` in `config.yaml` (Hermes expands `${VAR}`)
+- Vulcain: `llm.provider.apiKey: "${BIFROST_API_KEY}"` in `/data/.vulcain/config/config.json` on the PVC (pi expands `${VAR}`). Set once with `kubectl -n vulcain exec`, it is not in git
+- OpenCode (laptops): `providers.bifrost.settings.apiKey: "{file:~/.config/opencode/bifrost-vk}"` in `~/.config/opencode/opencode.jsonc`, the key in `~/.config/opencode/bifrost-vk` (mode 600)
+
+Add a key: create `BIFROST_VK_<ID>` in Infisical (`echo "sk-bf-$(openssl rand -hex 24)"`), add the VK to `governance.virtual_keys`, push. Rotate: change the value in Infisical; the auto-reload annotation restarts Bifrost and the agent.
+
+`client.enforce_auth_on_inference` is off: a request without a VK still goes through, unattributed and unrestricted. A request with a VK is checked against it.
+
 ### OpenCode Go session headers
 
 OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifrost v2.0.0 drops the organic header and only forwards `x-bf-eh-*`. Do **not** add custom code to OpenAI-compat clients to send a per-conversation ID: keep the OpenAI abstraction, with a default session on the gateway and optional per-agent overrides. Hermes supports it natively through config (`session_affinity_header`), so it is used for Leo.
@@ -886,7 +911,7 @@ OpenCode Go requires `x-opencode-session` (sticky upstream + prompt cache). Bifr
 Symptom that the pin is dead: `Error from provider (Console Go): Upstream request failed: [server_error] Upstream response was not valid JSON` (often HTTP 530 on the OpenCode side). Confirm with a **fresh** session before rotating:
 
 ```bash
-KEY=$(kubectl get secret -n openclaw bifrost-secret -o jsonpath='{.data.LITELLM_MASTER_KEY}' | base64 -d)
+KEY=$(kubectl get secret -n openclaw bifrost-secret-vk -o jsonpath='{.data.BIFROST_VK_TAILSCALE_BAPTISTE}' | base64 -d)
 # Fresh ID works → the stuck session is the problem, not the keys/models
 curl -skS -m 45 -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
   -H "x-bf-eh-x-opencode-session: ses_diag_$(date +%Y%m%dT%H%M%S)" \

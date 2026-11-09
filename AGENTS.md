@@ -75,6 +75,7 @@ build: automatic update of voyage
 - `workloads/agents/` is a Kustomize aggregator. Hermes (leo, lea, lya) lives under `hermes/`, next to bifrost and the other agents. ClusterRoles and the grokbot service account live under `rbac/`
 - Monitoring stack (kube-prometheus-stack: Prometheus, Grafana, node-exporter, kube-state-metrics) runs in namespace `monitoring` -- all non-DaemonSet components are scheduled on the worker node by the scheduler (resource-based)
 - CNPG backups use the Barman Cloud plugin (`ObjectStore` `cnpg-r2`, `method: plugin`); the in-tree `barmanObjectStore` is not supported by the operator anymore. Keep the R2 bucket under 10 GB: weekly full backups, 14-day retention
+- Bifrost virtual keys: one per client (Hermes lea/leo/lya, vulcain, Tailscale users), values in Infisical `/agents/bifrost/virtual-keys`; only `hermes-lea` reaches `bedrock`. A new Bifrost client needs its own VK (README "Virtual keys")
 - OpenCode Go session: default `x-opencode-session` lives on Bifrost `extra_headers`; Hermes overrides with `x-bf-eh-x-opencode-session` (Leo: per conversation via `providers.bifrost.session_affinity_header`; Lea/Lya: static ID). Rotate a stuck static ID via git (see README "OpenCode Go session headers"). Do not put a reverse proxy in front of Bifrost for this.
 
 ## Manual operations policy

@@ -5,6 +5,8 @@ metadata:
   namespace: vulcain
   labels:
     app: vulcain
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   selector:
@@ -26,6 +28,13 @@ spec:
             # VULCAIN_PORT=tcp://<ip>:7331, que l'app essaie de parser en nombre
             - name: VULCAIN_PORT
               value: "7331"
+            # Virtual key Bifrost, référencée par llm.provider.apiKey: "${BIFROST_API_KEY}"
+            # dans /data/.vulcain/config/config.json (PVC)
+            - name: BIFROST_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vulcain-secret-bifrost
+                  key: BIFROST_API_KEY
           volumeMounts:
             - name: data
               mountPath: /data
