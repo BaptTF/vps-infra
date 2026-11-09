@@ -19,10 +19,16 @@ spec:
       labels:
         app: searxng
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       enableServiceLinks: false
       initContainers:
         - name: settings
           image: busybox:1.38.0
+          securityContext:
+            allowPrivilegeEscalation: false
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -58,6 +64,8 @@ spec:
       containers:
         - name: searxng
           image: searxng/searxng:2026.9.11-ffe96f8a6
+          securityContext:
+            allowPrivilegeEscalation: false
           env:
             - name: SEARXNG_BASE_URL
               value: "http://searxng.openclaw.svc.cluster.local:8080"

@@ -17,9 +17,18 @@ spec:
       labels:
         app: bifrost
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: bifrost
           image: maximhq/bifrost:v2.4.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
           resources:
             requests:
               cpu: "100m"

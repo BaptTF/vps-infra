@@ -21,9 +21,15 @@ spec:
       labels:
         app: hermes-lya
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: init-config
           image: busybox:1.38.0
+          securityContext:
+            allowPrivilegeEscalation: false
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -38,6 +44,8 @@ spec:
       containers:
         - name: hermes-lya
           image: ghcr.io/rjullien/hermes-lya-config:v2026.10.11
+          securityContext:
+            allowPrivilegeEscalation: false
           args: ["gateway", "run"]
           envFrom:
             - secretRef:

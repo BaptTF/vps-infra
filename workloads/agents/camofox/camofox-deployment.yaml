@@ -17,10 +17,16 @@ spec:
       labels:
         app: camofox
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       enableServiceLinks: false
       containers:
         - name: camofox
           image: ghcr.io/jo-inc/camofox-browser:1.18.1
+          securityContext:
+            allowPrivilegeEscalation: false
           env:
             - name: CAMOFOX_PORT
               value: "9377"
