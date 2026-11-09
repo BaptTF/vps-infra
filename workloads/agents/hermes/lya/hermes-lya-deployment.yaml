@@ -21,6 +21,7 @@ spec:
       labels:
         app: hermes-lya
     spec:
+      hostUsers: false
       automountServiceAccountToken: false
       securityContext:
         seccompProfile:
