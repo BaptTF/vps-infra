@@ -633,6 +633,23 @@ REST_PASSWORD=... RESTIC_PASSWORD=... ./scripts/nas/prune.sh
 
 That keeps 14 daily and 8 weekly snapshots, then runs `restic check`. k8up's Prometheus rules alert when a backup job fails, which is also how an unreachable rest-server shows up.
 
+### NAS hardening
+
+`scripts/nas/dsplay-harden.sh` holds the manual hardening of `dsplay`. Baptiste has no passwordless sudo on the NAS, so Baptiste runs it:
+
+```bash
+ssh dsplay 'cat > /var/services/homes/Baptiste/bin/dsplay-harden.sh' < scripts/nas/dsplay-harden.sh
+ssh -t dsplay 'sudo sh ~/bin/dsplay-harden.sh report'   # read-only, ~/dsplay-harden-report.txt
+ssh -t dsplay 'sudo sh ~/bin/dsplay-harden.sh apply'    # log in ~/dsplay-harden-apply.txt
+```
+
+`apply` (2026-11-09):
+
+- **Squid (ProxyServer):** `squid/etc/local_hardening.conf`, included right after `acl_syno.conf`, accepts only tailnet sources and denies every private, CGNAT, loopback, link-local and multicast destination. It has to sit before the stock `http_access allow CONNECT SSL_ports`, which otherwise lets any source tunnel to any `host:443`. The agents keep Internet egress through the home IP; they no longer reach the LAN, DSM or Home Assistant through Squid (403). A ProxyServer package update can rewrite `squid.conf`: check `grep local_hardening /var/packages/ProxyServer/target/squid/etc/squid.conf` after one, and rerun `apply` if the line is gone.
+- **SSH:** `PasswordAuthentication no` in `/etc/ssh/sshd_config` (backup `.bak-<date>`). Every SSH client uses a key: Baptiste's laptop, René's Pis, Hermes Léo and grokbot (in `Rene`'s `authorized_keys`). Saving the Terminal settings in DSM can rewrite the file; rerun `apply` after that.
+- **QuickConnect:** QuickConnect, its relay and UPnP port forwarding are off, so DSM is no longer reachable from the Internet through `rjullienplay.quickconnect.to`. The Synology DDNS `rjullienplay.synology.me` stays, for the fallback VPN (VPN Center, OpenVPN `udp/1194` forwarded by the Livebox).
+- **Services off:** FTP and FTPS, WebDAV, iSCSI, Tailscale web client. NFS (exports to the LAN) and AFP (Time Machine is advertised over AFP only) stay on.
+
 ---
 
 ## Camille (camille.bapttf.com)
