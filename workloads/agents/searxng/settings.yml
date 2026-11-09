@@ -11,6 +11,11 @@ search:
     - json
   safe_search: 2
 
+engines:
+  - name: startpage
+    inactive: false
+    disabled: false
+
 outgoing:
   proxies:
     http: http://nas-proxy.openclaw.svc.cluster.local:3128
