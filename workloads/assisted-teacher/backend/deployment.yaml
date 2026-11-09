@@ -20,13 +20,38 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: data-ownership
+          image: busybox:1.38.0
+          command: ["sh", "-c", "find /workspace -xdev ! -user 65532 -exec chown 65532:65532 {} +"]
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN]
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              memory: 64Mi
       containers:
         - name: backend
           image: ghcr.io/rjullien/assisted-teacher/backend:main
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           ports:
             - containerPort: 9847
               name: http
