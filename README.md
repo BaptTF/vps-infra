@@ -476,7 +476,7 @@ Two Prometheus instances:
 | Instance | Content | Retention | Tailscale |
 |---|---|---|---|
 | `kps-kube-prometheus-stack-prometheus` | every target, 30s | 30d / 18 GB (the size cap is reached after ~18 days at ~1 GB/day, 70% of it kubelet and apiserver) | `https://prometheus` |
-| `longterm` (`system/monitoring/prometheus-longterm.yaml`) | application jobs copied from the main one through `/federate`: small jobs at 30s, Home Assistant, node-exporter, Immich and Traefik every 5 minutes (`query.lookbackDelta: 15m`). No kubelet, apiserver or kube-state-metrics | 365d / 25 GB, PVC 30Gi (~16 GB/year expected) | `https://prometheus-longterm` |
+| `longterm` (`system/monitoring/prometheus-longterm.yaml`) | application jobs copied from the main one through `/federate`: applications (Bifrost, Hermes, Immich, Traefik, CNPG, ...) at 30s, Home Assistant and node-exporter every 5 minutes (`query.lookbackDelta: 15m`). No kubelet, apiserver or kube-state-metrics | 365d / 45 GB, PVC 50Gi (~26-35 GB/year expected) | `https://prometheus-longterm` |
 
 To keep a job for a year, add it to the `match[]` of `longterm-federate-30s` or `longterm-federate-5m`. The ScrapeConfigs have no `release: kps` label, so the main Prometheus does not pick them up. Federation only copies what the main Prometheus still has: a job added later starts its history then.
 

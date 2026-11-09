@@ -1,6 +1,6 @@
 # Long-term Prometheus: one year of the application metrics, copied from the main
-# Prometheus through /federate. Small jobs keep their 30s resolution, big ones
-# (Home Assistant, node-exporter, Immich, Traefik) are copied every 5 minutes.
+# Prometheus through /federate. Applications keep their 30s resolution; Home
+# Assistant and node-exporter (the biggest jobs) are copied every 5 minutes.
 # Kubernetes internals (kubelet, apiserver, kube-state-metrics) are not copied.
 # Add a job to one of the ScrapeConfigs below to keep it for a year.
 apiVersion: monitoring.coreos.com/v1
@@ -11,8 +11,8 @@ metadata:
 spec:
   replicas: 1
   retention: 365d
-  # ~16 GB/year at the intervals below; the size cap only guards the 30Gi PVC.
-  retentionSize: 25GB
+  # ~26-35 GB/year at the intervals below; the size cap only guards the 50Gi PVC.
+  retentionSize: 45GB
   scrapeInterval: 5m
   evaluationInterval: 5m
   # The 5-minute jobs have one sample every 5 minutes: the default 5m lookback would leave gaps.
@@ -37,10 +37,10 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 30Gi
+            storage: 50Gi
 ---
 # The ScrapeConfigs are not selected by the main Prometheus (its scrapeConfigSelector is release=kps).
-# Small jobs (~6k series): full 30s resolution.
+# Applications (~16k series): full 30s resolution.
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
@@ -55,12 +55,12 @@ spec:
   scrapeTimeout: 25s
   params:
     "match[]":
-      - '{job=~"bifrost|hermes-leo|cnpg-system/.*|k8up-metrics|vikunja|authelia|camille|searxng|cloudflare-exporter|snmp-dsplay|homeassistant-livebox|local-path-exporter"}'
+      - '{job=~"bifrost|hermes-leo|cnpg-system/.*|k8up-metrics|vikunja|authelia|camille|searxng|cloudflare-exporter|snmp-dsplay|homeassistant-livebox|local-path-exporter|immich-server|immich-microservices|traefik-metrics"}'
   staticConfigs:
     - targets:
         - kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
 ---
-# Big jobs (~39k series): one sample every 5 minutes.
+# Home Assistant and node-exporter (~29k series): one sample every 5 minutes.
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
@@ -75,7 +75,7 @@ spec:
   scrapeTimeout: 2m
   params:
     "match[]":
-      - '{job=~"homeassistant|homeassistant-eyg|node-exporter|immich-server|immich-microservices|traefik-metrics"}'
+      - '{job=~"homeassistant|homeassistant-eyg|node-exporter"}'
   staticConfigs:
     - targets:
         - kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
