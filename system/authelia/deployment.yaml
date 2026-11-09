@@ -19,6 +19,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       enableServiceLinks: false
@@ -29,6 +32,8 @@ spec:
           image: authelia/authelia:4.39.28
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           ports:
             - name: http
               containerPort: 9091
@@ -37,6 +42,8 @@ spec:
           env:
             - name: X_AUTHELIA_CONFIG_FILTERS
               value: template
+            - name: X_AUTHELIA_HEALTHCHECK
+              value: ""
             - name: AUTHELIA_STORAGE_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:

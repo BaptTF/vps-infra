@@ -17,6 +17,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       imagePullSecrets:
@@ -26,6 +29,8 @@ spec:
           image: ghcr.io/rjullien/tripkit-backend
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3001

@@ -21,6 +21,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 977
+        runAsGroup: 977
         seccompProfile:
           type: RuntimeDefault
       enableServiceLinks: false
@@ -29,6 +32,8 @@ spec:
           image: busybox:1.38.0
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -66,6 +71,8 @@ spec:
           image: searxng/searxng:2026.9.11-ffe96f8a6
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           env:
             - name: SEARXNG_BASE_URL
               value: "http://searxng.openclaw.svc.cluster.local:8080"
