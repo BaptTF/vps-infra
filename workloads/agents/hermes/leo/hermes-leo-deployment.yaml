@@ -21,10 +21,15 @@ spec:
       labels:
         app: hermes-leo
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: hermes-leo
       initContainers:
         - name: init-config
           image: alpine/git:2.54.0
+          securityContext:
+            allowPrivilegeEscalation: false
           command: ["/bin/sh", "/scripts/init-skills.sh"]
           volumeMounts:
             - name: config-template
@@ -41,6 +46,8 @@ spec:
       containers:
         - name: hermes-leo
           image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.9
+          securityContext:
+            allowPrivilegeEscalation: false
           args: ["gateway", "run"]
           envFrom:
             - secretRef:
