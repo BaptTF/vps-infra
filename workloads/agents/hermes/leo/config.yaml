@@ -25,6 +25,8 @@ telegram:
   require_mention: false
 display:
   tool_progress: all
+web:
+  search_backend: perplexity
 agent:
   verify_on_stop: false
 plugins:

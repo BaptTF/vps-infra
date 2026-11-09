@@ -86,6 +86,8 @@ spec:
               value: "/opt/data/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: CAMOFOX_URL
               value: "http://camofox:9377"
+            - name: SEARXNG_URL
+              value: "http://searxng.openclaw.svc.cluster.local:8080"
           ports:
             - containerPort: 8642
               name: http
