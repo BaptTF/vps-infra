@@ -456,7 +456,23 @@ Every application pod sets:
             allowPrivilegeEscalation: false
 ```
 
-A container whose image runs as a non-root user also gets `runAsNonRoot: true` and `capabilities: drop: [ALL]`. When the image `USER` is a name (`lldap`, `sws:sws`), set `runAsUser`/`runAsGroup` too, or the kubelet refuses to start it. Containers that start as root (nginx, s6-overlay in Hermes, su-exec in gowa and valkey, Immich, Vaultwarden, Authelia) keep their capabilities until they are moved to a non-root user one by one. Low ports need no capability: the pod sysctl `net.ipv4.ip_unprivileged_port_start` is `0`.
+Application containers run as non-root with `runAsNonRoot: true`, an explicit `runAsUser`/`runAsGroup` and `capabilities: drop: [ALL]`. Set the uid even when the image has a `USER`: the kubelet refuses `runAsNonRoot` with a named user (`lldap`, `sws:sws`). Low ports need no capability: the pod sysctl `net.ipv4.ip_unprivileged_port_start` is `0`.
+
+| uid | Containers |
+|---|---|
+| 1000 | bapttf-front, lldap, vikunja, filebrowser, bifrost, vaultwarden, immich (server, microservices, machine learning), vulcain |
+| 999 / 977 / 101 | valkey / searxng / nginx (assisted-teacher frontend) |
+| 20001:20000 | gowa (started as `/app/whatsapp`, not through the root entrypoint's `su-exec`) |
+| 65532 | sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
+| 65534 | camille git sync (`nobody`: ssh needs a passwd entry) |
+
+What breaks when an image moves to non-root:
+
+- **Volumes stay root-owned.** `fsGroup` is not applied to local-path volumes. A volume written by root gets an init container `data-ownership` (busybox, root, `drop: [ALL]`, `add: [CHOWN]`) that runs `find <path> -xdev ! -user <uid> -exec chown <uid>:<uid> {} +`; it does nothing on later starts. Only `CHOWN` is allowed: `DAC_READ_SEARCH` and other extra capabilities are outside baseline, and the namespace refuses the pod. The SMB volumes are already mounted `uid=1000`.
+- **Root-only paths in the image.** `HOME=/root` is not writable: assisted-teacher-backend and Immich machine learning set `HOME=/tmp`. nginx gets emptyDirs on `/run` and `/var/cache/nginx`. Authelia sets `X_AUTHELIA_HEALTHCHECK=""` so it does not write `/app/.healthcheck.env`.
+- **git and emptyDir mount points.** The mount point stays root-owned: `chmod` it fails and git reports dubious ownership. camille's `pull.sh` only chmods the content and trusts `/www` through `GIT_CONFIG_*`.
+
+Still root: Hermes Léo, Léa and Lya (s6-overlay, which drops to uid 10000 itself), camofox (the browser lives under `/root`) and tripkit-frontend (its entrypoint renders `config.js` into a root-owned directory).
 
 `RuntimeDefault` is the same seccomp profile Docker applies by default, so images built for Docker run unchanged. Rollback is a `git revert`; a pod that breaks shows `CreateContainerConfigError` (non-numeric user) or `operation not permitted` in its logs.
 
