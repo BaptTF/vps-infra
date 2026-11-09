@@ -21,6 +21,7 @@ spec:
       labels:
         app: hermes-leo
     spec:
+      hostUsers: false
       securityContext:
         seccompProfile:
           type: RuntimeDefault
