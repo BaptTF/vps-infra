@@ -18,6 +18,9 @@ spec:
         app: camofox
     spec:
       automountServiceAccountToken: false
+      hostUsers: false
+      nodeSelector:
+        kubernetes.io/hostname: debian-16gb-hel1-2
       securityContext:
         seccompProfile:
           type: RuntimeDefault
@@ -27,6 +30,8 @@ spec:
           image: ghcr.io/jo-inc/camofox-browser:1.18.1
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           env:
             - name: CAMOFOX_PORT
               value: "9377"
