@@ -19,9 +19,15 @@ spec:
         app: immich
         component: machine-learning
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: machine-learning
           image: ghcr.io/immich-app/immich-machine-learning:v3.3.6@sha256:14367bfb374b8576ddf49abd67c5ca0190a4c7fcf6303cdad65d7f7bf1a50bc2
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 3003
               name: http

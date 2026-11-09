@@ -18,9 +18,15 @@ spec:
       labels:
         app: assisted-teacher-backend
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: backend
           image: ghcr.io/rjullien/assisted-teacher/backend:main
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 9847
               name: http

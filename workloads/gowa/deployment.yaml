@@ -18,9 +18,15 @@ spec:
       labels:
         app: gowa
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: gowa
           image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:v9.9.0
+          securityContext:
+            allowPrivilegeEscalation: false
           args: ["rest"]
           env:
             - name: APP_PORT

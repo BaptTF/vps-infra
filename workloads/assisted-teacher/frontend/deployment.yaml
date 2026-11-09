@@ -16,9 +16,15 @@ spec:
       labels:
         app: assisted-teacher-frontend
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: frontend
           image: ghcr.io/rjullien/assisted-teacher/frontend:main
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
               name: http

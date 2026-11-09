@@ -17,12 +17,18 @@ spec:
       labels:
         app: authelia
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       enableServiceLinks: false
       nodeSelector:
         kubernetes.io/hostname: debian-16gb-hel1-2
       containers:
         - name: authelia
           image: authelia/authelia:4.39.28
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - name: http
               containerPort: 9091

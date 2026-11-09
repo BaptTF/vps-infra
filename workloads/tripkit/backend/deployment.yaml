@@ -15,11 +15,17 @@ spec:
       labels:
         app: tripkit-backend
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
         - name: ghcr-login-secret
       containers:
         - name: backend
           image: ghcr.io/rjullien/tripkit-backend
+          securityContext:
+            allowPrivilegeEscalation: false
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3001

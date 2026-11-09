@@ -16,9 +16,15 @@ spec:
       labels:
         app: vaultwarden
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: vaultwarden
           image: vaultwarden/server:1.37.5
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
           env:

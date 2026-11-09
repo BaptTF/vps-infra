@@ -17,9 +17,15 @@ spec:
       labels:
         app: vulcain
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: vulcain
           image: ghcr.io/bapttf/vulcain
+          securityContext:
+            allowPrivilegeEscalation: false
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7331
