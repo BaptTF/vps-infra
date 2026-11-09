@@ -8,13 +8,13 @@ export GIT_SSH_COMMAND="ssh -i /tmp/ssh/id_ed25519 -o UserKnownHostsFile=/tmp/ss
 if [ ! -d /www/.git ]; then
   git clone --depth 1 --branch site git@github.com:rjullien/camille-potager.git /www
 fi
-chmod -R a+rX /www
+find /www -mindepth 1 -exec chmod a+rX {} +
 if [ "${GIT_PULL_ONCE:-}" = "1" ]; then
   exit 0
 fi
 while true; do
   if git -C /www fetch --depth 1 origin site && git -C /www reset --hard FETCH_HEAD; then
-    chmod -R a+rX /www
+    find /www -mindepth 1 -exec chmod a+rX {} +
     echo "synced $(git -C /www rev-parse --short HEAD)"
   else
     echo "git sync failed, retrying in 60s" >&2
