@@ -18,9 +18,20 @@ spec:
       labels:
         app: opencode-dashboard
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: opencode-dashboard
           image: ghcr.io/rjullien/opencode-usage-tracker:main
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
           ports:
             - containerPort: 8080
               name: http

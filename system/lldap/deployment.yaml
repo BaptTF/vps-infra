@@ -16,11 +16,22 @@ spec:
         app: lldap
     spec:
       enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         kubernetes.io/hostname: debian-16gb-hel1-2
       containers:
         - name: lldap
           image: ghcr.io/lldap/lldap:v0.6.3-alpine-rootless
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
           command: ["/bin/sh", "-c"]
           args:
             - |

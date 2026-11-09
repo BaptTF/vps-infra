@@ -18,10 +18,13 @@ spec:
       labels:
         app: filebrowser
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: init-family-dirs
           image: busybox:1.38.0
@@ -34,12 +37,18 @@ spec:
               chmod -R 775 /data/family
           securityContext:
             runAsUser: 0
+            allowPrivilegeEscalation: false
           volumeMounts:
             - name: storagebox
               mountPath: /data
       containers:
         - name: filebrowser
           image: ghcr.io/gtsteffaniak/filebrowser:2.0.2-stable
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
           ports:
             - containerPort: 80
               name: http

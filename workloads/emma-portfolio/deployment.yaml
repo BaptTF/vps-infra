@@ -15,12 +15,18 @@ spec:
       labels:
         app: emma-portfolio
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
         - name: ghcr-login-secret
       containers:
         - name: portfolio
           image: ghcr.io/emmatf/my_portfolio:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
               name: http
