@@ -23,26 +23,6 @@ spec:
         runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      initContainers:
-        - name: data-ownership
-          image: busybox:1.38.0
-          command: ["sh", "-c", "find /data ! -user 1000 -exec chown 1000:1000 {} +"]
-          securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-              add: [CHOWN]
-          volumeMounts:
-            - name: data
-              mountPath: /data
-          resources:
-            requests:
-              cpu: 5m
-              memory: 8Mi
-            limits:
-              memory: 32Mi
       containers:
         - name: vaultwarden
           image: vaultwarden/server:1.37.5

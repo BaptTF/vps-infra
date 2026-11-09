@@ -461,18 +461,18 @@ Application containers run as non-root with `runAsNonRoot: true`, an explicit `r
 | uid | Containers |
 |---|---|
 | 1000 | bapttf-front, lldap, vikunja, filebrowser, bifrost, vaultwarden, immich (server, microservices, machine learning), vulcain |
-| 999 / 977 / 101 | valkey / searxng / nginx (assisted-teacher frontend) |
+| 999 / 977 / 101 | valkey / searxng / nginx (assisted-teacher and tripkit frontends) |
 | 20001:20000 | gowa (started as `/app/whatsapp`, not through the root entrypoint's `su-exec`) |
 | 65532 | sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
 | 65534 | camille git sync (`nobody`: ssh needs a passwd entry) |
 
 What breaks when an image moves to non-root:
 
-- **Volumes stay root-owned.** `fsGroup` is not applied to local-path volumes. A volume written by root gets an init container `data-ownership` (busybox, root, `drop: [ALL]`, `add: [CHOWN]`) that runs `find <path> -xdev ! -user <uid> -exec chown <uid>:<uid> {} +`; it does nothing on later starts. Only `CHOWN` is allowed: `DAC_READ_SEARCH` and other extra capabilities are outside baseline, and the namespace refuses the pod. The SMB volumes are already mounted `uid=1000`.
-- **Root-only paths in the image.** `HOME=/root` is not writable: assisted-teacher-backend and Immich machine learning set `HOME=/tmp`. nginx gets emptyDirs on `/run` and `/var/cache/nginx`. Authelia sets `X_AUTHELIA_HEALTHCHECK=""` so it does not write `/app/.healthcheck.env`.
+- **Volumes stay root-owned.** `fsGroup` is not applied to local-path volumes. To move a volume written by root, deploy once with an init container `data-ownership` (busybox, `runAsUser: 0`, `runAsNonRoot: false`, `drop: [ALL]`, `add: [CHOWN]`) that runs `find <path> -xdev ! -user <uid> -exec chown <uid>:<uid> {} +`, check `find <path> ! -user <uid>` is empty, then remove it (vaultwarden, Immich, vulcain and assisted-teacher went through it, see `git log -S data-ownership`). Only `CHOWN` is allowed: `DAC_READ_SEARCH` and other extra capabilities are outside baseline, and the namespace refuses the pod. A restic restore of a snapshot taken before 2026-11-09 brings back root-owned files: run the same init container once after it. The SMB volumes are already mounted `uid=1000`.
+- **Root-only paths in the image.** `HOME=/root` is not writable: assisted-teacher-backend and Immich machine learning set `HOME=/tmp`. nginx gets emptyDirs on `/run` and `/var/cache/nginx`. tripkit-frontend renders `config.js` in an init container (same image) into an emptyDir mounted with `subPath` over `/usr/share/nginx/html/config.js`. Authelia sets `X_AUTHELIA_HEALTHCHECK=""` so it does not write `/app/.healthcheck.env`.
 - **git and emptyDir mount points.** The mount point stays root-owned: `chmod` it fails and git reports dubious ownership. camille's `pull.sh` only chmods the content and trusts `/www` through `GIT_CONFIG_*`.
 
-Still root: Hermes Léo, Léa and Lya (s6-overlay, which drops to uid 10000 itself), camofox (the browser lives under `/root`) and tripkit-frontend (its entrypoint renders `config.js` into a root-owned directory).
+Still root: Hermes Léo, Léa and Lya (s6-overlay, which drops to uid 10000 itself) and camofox (the browser lives under `/root`).
 
 `RuntimeDefault` is the same seccomp profile Docker applies by default, so images built for Docker run unchanged. Rollback is a `git revert`; a pod that breaks shows `CreateContainerConfigError` (non-numeric user) or `operation not permitted` in its logs.
 

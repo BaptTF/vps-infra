@@ -31,25 +31,6 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       initContainers:
-        - name: data-ownership
-          image: busybox:1.38.0
-          command: ["sh", "-c", "find /data -xdev ! -user 1000 -exec chown 1000:1000 {} +"]
-          securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-              add: [CHOWN]
-          volumeMounts:
-            - name: library
-              mountPath: /data
-          resources:
-            requests:
-              cpu: 5m
-              memory: 8Mi
-            limits:
-              memory: 64Mi
         - name: render-config
           image: busybox:1.38.0
           securityContext:
