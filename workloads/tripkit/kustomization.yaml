@@ -6,3 +6,4 @@ namespace: tripkit
 resources:
   - backend
   - frontend
+  - networkpolicy.yaml
