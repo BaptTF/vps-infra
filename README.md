@@ -479,16 +479,19 @@ Tailscale is the only access path. The SRE agent (service account `grokbot`) has
 
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That webhook is what wakes the SRE agent. A real alert that stays firing is repeated every 4 hours.
 
-Alerts the agent cannot act on go to the existing `null` receiver and are dropped. The repo has no ntfy, Discord, or email alert channel, and the Telegram blocks under `workloads/agents/hermes/` are the agents' own chats. Pointing noise at those would wake an agent, and a webhook URL must not be invented. A missing `url_file` would also fail Alertmanager's config load and take the SRE webhook down with it. Baptiste does not create a secret for this split. `ALERTMANAGER_WEBHOOK_URL` and `ALERTMANAGER_WEBHOOK_KEY` are unchanged.
+Alerts the agent cannot act on go to the `discord` receiver. Alertmanager 0.34.2 (kube-prometheus-stack 92.17.1) reads `discord_configs.webhook_url_file` when it sends, and `send_resolved` is true. Each of those routes sets `repeat_interval: 4h`, so a firing alert is not repeated more often than on the SRE webhook. The Discord URL is not in git. It is the key `ALERTMANAGER_DISCORD_WEBHOOK_URL` on the existing Secret `alertmanager-webhook` (Infisical path `/monitoring/alertmanager`, already mounted via `alertmanagerSpec.secrets`). `Watchdog` and `InfoInhibitor` stay on the `null` receiver and are still dropped. `ALERTMANAGER_WEBHOOK_URL` and `ALERTMANAGER_WEBHOOK_KEY` are unchanged.
 
-The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Dropped:
+Create the Discord webhook and that key before merging. A missing file does not stop Alertmanager from loading the config (the file is read at send time), but every Discord notification fails until the key exists.
+
+The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Sent to Discord:
 
 - `HomeAssistantDown`.
 - `TargetDown` only when `job` is `homeassistant`, `homeassistant-livebox`, or `homeassistant-eyg`. Any other `TargetDown` stays on the webhook.
 - `TraefikService5xx` and `TraefikHighLatencyP95` only when `exported_service` is the Roquefort or Eyguians IngressRoute (`ha-ha-<20 hex>@kubernetescrd` or `ha-eyg-ha-eyg-<20 hex>@kubernetescrd`). Traefik errors for every other service stay on the webhook. The livebox instance has no IngressRoute.
 - `LocalPathPVCOverRequested`. local-path does not enforce the request. `LocalPathPVCGrowingFast` stays on the webhook.
-- `severity="info"`, except `KubeNodePressure`, `KubeNodeEviction`, `NodeCPUHighUsage`, and `KubeletTooManyPods`. kube-prometheus-stack 92.17.0 ships those four at info, and they are node pressure or saturation, so they stay on the webhook. The info route therefore drops `CPUThrottlingHigh`, `KubeQuotaAlmostFull`, and `KubeQuotaFullyUsed`. The chart's `InfoInhibitor` rule would still suppress those four while it is firing, so that inhibit rule excludes the same four names. A lone node-pressure alert reaches the webhook.
-- `Watchdog` and `InfoInhibitor` (severity `none`).
+- `severity="info"`, except `KubeNodePressure`, `KubeNodeEviction`, `NodeCPUHighUsage`, and `KubeletTooManyPods`. kube-prometheus-stack 92.17.0 ships those four at info, and they are node pressure or saturation, so they stay on the webhook. The info route therefore sends `CPUThrottlingHigh`, `KubeQuotaAlmostFull`, and `KubeQuotaFullyUsed` to Discord. The chart's `InfoInhibitor` rule would still suppress those four while it is firing, so that inhibit rule excludes the same four names. A lone node-pressure alert reaches the webhook.
+
+`Watchdog` and `InfoInhibitor` (severity `none`) stay on `null`.
 
 `LocalPathExporterScanErrors` and `LocalPathExporterScanSlow` stay on the webhook. `local_path_exporter_scan_errors_total` and `local_path_exporter_scan_duration_seconds` are one series per node: they have no `persistentvolumeclaim` or volume `namespace` label. A matcher on `immich-library` would never match, and matching the alert name would also drop a real I/O error, including on the other large volume (`nullclaw-leo-data`).
 
@@ -509,6 +512,7 @@ Path `/monitoring/alertmanager` -> Secret `alertmanager-webhook` (mounted in Ale
 |-----|---------|
 | `ALERTMANAGER_WEBHOOK_URL` | Alertmanager webhook URL, one line. |
 | `ALERTMANAGER_WEBHOOK_KEY` | Bearer token sent as `Authorization: Bearer`. One line, no quotes. |
+| `ALERTMANAGER_DISCORD_WEBHOOK_URL` | Discord webhook URL for the `discord` receiver (`https://discord.com/api/webhooks/...`). One line, no quotes. Create it before the Discord route is synced. |
 
 Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth` (mounted in Prometheus; snmp-exporter only gets `SNMP_COMMUNITY`):
 
