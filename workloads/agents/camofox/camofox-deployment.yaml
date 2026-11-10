@@ -25,7 +25,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: camofox
-          image: ghcr.io/jo-inc/camofox-browser:1.18.1
+          image: ghcr.io/jo-inc/camofox-browser:1.19.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
