@@ -92,6 +92,8 @@ spec:
             - configMapRef:
                 name: immich-config
           env:
+            - name: NODE_OPTIONS
+              value: --import /usr/src/app/server/otel-prometheus-host.mjs
             - name: IMMICH_WORKERS_INCLUDE
               value: api
             - name: IMMICH_TELEMETRY_INCLUDE
@@ -111,6 +113,10 @@ spec:
                   name: immich-db-secret
                   key: password
           volumeMounts:
+            - name: otel-prometheus-host
+              mountPath: /usr/src/app/server/otel-prometheus-host.mjs
+              subPath: otel-prometheus-host.mjs
+              readOnly: true
             - name: rendered-config
               mountPath: /config
               readOnly: true
@@ -168,6 +174,9 @@ spec:
               cpu: "2"
               memory: 2Gi
       volumes:
+        - name: otel-prometheus-host
+          configMap:
+            name: immich-otel-prometheus-host
         - name: config-template
           configMap:
             name: immich-config-file
