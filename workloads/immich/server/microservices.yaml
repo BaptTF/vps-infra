@@ -91,6 +91,8 @@ spec:
             - configMapRef:
                 name: immich-config
           env:
+            - name: NODE_OPTIONS
+              value: --import /usr/src/app/server/otel-prometheus-host.mjs
             - name: IMMICH_WORKERS_EXCLUDE
               value: api
             - name: IMMICH_TELEMETRY_INCLUDE
@@ -110,6 +112,10 @@ spec:
                   name: immich-db-secret
                   key: password
           volumeMounts:
+            - name: otel-prometheus-host
+              mountPath: /usr/src/app/server/otel-prometheus-host.mjs
+              subPath: otel-prometheus-host.mjs
+              readOnly: true
             - name: rendered-config
               mountPath: /config
               readOnly: true
@@ -136,31 +142,22 @@ spec:
             - name: archives
               mountPath: /mnt/archives
           startupProbe:
-            exec:
-              command:
-                - node
-                - -e
-                - "require('net').connect(8082,'localhost').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
+            tcpSocket:
+              port: metrics
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 30
           readinessProbe:
-            exec:
-              command:
-                - node
-                - -e
-                - "require('net').connect(8082,'localhost').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
+            tcpSocket:
+              port: metrics
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
           livenessProbe:
-            exec:
-              command:
-                - node
-                - -e
-                - "require('net').connect(8082,'localhost').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
+            tcpSocket:
+              port: metrics
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 5
@@ -173,6 +170,9 @@ spec:
               cpu: "4"
               memory: 4Gi
       volumes:
+        - name: otel-prometheus-host
+          configMap:
+            name: immich-otel-prometheus-host
         - name: config-template
           configMap:
             name: immich-config-file
