@@ -33,6 +33,13 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
+          args:
+            - --maxmemory
+            - 400mb
+            - --maxmemory-policy
+            - noeviction
+            - --save
+            - ""
           ports:
             - containerPort: 6379
               name: redis
@@ -55,7 +62,7 @@ spec:
           resources:
             requests:
               cpu: 25m
-              memory: 64Mi
+              memory: 128Mi
             limits:
               cpu: 250m
-              memory: 256Mi
+              memory: 512Mi
