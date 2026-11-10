@@ -377,7 +377,21 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 | Node | Role | vCPU | RAM | Allocatable | OS | Typical workloads |
 |------|------|------|-----|-------------|-----|-------------------|
 | `debian-16gb-hel1-2` (Hetzner VPS) | control-plane | 8 | 15Gi | ~12Gi | Debian 13 | ArgoCD, CNPG, Traefik, cert-manager, agents, critical stateful services |
-| `vmi2735515.contaboserver.net` (Contabo VPS) | worker | 6 | 12Gi | ~11Gi | Debian 12 | Prometheus, Loki, overflow workloads |
+| `vmi2735515.contaboserver.net` (Contabo VPS) | worker | 6 | 12Gi | ~11Gi | Debian 13 | Prometheus, Loki, overflow workloads |
+
+### Upgrading a node to a new Debian release
+
+Done on Contabo, 12 to 13, on 2026-11-10 (provider snapshot taken first). The node keeps its k3s, Tailscale and firewall setup; only apt changes.
+
+1. Silence Alertmanager except `Watchdog` (`amtool silence add 'alertname!=Watchdog' --duration=90m`), then `kubectl drain <node> --ignore-daemonsets --delete-emptydir-data`. Pods on the node's local-path volumes stay Pending until it is back (on Contabo: Prometheus, Loki, vikunja, vulcain, assisted-teacher-backend, kirocrew). kured only reboots between 08:30 and 10:30.
+2. Run apt from a transient unit, `systemd-run --unit=upgrade sh -c '... > /root/upgrade.log 2>&1'`: the tailscaled upgrade cuts the Tailscale SSH session. Use `DEBIAN_FRONTEND=noninteractive APT_LISTCHANGES_FRONTEND=none` and `-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold` to keep local config (`/etc/default/grub` holds `net.ifnames=0`, which names the interface `eth0`). First `full-upgrade` on the current release, then `sed -i s/bookworm/trixie/g` on `/etc/apt/sources.list` and `/etc/apt/sources.list.d/tailscale.list`, `upgrade --without-new-pkgs`, `full-upgrade`, `autoremove --purge`, `dpkg --audit`.
+3. Before rebooting, check `find /etc -name '*.ucf-dist' -o -name '*.dpkg-dist'` and `systemctl --failed`, then reboot.
+4. After the reboot:
+   - **sshd:** the openssh upgrade enables `ssh.service` again. Run `systemctl disable --now ssh`.
+   - **sysctl:** Debian 13 no longer reads `/etc/sysctl.conf` and renames a modified one to `.dpkg-bak`. Move its settings to `/etc/sysctl.d/`. Contabo's image sets `net.ipv6.conf.all.disable_ipv6 = 1` and `kernel.panic = 10`, now in `/etc/sysctl.d/99-contabo.conf`.
+   - **Checks:** `nftables-edge`, `k3s-agent`, `tailscaled`, `timedatectl`, and from another host the NodePorts and udp 8472 filtered. Then `kubectl uncordon` and expire the silence.
+
+Docker (left over from the Docker Compose era, inactive) was purged from Contabo during that upgrade; k3s ships its own containerd.
 
 ---
 
