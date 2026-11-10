@@ -176,6 +176,22 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  name: hermes-lea
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: [openclaw]
+  selector:
+    matchLabels:
+      app: hermes-lea
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
   name: camille
   namespace: monitoring
 spec:

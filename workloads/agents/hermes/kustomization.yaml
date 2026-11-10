@@ -7,7 +7,12 @@ resources:
   - lya
 
 # Single source for the skills init script used by hermes-leo and hermes-lea.
+# Léa's usage exporter is the same script as Léo's; the agent name and the
+# database path come from the container env.
 configMapGenerator:
   - name: hermes-init-skills
     files:
       - init-skills.sh
+  - name: hermes-lea-usage-exporter
+    files:
+      - usage-exporter.py=leo/usage-exporter.py
