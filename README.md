@@ -973,13 +973,12 @@ Values live in Infisical `/agents/bifrost/virtual-keys` (keys `BIFROST_VK_<ID>`,
 
 Add a key: create `BIFROST_VK_<ID>` in Infisical (`echo "sk-bf-$(openssl rand -hex 24)"`), add the VK to `governance.virtual_keys`, push. Rotate: change the value in Infisical; the auto-reload annotation restarts Bifrost and the agent.
 
-Bifrost's pricing catalog has no `opencode-go` models, so their cost was 0. `governance.pricing_overrides` sets one override per model (scope `provider`, `pattern` = model without the `opencode-go/` prefix) with the per-token prices from https://opencode.ai/docs/go ("Usage limits", the same for every plan). This is the API-equivalent price counted against the Go allowance, not money paid (the subscription is flat). Limits of the mapping:
+Bifrost's datasheet now has `opencode-go` model rows (the provider-name mismatch was fixed in [#9786](https://github.com/maximhq/bifrost/issues/9786)), so ordinary base prices come from its synced catalog. `governance.pricing_overrides` is limited to cases the catalog cannot express; omitted fields inherit the datasheet price. These are API-equivalent prices counted against the Go allowance, not money paid (the subscription is flat). See [OpenCode Go pricing](https://opencode.ai/docs/console/go/) and [Bifrost custom pricing](https://docs.getbifrost.ai/providers/custom-pricing).
 
-- DeepSeek V4.1 Flash / V4 Pro use the Off-Peak price: Bifrost has no time-of-day pricing (Peak is 01:00-04:00 and 06:00-10:00 UTC on weekdays, 2x)
-- Qwen3.7 Plus (> 256K) and MiniMax M3 (> 512K) are priced at their base tier: Bifrost tiers only exist above 100k/128k/200k/272k. Grok 4.7 (200k), GPT 6 / 5.6 Luna (272k) and Claude Haiku 5.5 (100k) have their tier
-- Free models have no override (cost 0). A new Go model costs 0 until it gets an override
-
-Regenerate when OpenCode changes the prices or the model list (`GET /v1/models?provider=opencode-go` lists the IDs).
+- DeepSeek V4.1 Flash / V4 Pro use Off-Peak cache-read prices. OpenCode documents separate Peak and Off-Peak prices (Peak is 01:00-04:00 and 06:00-10:00 UTC on weekdays, 2x); Bifrost cannot select a price by request time, and its current datasheet cache-read price is Peak.
+- Hy4 is listed in OpenCode's pricing table but is missing from the datasheet, so its full override remains.
+- The datasheet's `tiered_pricing` field is not consumed by Bifrost. Overrides supply the higher-context tiers for Grok 4.7 (> 200K), GPT 6 / 5.6 Luna (> 272K), and Claude Haiku 5.5 (> 100K). Qwen3.7 Plus (> 256K) and MiniMax M3 (> 512K) still use their base tier.
+- New Go models use datasheet pricing when their model rows are available in Bifrost's catalog; free models need no override.
 
 `client.enforce_auth_on_inference` is on: an inference request without a valid VK gets `401`. Scripts and skills inside the agent pods must send `Authorization: Bearer $BIFROST_API_KEY`. `/metrics` stays open (`whitelisted_routes`), and `/api` uses the setup token, not a VK.
 
