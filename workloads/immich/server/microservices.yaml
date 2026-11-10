@@ -136,22 +136,31 @@ spec:
             - name: archives
               mountPath: /mnt/archives
           startupProbe:
-            tcpSocket:
-              port: metrics
+            exec:
+              command:
+                - node
+                - -e
+                - "require('net').connect(8082,'localhost').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 30
           readinessProbe:
-            tcpSocket:
-              port: metrics
+            exec:
+              command:
+                - node
+                - -e
+                - "require('net').connect(8082,'localhost').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
           livenessProbe:
-            tcpSocket:
-              port: metrics
+            exec:
+              command:
+                - node
+                - -e
+                - "require('net').connect(8082,'localhost').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 5
