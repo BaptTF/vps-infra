@@ -41,6 +41,8 @@ spec:
               value: "8080"
             - name: CACHE_TTL
               value: "30s"
+            - name: PROMETHEUS_URL
+              value: http://prometheus-longterm.monitoring.svc.cluster.local:9090
             - name: OPENCODE_GO_API_KEY
               valueFrom:
                 secretKeyRef:
