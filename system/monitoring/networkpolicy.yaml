@@ -64,3 +64,27 @@ spec:
       ports:
         - protocol: TCP
           port: 10250
+---
+# The opencode dashboard reads Bifrost and Hermes Leo consumption from the
+# long-term Prometheus only. The main Prometheus stays closed: it has no auth.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus-longterm-dashboard
+spec:
+  podSelector:
+    matchLabels:
+      operator.prometheus.io/name: longterm
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: opencode-dashboard
+          podSelector:
+            matchLabels:
+              app: opencode-dashboard
+      ports:
+        - protocol: TCP
+          port: 9090
