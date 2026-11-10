@@ -1,8 +1,15 @@
 """Prometheus exporter for Hermes Leo token usage per user.
 
-Reads Hermes' state.db (sessions table) read-only on every scrape. Sub-agent sessions are
-attributed to the user of their root session. The user label is the latest sender name Hermes
-recorded for that user (origin_json.user_name), else "<source>:<user_id>".
+Reads Hermes' state.db read-only on every scrape. Sub-agent sessions are
+attributed to the user of their root session. The user label is the latest
+sender name Hermes recorded (origin_json.user_name), else "<source>:<user_id>".
+
+Tokens and cost come from session_model_usage (the route that served them).
+A model stored as "<provider>/<model>" yields those two labels; otherwise the
+billing provider is kept, except the Hermes profile name "custom". The same
+metrics without provider and model are not emitted for tokens: one series per
+route. hermes_sessions_total without those labels counts every session once;
+with them, it counts sessions that used that route.
 """
 
 import os
@@ -15,15 +22,55 @@ PORT = int(os.environ.get("PORT", "9464"))
 
 TOKEN_COLUMNS = ("input", "output", "cache_read", "cache_write", "reasoning")
 
-USAGE = f"""
+ROOT = """
 WITH RECURSIVE root(id, root_id) AS (
   SELECT id, id FROM sessions WHERE parent_session_id IS NULL
   UNION ALL
   SELECT s.id, root.root_id FROM sessions s JOIN root ON s.parent_session_id = root.id
 )
-SELECT r.source, r.user_id, count(*),
-       {", ".join(f"sum(coalesce(s.{c}_tokens, 0))" for c in TOKEN_COLUMNS)},
-       sum(coalesce(s.actual_cost_usd, s.estimated_cost_usd, 0))
+"""
+
+# One row per model-usage record. actual and estimated are disjoint; a stored
+# 0 must not hide the other column (coalesce would).
+MODEL_ROWS = ROOT + """
+SELECT r.source, r.user_id, s.id,
+       coalesce(u.billing_provider, ''),
+       coalesce(u.model, ''),
+       coalesce(u.input_tokens, 0),
+       coalesce(u.output_tokens, 0),
+       coalesce(u.cache_read_tokens, 0),
+       coalesce(u.cache_write_tokens, 0),
+       coalesce(u.reasoning_tokens, 0),
+       coalesce(u.actual_cost_usd, 0) + coalesce(u.estimated_cost_usd, 0)
+FROM session_model_usage u
+JOIN sessions s ON s.id = u.session_id
+JOIN root ON root.id = s.id
+JOIN sessions r ON r.id = root.root_id
+"""
+
+# Used when the per-model table is missing or still empty. The session row
+# only knows the model it ended on.
+SESSION_ROWS = ROOT + """
+SELECT r.source, r.user_id, s.id,
+       coalesce(s.billing_provider, ''),
+       coalesce(s.model, ''),
+       coalesce(s.input_tokens, 0),
+       coalesce(s.output_tokens, 0),
+       coalesce(s.cache_read_tokens, 0),
+       coalesce(s.cache_write_tokens, 0),
+       coalesce(s.reasoning_tokens, 0),
+       coalesce(s.actual_cost_usd, 0) + coalesce(s.estimated_cost_usd, 0)
+FROM sessions s
+JOIN root ON root.id = s.id
+JOIN sessions r ON r.id = root.root_id
+WHERE coalesce(s.input_tokens, 0) + coalesce(s.output_tokens, 0)
+    + coalesce(s.cache_read_tokens, 0) + coalesce(s.cache_write_tokens, 0)
+    + coalesce(s.reasoning_tokens, 0)
+    + coalesce(s.actual_cost_usd, 0) + coalesce(s.estimated_cost_usd, 0) > 0
+"""
+
+USER_SESSIONS = ROOT + """
+SELECT r.source, r.user_id, count(*)
 FROM sessions s
 JOIN root ON root.id = s.id
 JOIN sessions r ON r.id = root.root_id
@@ -45,6 +92,20 @@ def user_label(source, user_id, names):
     return names.get((source, user_id), f"{source}:{user_id}")
 
 
+def route(billing, model):
+    """Provider and model labels. A slash in the model is the gateway route."""
+    billing = (billing or "").strip()
+    model = (model or "").strip()
+    if "/" in model:
+        provider, rest = model.split("/", 1)
+        provider, rest = provider.strip(), rest.strip()
+        if provider and rest:
+            return provider, rest
+    if billing and billing != "custom":
+        return billing, model or "inconnu"
+    return billing or "inconnu", model or "inconnu"
+
+
 def esc(v):
     return str(v).replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
 
@@ -53,31 +114,61 @@ def render():
     db = sqlite3.connect(f"file:{DATA}/state.db?mode=ro", uri=True, timeout=10)
     try:
         names = {(s, u): n.strip() for s, u, n in db.execute(NAMES)}
-        rows = db.execute(USAGE).fetchall()
+        user_sessions = db.execute(USER_SESSIONS).fetchall()
+        try:
+            rows = db.execute(MODEL_ROWS).fetchall()
+        except sqlite3.OperationalError:
+            rows = []
+        if not rows:
+            rows = db.execute(SESSION_ROWS).fetchall()
     finally:
         db.close()
-    sessions, tokens, cost = {}, {}, {}
-    for source, user_id, count, *rest in rows:
-        key = (source or "unknown", user_label(source, user_id, names))
-        sessions[key] = sessions.get(key, 0) + count
+
+    tokens, cost, model_sessions = {}, {}, {}
+    for source, user_id, sid, billing, model, *rest in rows:
+        key = (source or "unknown", user_label(source, user_id, names), *route(billing, model))
         for col, val in zip(TOKEN_COLUMNS, rest[:-1]):
             tokens[key + (col,)] = tokens.get(key + (col,), 0) + val
         cost[key] = cost.get(key, 0) + rest[-1]
+        model_sessions.setdefault(key, set()).add(sid)
+
+    sessions = {}
+    for source, user_id, count in user_sessions:
+        key = (source or "unknown", user_label(source, user_id, names))
+        sessions[key] = sessions.get(key, 0) + count
+
     out = [
-        "# HELP hermes_sessions_total Hermes sessions (sub-agents counted under their root session's user).",
+        "# HELP hermes_sessions_total Hermes sessions. Without provider and model, every session once under its root user. With them, sessions that used that route.",
         "# TYPE hermes_sessions_total counter",
     ]
-    out += [f'hermes_sessions_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}"}} {v}' for (s, u), v in sorted(sessions.items())]
     out += [
-        "# HELP hermes_tokens_total Tokens used by Hermes sessions, by root session user.",
+        f'hermes_sessions_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}"}} {v}'
+        for (s, u), v in sorted(sessions.items())
+        if v
+    ]
+    out += [
+        f'hermes_sessions_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}"}} {len(ids)}'
+        for (s, u, p, m), ids in sorted(model_sessions.items())
+        if ids
+    ]
+    out += [
+        "# HELP hermes_tokens_total Tokens used by Hermes sessions, by root user, provider and model.",
         "# TYPE hermes_tokens_total counter",
     ]
-    out += [f'hermes_tokens_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}",type="{t}"}} {v}' for (s, u, t), v in sorted(tokens.items())]
     out += [
-        "# HELP hermes_cost_usd_total Hermes' own cost estimate (actual_cost_usd, else estimated_cost_usd).",
+        f'hermes_tokens_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}",type="{t}"}} {v}'
+        for (s, u, p, m, t), v in sorted(tokens.items())
+        if v
+    ]
+    out += [
+        "# HELP hermes_cost_usd_total Hermes cost (actual_cost_usd + estimated_cost_usd), by root user, provider and model.",
         "# TYPE hermes_cost_usd_total counter",
     ]
-    out += [f'hermes_cost_usd_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}"}} {v:.6f}' for (s, u), v in sorted(cost.items())]
+    out += [
+        f'hermes_cost_usd_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}"}} {v:.6f}'
+        for (s, u, p, m), v in sorted(cost.items())
+        if v
+    ]
     return "\n".join(out) + "\n"
 
 
