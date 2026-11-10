@@ -19,8 +19,6 @@ spec:
     spec:
       automountServiceAccountToken: false
       hostUsers: false
-      nodeSelector:
-        kubernetes.io/hostname: debian-16gb-hel1-2
       securityContext:
         seccompProfile:
           type: RuntimeDefault
