@@ -98,6 +98,8 @@ def user_label(source, user_id, names):
 # profile is ten percent more, the same convention as the imported history.
 _CATALOGUE = {
     "us.anthropic.claude-opus-5-5": (4.40e-6, 22e-6, 0.22e-6, 5.50e-6),
+    # OpenCode Go list price, same as DeepSeek V4 Flash: $0.15 / $0.60 / $0.003.
+    "deepseek-v4-flash-vision-exp": (1.5e-7, 6e-7, 3e-9, 0.0),
 }
 
 
