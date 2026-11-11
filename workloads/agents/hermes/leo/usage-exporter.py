@@ -269,9 +269,14 @@ def render():
     vk = f"hermes-{AGENT}"
     bf_cost, bf_tokens = {}, {}
     for (wid, _source, _user, provider, model), amount in w_cost.items():
+        # GitHub Copilot is not Bifrost; keep it on the Hermes person tree only.
+        if provider == "github-copilot":
+            continue
         key = (wid, provider, model)
         bf_cost[key] = bf_cost.get(key, 0) + amount
     for (wid, _source, _user, provider, model, col), val in w_tokens.items():
+        if provider == "github-copilot":
+            continue
         if col not in ("input", "output", "cache_read"):
             continue
         key = (wid, provider, model, col)
