@@ -92,6 +92,29 @@ def user_label(source, user_id, names):
     return names.get((source, user_id), f"{source}:{user_id}")
 
 
+# Bedrock US inference profile, USD per token. Hermes stores 0 when the call
+# goes through the custom Bifrost provider, so these rates replace that 0.
+# Input, output, cache read, cache write. Opus 5.5 list is $4/$20; the us.
+# profile is ten percent more, the same convention as the imported history.
+_CATALOGUE = {
+    "us.anthropic.claude-opus-5-5": (4.40e-6, 22e-6, 0.22e-6, 5.50e-6),
+    # OpenCode Go list price, same as DeepSeek V4 Flash: $0.15 / $0.60 / $0.003.
+    "deepseek-v4-flash-vision-exp": (1.5e-7, 6e-7, 3e-9, 0.0),
+}
+
+
+def catalogue_cost(model, input_tokens, output_tokens, cache_read, cache_write):
+    """List price for a model Hermes left unpriced. None when we have no rate."""
+    name = (model or "").strip()
+    if "/" in name:
+        name = name.split("/", 1)[1].strip()
+    rates = _CATALOGUE.get(name)
+    if rates is None:
+        return None
+    pin, pout, pcr, pcw = rates
+    return input_tokens * pin + output_tokens * pout + cache_read * pcr + cache_write * pcw
+
+
 def route(billing, model):
     """Provider and model labels. A slash in the model is the gateway route."""
     billing = (billing or "").strip()
@@ -129,7 +152,8 @@ def render():
         key = (source or "unknown", user_label(source, user_id, names), *route(billing, model))
         for col, val in zip(TOKEN_COLUMNS, rest[:-1]):
             tokens[key + (col,)] = tokens.get(key + (col,), 0) + val
-        cost[key] = cost.get(key, 0) + rest[-1]
+        priced = catalogue_cost(model, *rest[:4])
+        cost[key] = cost.get(key, 0) + (priced if priced is not None else rest[-1])
         model_sessions.setdefault(key, set()).add(sid)
 
     sessions = {}

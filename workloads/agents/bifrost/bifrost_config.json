@@ -26,7 +26,8 @@
         "max_retries": 3,
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
-      }
+      },
+      "prompt_cache": { "auto_inject": true }
     },
     "gemini": {
       "keys": [
