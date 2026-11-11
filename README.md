@@ -981,6 +981,8 @@ Bifrost's pricing catalog has no `opencode-go` models, so their cost was 0. `gov
 
 Regenerate when OpenCode changes the prices or the model list (`GET /v1/models?provider=opencode-go` lists the IDs).
 
+The Bedrock provider has `prompt_cache.auto_inject`. Hermes sends no cache marker, and Bedrock caches nothing without one, so Bifrost marks the first cacheable block. That prefix is what stays stable across turns. A marker the client already sent is left untouched. The lifetime is Bedrock's default, five minutes. Claude models only: a model that cannot take a cache point is skipped.
+
 `client.enforce_auth_on_inference` is on: an inference request without a valid VK gets `401`. Scripts and skills inside the agent pods must send `Authorization: Bearer $BIFROST_API_KEY`. `/metrics` stays open (`whitelisted_routes`), and `/api` uses the setup token, not a VK.
 
 ### Hermes Leo usage per user
