@@ -17,6 +17,12 @@ memory:
   user_profile_enabled: true
 telegram:
   require_mention: false
+platforms:
+  telegram:
+    extra:
+      # Ne pas jeter les messages reçus pendant un redémarrage : ils sont
+      # traités au démarrage suivant (défaut amont : true = jetés).
+      drop_pending_on_cold_boot: false
 delegation:
   provider: custom
   model: opencode-go/mimo-v2.6-pro
