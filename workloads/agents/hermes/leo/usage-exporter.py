@@ -5,6 +5,8 @@ attributed to the user of their root session. The user label is the latest
 sender name Hermes recorded (origin_json.user_name), else "<source>:<user_id>".
 
 Tokens and cost come from session_model_usage (the route that served them).
+hermes_window_* sums the part of each session that falls in 1m, 3m, 6m or 1y
+(from the 1st, Europe/Paris). A session crossing the boundary is split by time.
 A model stored as "<provider>/<model>" yields those two labels; otherwise the
 billing provider is kept, except the Hermes profile name "custom". The same
 metrics without provider and model are not emitted for tokens: one series per
@@ -70,11 +72,28 @@ WHERE coalesce(s.input_tokens, 0) + coalesce(s.output_tokens, 0)
 """
 
 USER_SESSIONS = ROOT + """
-SELECT r.source, r.user_id, count(*)
+SELECT r.source, r.user_id, s.id, s.started_at, coalesce(s.ended_at, s.started_at)
 FROM sessions s
 JOIN root ON root.id = s.id
 JOIN sessions r ON r.id = root.root_id
-GROUP BY r.source, r.user_id
+"""
+
+TIMED_ROWS = ROOT + """
+SELECT r.source, r.user_id, s.id,
+       coalesce(u.billing_provider, ''),
+       coalesce(u.model, ''),
+       coalesce(u.input_tokens, 0),
+       coalesce(u.output_tokens, 0),
+       coalesce(u.cache_read_tokens, 0),
+       coalesce(u.cache_write_tokens, 0),
+       coalesce(u.reasoning_tokens, 0),
+       coalesce(u.actual_cost_usd, 0) + coalesce(u.estimated_cost_usd, 0),
+       coalesce(u.first_seen, s.started_at),
+       coalesce(u.last_seen, s.ended_at, u.first_seen, s.started_at)
+FROM session_model_usage u
+JOIN sessions s ON s.id = u.session_id
+JOIN root ON root.id = s.id
+JOIN sessions r ON r.id = root.root_id
 """
 
 NAMES = """
@@ -133,6 +152,60 @@ def esc(v):
     return str(v).replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
 
 
+def _last_sunday(year, month):
+    """Last Sunday of a month, as a naive UTC date at 00:00."""
+    from datetime import datetime, timedelta
+    if month == 12:
+        day = datetime(year + 1, 1, 1) - timedelta(days=1)
+    else:
+        day = datetime(year, month + 1, 1) - timedelta(days=1)
+    return day - timedelta(days=(day.weekday() + 1) % 7)
+
+
+def _paris_offset(utc):
+    """EU rule: CEST from the last Sunday of March 01:00 UTC, else CET."""
+    from datetime import timedelta
+    start = _last_sunday(utc.year, 3).replace(hour=1)
+    end = _last_sunday(utc.year, 10).replace(hour=1)
+    if start <= utc < end:
+        return timedelta(hours=2)
+    return timedelta(hours=1)
+
+
+def window_starts(now_ts):
+    """Unix start of each dashboard window: 1st 00:00 Europe/Paris, through now."""
+    from datetime import datetime, timedelta, timezone
+    now = datetime.fromtimestamp(now_ts, timezone.utc).replace(tzinfo=None)
+    local = now + _paris_offset(now)
+    starts = {}
+    for wid, back in (("1m", 0), ("3m", 2), ("6m", 5), ("1y", 11)):
+        year, month = local.year, local.month - back
+        while month <= 0:
+            month += 12
+            year -= 1
+        midnight = datetime(year, month, 1)
+        guess = midnight - timedelta(hours=1)
+        utc_start = midnight - _paris_offset(guess)
+        starts[wid] = utc_start.replace(tzinfo=timezone.utc).timestamp()
+    return starts, now_ts
+
+
+def overlap_fraction(t0, t1, start, end):
+    """Share of [t0, t1] that falls in [start, end). A point in the window counts whole."""
+    if t0 is None:
+        return 0.0
+    t0 = float(t0)
+    t1 = t0 if t1 is None else float(t1)
+    if t1 < t0:
+        t1 = t0
+    if t1 - t0 < 1:
+        return 1.0 if start <= t0 < end else 0.0
+    lo, hi = max(t0, start), min(t1, end)
+    if hi <= lo:
+        return 0.0
+    return (hi - lo) / (t1 - t0)
+
+
 def render():
     db = sqlite3.connect(f"file:{DATA}/state.db?mode=ro", uri=True, timeout=10)
     try:
@@ -140,10 +213,14 @@ def render():
         user_sessions = db.execute(USER_SESSIONS).fetchall()
         try:
             rows = db.execute(MODEL_ROWS).fetchall()
+            timed = db.execute(TIMED_ROWS).fetchall()
         except sqlite3.OperationalError:
-            rows = []
+            rows, timed = [], []
         if not rows:
             rows = db.execute(SESSION_ROWS).fetchall()
+            timed = [
+                (*row, None, None) for row in rows
+            ]
     finally:
         db.close()
 
@@ -157,9 +234,34 @@ def render():
         model_sessions.setdefault(key, set()).add(sid)
 
     sessions = {}
-    for source, user_id, count in user_sessions:
+    for source, user_id, sid, started, ended in user_sessions:
         key = (source or "unknown", user_label(source, user_id, names))
-        sessions[key] = sessions.get(key, 0) + count
+        sessions[key] = sessions.get(key, 0) + 1
+
+    import time as _time
+    starts, now_ts = window_starts(_time.time())
+    w_tokens, w_cost, w_model_sessions, w_sessions = {}, {}, {}, {}
+    for source, user_id, sid, billing, model, *rest in timed:
+        t0, t1 = rest[-2], rest[-1]
+        inn, out, cr, cw, reasoning, stored = rest[:6]
+        priced = catalogue_cost(model, inn, out, cr, cw)
+        amount = priced if priced is not None else stored
+        person = (source or "unknown", user_label(source, user_id, names), *route(billing, model))
+        for wid, start in starts.items():
+            part = overlap_fraction(t0, t1, start, now_ts)
+            if part <= 0:
+                continue
+            w_cost[(wid, *person)] = w_cost.get((wid, *person), 0) + amount * part
+            for col, val in zip(TOKEN_COLUMNS, (inn, out, cr, cw, reasoning)):
+                if val:
+                    key = (wid, *person, col)
+                    w_tokens[key] = w_tokens.get(key, 0) + val * part
+            w_model_sessions.setdefault((wid, *person), set()).add(sid)
+    for source, user_id, sid, started, ended in user_sessions:
+        person = (source or "unknown", user_label(source, user_id, names))
+        for wid, start in starts.items():
+            if overlap_fraction(started, ended, start, now_ts) > 0:
+                w_sessions.setdefault((wid, *person), set()).add(sid)
 
     out = [
         "# HELP hermes_sessions_total Hermes sessions. Without provider and model, every session once under its root user. With them, sessions that used that route.",
@@ -192,6 +294,38 @@ def render():
         f'hermes_cost_usd_total{{agent="{AGENT}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}"}} {v:.6f}'
         for (s, u, p, m), v in sorted(cost.items())
         if v
+    ]
+    out += [
+        "# HELP hermes_window_cost_usd Cost of Hermes sessions whose time range falls in the window. A session crossing the boundary is split by time.",
+        "# TYPE hermes_window_cost_usd gauge",
+    ]
+    out += [
+        f'hermes_window_cost_usd{{agent="{AGENT}",window="{esc(w)}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}"}} {v:.6f}'
+        for (w, s, u, p, m), v in sorted(w_cost.items())
+        if v
+    ]
+    out += [
+        "# HELP hermes_window_tokens Tokens of Hermes sessions in the window, split by time when a session crosses the boundary.",
+        "# TYPE hermes_window_tokens gauge",
+    ]
+    out += [
+        f'hermes_window_tokens{{agent="{AGENT}",window="{esc(w)}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}",type="{t}"}} {v:.4f}'
+        for (w, s, u, p, m, t), v in sorted(w_tokens.items())
+        if v
+    ]
+    out += [
+        "# HELP hermes_window_sessions Sessions overlapping the window. Without provider and model, each session once. With them, sessions that used that route.",
+        "# TYPE hermes_window_sessions gauge",
+    ]
+    out += [
+        f'hermes_window_sessions{{agent="{AGENT}",window="{esc(w)}",source="{esc(s)}",user="{esc(u)}"}} {len(ids)}'
+        for (w, s, u), ids in sorted(w_sessions.items())
+        if ids
+    ]
+    out += [
+        f'hermes_window_sessions{{agent="{AGENT}",window="{esc(w)}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}"}} {len(ids)}'
+        for (w, s, u, p, m), ids in sorted(w_model_sessions.items())
+        if ids
     ]
     return "\n".join(out) + "\n"
 
