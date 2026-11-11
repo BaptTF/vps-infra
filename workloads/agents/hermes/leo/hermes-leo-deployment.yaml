@@ -128,7 +128,7 @@ spec:
               cpu: "500m"
         # Tokens par utilisateur, lus dans state.db (lecture seule)
         - name: usage-exporter
-          image: python:3.15.1-alpine
+          image: python:3.15.2-alpine
           command: ["python3", "/app/usage-exporter.py"]
           env:
             - name: PYTHONDONTWRITEBYTECODE
