@@ -99,11 +99,11 @@ spec:
           env:
             - name: METRICS_ADDR
               value: ":9091"
-            - name: OPENCODE_GO_API_KEY
+            - name: OPENCODE_GO_API_KEY_B
               valueFrom:
                 secretKeyRef:
                   name: bifrost-secret-opencode
-                  key: OPENCODE_GO_API_KEY
+                  key: OPENCODE_GO_API_KEY_B
             - name: OPENCODE_GO_API_KEY_R
               valueFrom:
                 secretKeyRef:

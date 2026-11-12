@@ -535,7 +535,15 @@ Two Prometheus instances:
 
 To keep a job for a year, add it to the `match[]` of `longterm-federate-30s` or `longterm-federate-5m`. The ScrapeConfigs have no `release: kps` label, so the main Prometheus does not pick them up. Federation only copies what the main Prometheus still has: a job added later starts its history then.
 
-`ai-usage-exporter` polls the OpenCode, Cursor and Devin subscription APIs and has no ingress. `dashboard-infra` reads from `longterm` in its TanStack Start server functions; neither Prometheus nor the provider credentials are available to the browser. Its public hostname is protected by Authelia `group:family`, and its Tailscale ingress uses `tag:monitoring`. Both GHCR packages may stay private: their pull secrets and the Image Updater credentials are synced from Infisical `/github/b`.
+`ai-usage-exporter` polls the OpenCode, Cursor and Devin subscription APIs and has no ingress. Its OpenCode Go key comes from `/agents/bifrost/opencode` (`OPENCODE_GO_API_KEY_B`, `_R`, `_A`, `_N`). Cursor is polled per account: `ai-usage-exporter-secret-cursor` (Infisical `/agents/cursor`) must hold three keys, with no `default` account and no bare `CURSOR_API_KEY`:
+
+| Key | Account |
+|---|---|
+| `CURSOR_API_KEY_R_PERSONAL` | R Personal |
+| `CURSOR_API_KEY_B_PERSONAL` | B Personal |
+| `CURSOR_API_KEY_B_STUDENT` | B Student |
+
+All three are `optional: true`, so a missing key only stops that account. `CURSOR_REFRESH_TOKEN` stays optional as the legacy fallback for `r_personal` only. `dashboard-infra` reads from `longterm` in its TanStack Start server functions; neither Prometheus nor the provider credentials are available to the browser. Its public hostname is protected by Authelia `group:family`, and its Tailscale ingress uses `tag:monitoring`. Both GHCR packages may stay private: their pull secrets and the Image Updater credentials are synced from Infisical `/github/b`.
 
 Tailscale is the only interactive access path to the monitoring backends. The SRE agent (service account `grokbot`) has read-only access to the cluster (ClusterRole `agents-readonly`), including the monitoring and k8up backup CRDs. It cannot create or delete anything: when a restore is needed, it proposes the k8up `Restore` manifest and Baptiste applies it. It can call:
 
@@ -951,7 +959,9 @@ Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in n
 |---|---|
 | `GOOGLE_API_KEY` | Google AI Studio API key (Gemini provider `gemini`) |
 | `GROQ_API_KEY` | Groq API key (provider `groq`, whisper transcriptions) |
-| `OPENCODE_GO_API_KEY` | OpenCode Go subscription API key (https://opencode.ai/auth → Go). Backs two providers: `opencode-go` (OpenAI-compatible, models `glm-5.2`/`glm-5.1`/`glm-5`/`kimi-k2.7-code`/`kimi-k2.6`/`kimi-k2.5`/`deepseek-v4-pro`/`deepseek-v4-flash`/`mimo-v2.5`/`mimo-v2.5-pro`/`mimo-v2-pro`/`mimo-v2-omni`) and `opencode-go-anthropic` (Anthropic-compatible, models `minimax-m3`/`minimax-m2.7`/`minimax-m2.5`/`qwen3.7-max`/`qwen3.7-plus`/`qwen3.6-plus`/`qwen3.5-plus`). Same key used for both — Bifrost sends the right auth header per `base_provider_type`. |
+| `OPENCODE_GO_API_KEY_B` | OpenCode Go subscription API key, account B (https://opencode.ai/auth → Go). Backs two providers: `opencode-go` (OpenAI-compatible, models `glm-5.2`/`glm-5.1`/`glm-5`/`kimi-k2.7-code`/`kimi-k2.6`/`kimi-k2.5`/`deepseek-v4-pro`/`deepseek-v4-flash`/`mimo-v2.5`/`mimo-v2.5-pro`/`mimo-v2-pro`/`mimo-v2-omni`) and `opencode-go-anthropic` (Anthropic-compatible, models `minimax-m3`/`minimax-m2.7`/`minimax-m2.5`/`qwen3.7-max`/`qwen3.7-plus`/`qwen3.6-plus`/`qwen3.5-plus`). Same key used for both — Bifrost sends the right auth header per `base_provider_type`. |
+
+The `opencode-go` provider rotates over four keys from `bifrost-secret-opencode` (`/agents/bifrost/opencode`): `OPENCODE_GO_API_KEY_B` (B), `OPENCODE_GO_API_KEY_R` (R), `OPENCODE_GO_API_KEY_A` (A) and `OPENCODE_GO_API_KEY_N` (N). `OPENCODE_GO_API_KEY` without a suffix is gone.
 
 ### Virtual keys
 
