@@ -12,3 +12,7 @@ spec:
       protocol: TCP
       port: 8080
       targetPort: http
+    - name: weights-metrics
+      protocol: TCP
+      port: 9091
+      targetPort: weights-metrics
