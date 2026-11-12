@@ -43,11 +43,11 @@ spec:
               value: "30s"
             - name: PROMETHEUS_URL
               value: http://prometheus-longterm.monitoring.svc.cluster.local:9090
-            - name: OPENCODE_GO_API_KEY
+            - name: OPENCODE_GO_API_KEY_B
               valueFrom:
                 secretKeyRef:
                   name: opencode-dashboard-secret
-                  key: OPENCODE_GO_API_KEY
+                  key: OPENCODE_GO_API_KEY_B
             - name: OPENCODE_GO_API_KEY_R
               valueFrom:
                 secretKeyRef:
