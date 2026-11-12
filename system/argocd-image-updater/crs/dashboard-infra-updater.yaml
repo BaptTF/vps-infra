@@ -1,0 +1,19 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: dashboard-infra-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: dashboard-infra
+      images:
+        - alias: dashboard-infra
+          imageName: ghcr.io/bapttf/dashboard-infra
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^sha-[0-9a-f]{7}$"
+            pullSecret: pullsecret:argocd/ai-platform-ghcr-login-secret
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

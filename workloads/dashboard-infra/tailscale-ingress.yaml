@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dashboard
+  namespace: dashboard-infra
+  annotations:
+    tailscale.com/tags: tag:monitoring
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - dashboard
+  defaultBackend:
+    service:
+      name: dashboard-infra
+      port:
+        number: 3000

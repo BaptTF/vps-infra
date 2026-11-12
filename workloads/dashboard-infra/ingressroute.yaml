@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard-infra
+  namespace: dashboard-infra
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`dashboard.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: dashboard-infra
+          port: 3000
+  tls: {}

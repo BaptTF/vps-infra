@@ -56,6 +56,7 @@ spec:
   params:
     "match[]":
       - '{job=~"bifrost|hermes-leo|hermes-lea|cnpg-system/.*|k8up-metrics|vikunja|authelia|camille|searxng|cloudflare-exporter|snmp-dsplay|homeassistant-livebox|local-path-exporter|immich-server|immich-microservices|traefik-metrics"}'
+      - '{__name__=~"ai_usage_.*|bifrost_provider_key_weight|bifrost_weight_sidecar_observation_success|bifrost_weight_sidecar_last_observation_timestamp_seconds"}'
   staticConfigs:
     - targets:
         - kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090

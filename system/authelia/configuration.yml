@@ -65,6 +65,9 @@ access_control:
     - domain: vulcain.bapttf.com
       policy: one_factor
       subject: "group:family"
+    - domain: dashboard.bapttf.com
+      policy: one_factor
+      subject: "group:family"
     - domain: oc-board.bapttf.com
       policy: one_factor
       subject: "group:family"

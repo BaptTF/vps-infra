@@ -156,6 +156,25 @@ spec:
     - port: http
       path: /metrics
       interval: 30s
+    - port: weights-metrics
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-usage-exporter
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: [ai-usage-exporter]
+  selector:
+    matchLabels:
+      app: ai-usage-exporter
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 30s
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

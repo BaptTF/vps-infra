@@ -415,6 +415,7 @@ Docker (left over from the Docker Compose era, inactive) was purged from Contabo
 | JujuDB | https://jujudb.bapttf.com | Public |
 | Vulcain | https://vulcain.bapttf.com | Public (Authelia) |
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
+| Infrastructure dashboards | https://dashboard.bapttf.com / https://dashboard (Tailscale) | Authelia (group:family) / Tailscale tag:monitoring |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
 | Home Assistant (Roquefort) | https://ha.bapttf.com | Public (Home Assistant login) |
 | Home Assistant (Eyguians) | https://eyguians.bapttf.com | Public (Home Assistant login) |
@@ -454,7 +455,7 @@ Rollback: remove the `clientAuth` block from the `default` TLSOption, then turn 
 
 ## Pod security
 
-Application namespaces (`assisted-teacher`, `authelia`, `bapttf-front`, `camille`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
+Application namespaces (`ai-usage-exporter`, `assisted-teacher`, `authelia`, `bapttf-front`, `camille`, `dashboard-infra`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
 
 Every application pod sets:
 
@@ -474,10 +475,10 @@ Application containers run as non-root with `runAsNonRoot: true`, an explicit `r
 
 | uid | Containers |
 |---|---|
-| 1000 | bapttf-front, lldap, vikunja, filebrowser, bifrost, vaultwarden, immich (server, microservices, machine learning), vulcain |
+| 1000 | bapttf-front, dashboard-infra, lldap, vikunja, filebrowser, bifrost, vaultwarden, immich (server, microservices, machine learning), vulcain |
 | 999 / 977 / 101 | valkey / searxng / nginx (assisted-teacher and tripkit frontends) |
 | 20001:20000 | gowa (started as `/app/whatsapp`, not through the root entrypoint's `su-exec`) |
-| 65532 | sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
+| 65532 | ai-usage-exporter, sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
 | 65534 | camille git sync (`nobody`: ssh needs a passwd entry) |
 
 What breaks when an image moves to non-root:
@@ -534,7 +535,9 @@ Two Prometheus instances:
 
 To keep a job for a year, add it to the `match[]` of `longterm-federate-30s` or `longterm-federate-5m`. The ScrapeConfigs have no `release: kps` label, so the main Prometheus does not pick them up. Federation only copies what the main Prometheus still has: a job added later starts its history then.
 
-Tailscale is the only access path. The SRE agent (service account `grokbot`) has read-only access to the cluster (ClusterRole `agents-readonly`), including the monitoring and k8up backup CRDs. It cannot create or delete anything: when a restore is needed, it proposes the k8up `Restore` manifest and Baptiste applies it. It can call:
+`ai-usage-exporter` polls the OpenCode, Cursor and Devin subscription APIs and has no ingress. The Bifrost weight sidecar exposes the key weights it actually observes on port 9091. `dashboard-infra` reads both from `longterm` in its TanStack Start server functions; neither Prometheus nor the provider credentials are available to the browser. Its public hostname is protected by Authelia `group:family`, and its Tailscale ingress uses `tag:monitoring`. Both GHCR packages may stay private: their pull secrets and the Image Updater credentials are synced from Infisical `/github/b`.
+
+Tailscale is the only interactive access path to the monitoring backends. The SRE agent (service account `grokbot`) has read-only access to the cluster (ClusterRole `agents-readonly`), including the monitoring and k8up backup CRDs. It cannot create or delete anything: when a restore is needed, it proposes the k8up `Restore` manifest and Baptiste applies it. It can call:
 
 - Prometheus: `GET https://prometheus/api/v1/query`, `/api/v1/alerts`, `/api/v1/rules`; one year of application metrics on `https://prometheus-longterm/api/v1/query_range`
 - Alertmanager: `GET https://alertmanager/api/v2/alerts`, and `POST`/`DELETE` `/api/v2/silences` to create and expire silences

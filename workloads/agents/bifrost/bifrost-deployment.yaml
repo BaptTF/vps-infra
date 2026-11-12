@@ -89,7 +89,13 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+          ports:
+            - name: weights-metrics
+              containerPort: 9091
+              protocol: TCP
           env:
+            - name: METRICS_ADDR
+              value: ":9091"
             - name: OPENCODE_GO_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -124,6 +130,22 @@ spec:
               value: http://127.0.0.1:8080
             - name: DRY_RUN
               value: "false"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: weights-metrics
+            initialDelaySeconds: 3
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: weights-metrics
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests:
               cpu: "5m"

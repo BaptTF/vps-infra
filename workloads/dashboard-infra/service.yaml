@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-infra
+  namespace: dashboard-infra
+  labels:
+    app: dashboard-infra
+spec:
+  selector:
+    app: dashboard-infra
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: http
+      name: http
