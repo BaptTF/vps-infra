@@ -73,7 +73,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: opencode-dashboard-secret-cursor
-                  key: CURSOR_API_KEY
+                  key: CURSOR_API_KEY_R_PERSONAL
                   optional: true
           livenessProbe:
             httpGet:
