@@ -46,11 +46,11 @@ spec:
               value: "5m"
             - name: REQUEST_TIMEOUT
               value: "15s"
-            - name: OPENCODE_GO_API_KEY
+            - name: OPENCODE_GO_API_KEY_B
               valueFrom:
                 secretKeyRef:
                   name: ai-usage-exporter-secret
-                  key: OPENCODE_GO_API_KEY
+                  key: OPENCODE_GO_API_KEY_B
             - name: OPENCODE_GO_API_KEY_R
               valueFrom:
                 secretKeyRef:
@@ -78,12 +78,27 @@ spec:
                   name: ai-usage-exporter-secret-devin
                   key: DEVIN_ORG_ID
                   optional: true
-            - name: CURSOR_API_KEY
+            # Cursor est interroge par compte. Pas de compte "default" et pas de
+            # CURSOR_API_KEY nue : chaque credential porte son suffixe de compte.
+            - name: CURSOR_API_KEY_R_PERSONAL
               valueFrom:
                 secretKeyRef:
                   name: ai-usage-exporter-secret-cursor
-                  key: CURSOR_API_KEY
+                  key: CURSOR_API_KEY_R_PERSONAL
                   optional: true
+            - name: CURSOR_API_KEY_B_PERSONAL
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-cursor
+                  key: CURSOR_API_KEY_B_PERSONAL
+                  optional: true
+            - name: CURSOR_API_KEY_B_STUDENT
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-cursor
+                  key: CURSOR_API_KEY_B_STUDENT
+                  optional: true
+            # Fallback legacy du flux de refresh r_personal uniquement.
             - name: CURSOR_REFRESH_TOKEN
               valueFrom:
                 secretKeyRef:

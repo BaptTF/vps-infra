@@ -69,7 +69,7 @@
       "keys": [
         {
           "name": "opencode-go-key-1",
-          "value": "env.OPENCODE_GO_API_KEY",
+          "value": "env.OPENCODE_GO_API_KEY_B",
           "models": ["*"],
           "weight": 1.0
         },
