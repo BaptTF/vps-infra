@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: bifrost
-          image: maximhq/bifrost:v2.4.0
+          image: maximhq/bifrost:v2.5.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
