@@ -30,12 +30,15 @@ spec:
               drop: [ALL]
             runAsNonRoot: true
           resources:
+            # Baseline used when the VPA admission webhook misses the pod
+            # (e.g. new ReplicaSet not yet in its informer cache). Sized above
+            # observed working set (~450-670Mi) so a missed mutation cannot OOM.
             requests:
               cpu: "100m"
-              memory: "128Mi"
+              memory: "512Mi"
             limits:
               cpu: "1000m"
-              memory: "512Mi"
+              memory: "1Gi"
           env:
             - name: APP_DIR
               value: "/app/data"
