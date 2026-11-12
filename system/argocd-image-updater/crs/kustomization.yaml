@@ -6,7 +6,10 @@ kind: Kustomization
 namespace: argocd
 
 resources:
+  - ai-platform-ghcr-secret.yaml
+  - ai-usage-exporter-updater.yaml
   - bapttf-front-updater.yaml
+  - dashboard-infra-updater.yaml
   - assisted-teacher-updater.yaml
   - bifrost-updater.yaml
   - jujudb-updater.yaml

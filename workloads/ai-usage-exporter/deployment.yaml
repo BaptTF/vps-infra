@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-usage-exporter
+  namespace: ai-usage-exporter
+  labels:
+    app: ai-usage-exporter
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-usage-exporter
+  template:
+    metadata:
+      labels:
+        app: ai-usage-exporter
+    spec:
+      imagePullSecrets:
+        - name: ghcr-login-secret
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ai-usage-exporter
+          image: ghcr.io/bapttf/ai-usage-exporter:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+          ports:
+            - containerPort: 8080
+              name: http-metrics
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: POLL_INTERVAL
+              value: "5m"
+            - name: REQUEST_TIMEOUT
+              value: "15s"
+            - name: OPENCODE_GO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret
+                  key: OPENCODE_GO_API_KEY
+            - name: OPENCODE_GO_API_KEY_R
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret
+                  key: OPENCODE_GO_API_KEY_R
+            - name: OPENCODE_GO_API_KEY_A
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret
+                  key: OPENCODE_GO_API_KEY_A
+            - name: OPENCODE_GO_API_KEY_N
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret
+                  key: OPENCODE_GO_API_KEY_N
+            - name: DEVIN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-devin
+                  key: DEVIN_API_KEY
+                  optional: true
+            - name: DEVIN_ORG_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-devin
+                  key: DEVIN_ORG_ID
+                  optional: true
+            - name: CURSOR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-cursor
+                  key: CURSOR_API_KEY
+                  optional: true
+            - name: CURSOR_REFRESH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-cursor
+                  key: CURSOR_REFRESH_TOKEN
+                  optional: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http-metrics
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http-metrics
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
