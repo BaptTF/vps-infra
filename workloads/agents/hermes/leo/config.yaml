@@ -35,15 +35,14 @@ web:
   search_backend: perplexity
 agent:
   verify_on_stop: false
-  # Depuis hermes-agent 0.22.7, Camofox a quitté le core : le backend intégré
-  # (toolset `browser`, outil browser_exec) est remplacé par le plugin
-  # `camofox`, installé sur le PVC dans /opt/data/plugins/camofox.
-  disabled_toolsets:
-    - browser
+  # Ne pas lister `browser` dans disabled_toolsets ici : depuis hermes-agent
+  # 0.22.7, la migration left-core interprète sa présence comme « navigation
+  # désactivée » et coupe aussi le toolset `camofox`. Elle écrit elle-même
+  # `browser` dans disabled_toolsets au démarrage.
 plugins:
   enabled:
     # L'initContainer réécrit config.yaml à chaque démarrage : sans cette
-    # ligne, le plugin reste installé mais désactivé (plus aucun outil browser).
+    # ligne, le plugin camofox (installé sur le PVC) reste désactivé.
     - camofox
 _config_version: 33
 onboarding:
