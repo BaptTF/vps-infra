@@ -78,7 +78,7 @@ spec:
               memory: 64Mi
       containers:
         - name: immich-server
-          image: ghcr.io/immich-app/immich-server:v3.4.0@sha256:7b7b575029168bfb9eb901d868ce7dbfda0d7818e78aaace29b7b8a08cd4e7d5
+          image: ghcr.io/immich-app/immich-server:v3.4.1@sha256:7c489add298fc2f92cda4c777de6462aa206877e04087b815f62c7664af0b53b
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -92,8 +92,6 @@ spec:
             - configMapRef:
                 name: immich-config
           env:
-            - name: NODE_OPTIONS
-              value: --import /usr/src/app/server/otel-prometheus-host.mjs
             - name: IMMICH_WORKERS_INCLUDE
               value: api
             - name: IMMICH_TELEMETRY_INCLUDE
@@ -113,10 +111,6 @@ spec:
                   name: immich-db-secret
                   key: password
           volumeMounts:
-            - name: otel-prometheus-host
-              mountPath: /usr/src/app/server/otel-prometheus-host.mjs
-              subPath: otel-prometheus-host.mjs
-              readOnly: true
             - name: rendered-config
               mountPath: /config
               readOnly: true
@@ -174,9 +168,6 @@ spec:
               cpu: "2"
               memory: 2Gi
       volumes:
-        - name: otel-prometheus-host
-          configMap:
-            name: immich-otel-prometheus-host
         - name: config-template
           configMap:
             name: immich-config-file
