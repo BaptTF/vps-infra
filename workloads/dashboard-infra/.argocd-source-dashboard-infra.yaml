@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/bapttf/dashboard-infra:sha-7f89a61
