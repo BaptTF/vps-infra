@@ -263,28 +263,6 @@ def render():
             if overlap_fraction(started, ended, start, now_ts) > 0:
                 w_sessions.setdefault((wid, *person), set()).add(sid)
 
-    # Same windows, shaped like Bifrost: one series per virtual key. Input
-    # includes cache reads, which Bifrost counts inside the prompt. These are
-    # the history Bifrost never stored, from before virtual keys and monitoring.
-    vk = f"hermes-{AGENT}"
-    bf_cost, bf_tokens = {}, {}
-    for (wid, _source, _user, provider, model), amount in w_cost.items():
-        # GitHub Copilot is not Bifrost; keep it on the Hermes person tree only.
-        if provider == "github-copilot":
-            continue
-        key = (wid, provider, model)
-        bf_cost[key] = bf_cost.get(key, 0) + amount
-    for (wid, _source, _user, provider, model, col), val in w_tokens.items():
-        if provider == "github-copilot":
-            continue
-        if col not in ("input", "output", "cache_read"):
-            continue
-        key = (wid, provider, model, col)
-        bf_tokens[key] = bf_tokens.get(key, 0) + val
-        if col == "cache_read":
-            included = (wid, provider, model, "input")
-            bf_tokens[included] = bf_tokens.get(included, 0) + val
-
     out = [
         "# HELP hermes_sessions_total Hermes sessions. Without provider and model, every session once under its root user. With them, sessions that used that route.",
         "# TYPE hermes_sessions_total counter",
@@ -348,24 +326,6 @@ def render():
         f'hermes_window_sessions{{agent="{AGENT}",window="{esc(w)}",source="{esc(s)}",user="{esc(u)}",provider="{esc(p)}",model="{esc(m)}"}} {len(ids)}'
         for (w, s, u, p, m), ids in sorted(w_model_sessions.items())
         if ids
-    ]
-    out += [
-        "# HELP bifrost_window_cost_usd Hermes consumption for a Bifrost virtual key over a calendar window. Bifrost kept no history before virtual keys.",
-        "# TYPE bifrost_window_cost_usd gauge",
-    ]
-    out += [
-        f'bifrost_window_cost_usd{{virtual_key_name="{esc(vk)}",window="{esc(w)}",provider="{esc(p)}",model="{esc(m)}"}} {v:.6f}'
-        for (w, p, m), v in sorted(bf_cost.items())
-        if v
-    ]
-    out += [
-        "# HELP bifrost_window_tokens Tokens for a Bifrost virtual key over a calendar window. type=input includes cache_read, as Bifrost counts it.",
-        "# TYPE bifrost_window_tokens gauge",
-    ]
-    out += [
-        f'bifrost_window_tokens{{virtual_key_name="{esc(vk)}",window="{esc(w)}",provider="{esc(p)}",model="{esc(m)}",type="{t}"}} {v:.4f}'
-        for (w, p, m, t), v in sorted(bf_tokens.items())
-        if v
     ]
     return "\n".join(out) + "\n"
 

@@ -43,15 +43,3 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
-    # Only Prometheus may scrape the weight sidecar. Other Bifrost clients keep
-    # their existing access on 8080 and cannot reach this additional port.
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: monitoring
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: prometheus
-      ports:
-        - protocol: TCP
-          port: 9091

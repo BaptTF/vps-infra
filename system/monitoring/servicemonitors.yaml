@@ -156,9 +156,6 @@ spec:
     - port: http
       path: /metrics
       interval: 30s
-    - port: weights-metrics
-      path: /metrics
-      interval: 30s
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
