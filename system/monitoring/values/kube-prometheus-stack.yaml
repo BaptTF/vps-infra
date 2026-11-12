@@ -244,9 +244,10 @@ prometheus-node-exporter:
   resources:
     requests:
       cpu: 10m
-      memory: 16Mi
-    limits:
       memory: 32Mi
+    limits:
+      # Pics observés ~31,5Mi sur 7j (les 2 nœuds) : 32Mi laissait < 2 % de marge.
+      memory: 64Mi
 
 kube-state-metrics:
   resources:
