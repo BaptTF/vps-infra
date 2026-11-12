@@ -10,6 +10,8 @@ metadata:
   namespace: monitoring
 spec:
   replicas: 1
+  # Temporary: TSDB admin API for a targeted series cleanup (reverted right after).
+  enableAdminAPI: true
   retention: 365d
   # ~26-35 GB/year at the intervals below; the size cap only guards the 50Gi PVC.
   retentionSize: 45GB

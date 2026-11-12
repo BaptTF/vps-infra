@@ -15,6 +15,8 @@ prometheus:
     create: true
     name: kps-prometheus
   prometheusSpec:
+    # Temporary: TSDB admin API for a targeted series cleanup (reverted right after).
+    enableAdminAPI: true
     retention: 30d
     retentionSize: 18GB
     scrapeInterval: 30s
