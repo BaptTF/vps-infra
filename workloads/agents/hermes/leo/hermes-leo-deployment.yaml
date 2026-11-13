@@ -11,15 +11,12 @@ spec:
   revisionHistoryLimit: 2
   replicas: 1
   strategy:
-    # RollingUpdate avec passage de relais (image hermes-leo-custom >= relais) :
-    # le nouveau pod se prépare pendant que l'ancien répond, passe Ready en
-    # standby (cont-init 019-gateway-handoff), K8s arrête l'ancien, le
-    # gateway.lock (flock, PVC local-path = même nœud) se libère, le nouveau
-    # gateway démarre. Retour arrière : HERMES_HANDOFF_DISABLE=1 ou revert.
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    # Recreate pendant la migration nullclaw-leo-data -> hermes-leo-data :
+    # l'ancien pod doit être arrêté avant la copie (state.db au repos), et le
+    # relais par gateway.lock ne marche pas entre deux volumes différents
+    # (deux gateways en même temps). Le RollingUpdate avec passage de relais
+    # (maxSurge 1, maxUnavailable 0) revient dans la PR de nettoyage.
+    type: Recreate
   selector:
     matchLabels:
       app: hermes-leo
@@ -37,6 +34,41 @@ spec:
           type: RuntimeDefault
       serviceAccountName: hermes-leo
       initContainers:
+        # Migration unique vers hermes-leo-data (20Gi). Copie depuis l'ancien
+        # volume monté en lecture seule, sans camoufox (inutile : Camoufox
+        # tourne dans son propre pod). Idempotent : ne fait rien si le
+        # marqueur existe déjà. À retirer dans la PR de nettoyage.
+        - name: migrate-data
+          image: alpine/git:2.54.0
+          securityContext:
+            allowPrivilegeEscalation: false
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              marker=/new/.migrated-from-nullclaw-leo-data
+              if [ -f "$marker" ]; then
+                echo "migration déjà faite ($(cat "$marker")), rien à copier"
+                exit 0
+              fi
+              echo "copie /old -> /new (sans camoufox)"
+              cd /old
+              for e in * .[!.]* ..?*; do
+                [ -e "$e" ] || [ -L "$e" ] || continue
+                case "$e" in camoufox|lost+found) echo "ignoré : $e"; continue ;; esac
+                cp -a "/old/$e" /new/
+              done
+              sync
+              du -sh /new
+              date -u +%Y-%m-%dT%H:%M:%SZ > "$marker"
+              echo "migration terminée"
+          volumeMounts:
+            - name: old-data
+              mountPath: /old
+              readOnly: true
+            - name: data
+              mountPath: /new
         - name: init-config
           image: alpine/git:2.54.0
           securityContext:
@@ -194,4 +226,9 @@ spec:
             name: hermes-init-skills
         - name: data
           persistentVolumeClaim:
+            claimName: hermes-leo-data
+        # Ancien volume, lu seulement par migrate-data (lecture seule).
+        - name: old-data
+          persistentVolumeClaim:
             claimName: nullclaw-leo-data
+            readOnly: true

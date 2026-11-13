@@ -624,14 +624,14 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 |-----|-----------|------------|
 | `immich-library` | `immich` | `/k3s` |
 | `immich-storagebox` | `immich` | `/k3s/photos` |
-| `hermes-lea-data`, `hermes-lya-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
+| `hermes-lea-data`, `hermes-lya-data`, `hermes-leo-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
 | `vikunja-files` | `vikunja` | `/k3s` |
 | `vaultwarden-data` | `vaultwarden` | `/k3s` |
 | `vulcain-data` | `vulcain` | `/k3s` |
 | `gowa-storage` | `gowa` | `/k3s` |
 | `assisted-teacher-workspace` | `assisted-teacher` | `/k3s` |
 
-Caches (Immich machine-learning, Prometheus, Loki) and the CNPG data directories are left out. `nullclaw-leo-data` is the Hermes Leo volume. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
+Caches (Immich machine-learning, Prometheus, Loki) and the CNPG data directories are left out. `hermes-leo-data` is the Hermes Leo volume; `nullclaw-leo-data` is its old volume, kept read-only until the migration is validated. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
 
 Create these keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`, before the schedules can succeed. Secret `k8up-restic` is synced into each namespace above.
 
