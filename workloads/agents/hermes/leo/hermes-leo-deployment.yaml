@@ -35,12 +35,25 @@ spec:
       securityContext:
         seccompProfile:
           type: RuntimeDefault
+        # Les volumes sont déjà à hermes:hermes (10000:10000). fsGroup permet à
+        # init-config (non-root) de lire la deploy key montée en 0440 sans
+        # lancer un chown récursif du PVC (OnRootMismatch : le groupe de la
+        # racine correspond déjà).
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
       serviceAccountName: hermes-leo
       initContainers:
         - name: init-config
           image: alpine/git:2.54.0
+          # Non-root : le script n'a plus besoin de root, /opt/data et
+          # /opt/data/skills appartiennent déjà à 10000.
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           command: ["/bin/sh", "/scripts/init-skills.sh"]
           volumeMounts:
             - name: config-template
@@ -52,22 +65,32 @@ spec:
             - name: init-skills
               mountPath: /scripts
               readOnly: true
+            - name: init-passwd
+              mountPath: /etc/passwd
+              subPath: passwd
+              readOnly: true
             - name: data
               mountPath: /opt/data
       containers:
         - name: hermes-leo
           image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.13.1
+          # Pas de capabilities.drop: [ALL] ici : l'image démarre root pour que
+          # s6-rc (cont-init 01/015/02) chown /run et /opt/data puis passe aux
+          # services sous l'utilisateur hermes (SETUID/SETGID). Le pod tourne
+          # dans un user namespace (hostUsers: false), donc root y est déjà
+          # remappé ; le namespace enforce baseline. Passer à restricted
+          # demande de changer l'image (s6 sans root), pas le manifest.
           securityContext:
             allowPrivilegeEscalation: false
           args: ["gateway", "run"]
           envFrom:
             - secretRef:
-                name: nullclaw-leo-secret
+                name: hermes-leo-secret
           env:
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-leo-secret-init
+                  name: hermes-leo-secret-init
                   key: TELEGRAM_BOT_TOKEN
             - name: TELEGRAM_ALLOWED_USERS
               value: "974020023,8726326688,1156623391,8761164341,8348834293,8701879507,8920294477"
@@ -80,7 +103,7 @@ spec:
             - name: API_SERVER_KEY
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-leo-secret-api
+                  name: hermes-leo-secret-api
                   key: API_SERVER_KEY
             - name: BIFROST_API_KEY
               valueFrom:
@@ -90,7 +113,7 @@ spec:
             - name: NULLCLAW_WHATSMEOW_BRIDGE_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: nullclaw-leo-secret-bridge
+                  name: hermes-leo-secret-bridge
                   key: WHATSMEOW_BRIDGE_TOKEN
                   optional: true
             - name: PATH
@@ -188,10 +211,17 @@ spec:
         - name: skills-deploy-key
           secret:
             secretName: agents-skills-deploy-key
-            defaultMode: 0400
+            # 0440 + fsGroup 10000 : lisible par init-config non-root.
+            defaultMode: 0440
         - name: init-skills
           configMap:
             name: hermes-init-skills
+        - name: init-passwd
+          configMap:
+            name: hermes-leo-init-passwd
+            items:
+              - key: passwd
+                path: passwd
         - name: data
           persistentVolumeClaim:
             claimName: hermes-leo-data
