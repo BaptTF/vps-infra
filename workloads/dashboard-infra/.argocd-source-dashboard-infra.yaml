@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/bapttf/dashboard-infra:sha-417b60f
+  - ghcr.io/bapttf/dashboard-infra:sha-e9870bd
