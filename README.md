@@ -672,7 +672,7 @@ rm -f k3s.htpasswd
 
 `scp` cannot create `/var/services/homes/Baptiste/.config` on this NAS. Send the file over SSH instead.
 
-`--append-only` is process-wide, so k8up and prune cannot share one process. Tailscale on the DS218play now has a `tailscale0` interface, so both processes bind the Tailscale address `100.75.160.28` directly and `tailscale serve` is not used. The script waits up to 120 s for that address before starting. The DSM boot task above is what starts it again after a reboot.
+`--append-only` is process-wide, so k8up and prune cannot share one process. Tailscale on the DS218play now has a `tailscale0` interface, so both processes bind the Tailscale address `100.75.160.28` directly and `tailscale serve` is not used. The `tailscale-tun` boot task runs `tailscale configure-host` and restarts the package so Tailscale comes up in TUN mode; the script then waits up to 600 s for that address before starting. The DSM boot task above is what starts it again after a reboot.
 
 - Append-only, for k8up: `100.75.160.28:8000`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. `--private-repos` requires the first folder to be the username. A second folder is a separate repository, so Immich originals use `/k3s/photos`.
 - Prune: `100.75.160.28:8001`. It shares `k3s.htpasswd` with the append-only listener, so the k8up password can also delete snapshots. Until the prune host is chosen, the default-deny tailnet policy lets only the admin reach `tcp:8001`. The prune listener gets its own htpasswd at the same time.
