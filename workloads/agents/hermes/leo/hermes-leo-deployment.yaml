@@ -45,8 +45,8 @@ spec:
       initContainers:
         - name: init-config
           image: alpine/git:2.54.0
-          # Non-root : le script n'a plus besoin de root, /opt/data et
-          # /opt/data/skills appartiennent déjà à 10000.
+          # uid 10000 : /opt/data et /opt/data/skills lui appartiennent déjà,
+          # le script n'a pas besoin d'un autre uid pour écrire.
           securityContext:
             runAsNonRoot: true
             runAsUser: 10000
