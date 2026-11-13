@@ -1,24 +1,6 @@
-# Ancien volume de Léo (déclaré 2Gi, ~12G réels : local-path n'impose pas de
-# quota et ne s'agrandit pas). Conservé tel quel pendant la migration vers
-# hermes-leo-data : il doit rester dans git pour qu'ArgoCD (prune) ne le
-# supprime pas. Retrait dans une PR séparée, après validation.
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nullclaw-leo-data
-  namespace: openclaw
-  annotations:
-    k8up.io/backup: "true"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
----
-# Nouveau volume de Léo (20Gi). local-path est en WaitForFirstConsumer : le PV
-# est créé sur le nœud du pod, et le pod monte aussi nullclaw-leo-data (PV
-# attaché à hel1), donc les deux volumes sont sur le même nœud.
+# 20Gi : local-path ne sait pas agrandir un PVC existant (l'ancien
+# nullclaw-leo-data était déclaré 2Gi avec ~11G réels). Migration terminée le
+# 2026-11-13, l'ancien volume a été supprimé avec ce changement.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

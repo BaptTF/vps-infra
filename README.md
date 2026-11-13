@@ -569,7 +569,7 @@ The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Sent to
 
 `Watchdog` goes to `watchdog-hc`. `InfoInhibitor` (severity `none`) stays on `null`.
 
-`LocalPathExporterScanErrors` and `LocalPathExporterScanSlow` stay on the webhook. `local_path_exporter_scan_errors_total` and `local_path_exporter_scan_duration_seconds` are one series per node: they have no `persistentvolumeclaim` or volume `namespace` label. A matcher on `immich-library` would never match, and matching the alert name would also drop a real I/O error, including on the other large volume (`nullclaw-leo-data`).
+`LocalPathExporterScanErrors` and `LocalPathExporterScanSlow` stay on the webhook. `local_path_exporter_scan_errors_total` and `local_path_exporter_scan_duration_seconds` are one series per node: they have no `persistentvolumeclaim` or volume `namespace` label. A matcher on `immich-library` would never match, and matching the alert name would also drop a real I/O error, including on the other large volume (`hermes-leo-data`).
 
 OOMKilled, CrashLoop, pods not ready, Argo CD out of sync or degraded, node pressure and saturation, disk and volume full, exporter down, CNPG and backup failures, the R2 bucket, certificates, and every other warning or critical alert stay on the webhook.
 
@@ -624,14 +624,14 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 |-----|-----------|------------|
 | `immich-library` | `immich` | `/k3s` |
 | `immich-storagebox` | `immich` | `/k3s/photos` |
-| `hermes-lea-data`, `hermes-lya-data`, `hermes-leo-data`, `nullclaw-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
+| `hermes-lea-data`, `hermes-lya-data`, `hermes-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
 | `vikunja-files` | `vikunja` | `/k3s` |
 | `vaultwarden-data` | `vaultwarden` | `/k3s` |
 | `vulcain-data` | `vulcain` | `/k3s` |
 | `gowa-storage` | `gowa` | `/k3s` |
 | `assisted-teacher-workspace` | `assisted-teacher` | `/k3s` |
 
-Caches (Immich machine-learning, Prometheus, Loki) and the CNPG data directories are left out. `hermes-leo-data` is the Hermes Leo volume; `nullclaw-leo-data` is its old volume, kept read-only until the migration is validated. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
+Caches (Immich machine-learning, Prometheus, Loki) and the CNPG data directories are left out. `hermes-leo-data` is the Hermes Leo volume. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
 
 Create these keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`, before the schedules can succeed. Secret `k8up-restic` is synced into each namespace above.
 
