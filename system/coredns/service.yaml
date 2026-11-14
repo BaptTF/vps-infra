@@ -1,0 +1,23 @@
+# The kube-dns Service also belongs to the CoreDNS k3s AddOn: the packaged
+# manifest owns its selector, clusterIP and ports. This partial manifest is
+# applied with ServerSideApply and claims spec.trafficDistribution only.
+#
+# Two replicas alone are not enough. kube-proxy picks an endpoint at random from
+# the ClusterIP, so half the lookups from a pod on the Hetzner node still went to
+# the Contabo replica: 36-120 ms against 0.5-1 ms for the local one. PreferSameNode
+# makes kube-proxy prefer the endpoint on the caller's own node, and fall back to
+# any endpoint when the node has none, so DNS keeps answering while a CoreDNS pod
+# is rescheduled or a node is drained.
+#
+# Do not use PreferClose: it is deprecated in 1.36 in favour of PreferSameZone and
+# PreferSameNode, and it is zone-based, so it does nothing here (the nodes carry
+# no topology.kubernetes.io/zone label).
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  trafficDistribution: PreferSameNode
