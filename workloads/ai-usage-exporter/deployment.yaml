@@ -66,17 +66,44 @@ spec:
                 secretKeyRef:
                   name: ai-usage-exporter-secret
                   key: OPENCODE_GO_API_KEY_N
+            # Devin est interroge par compte. DEVIN_API_KEY nue reste acceptee
+            # comme alias de transition de la souscription "r" ; elle est
+            # ignoree des que DEVIN_API_KEY_R existe.
             - name: DEVIN_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: ai-usage-exporter-secret-devin
                   key: DEVIN_API_KEY
                   optional: true
+            - name: DEVIN_API_KEY_B
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-devin
+                  key: DEVIN_API_KEY_B
+                  optional: true
+            - name: DEVIN_API_KEY_R
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-devin
+                  key: DEVIN_API_KEY_R
+                  optional: true
             - name: DEVIN_ORG_ID
               valueFrom:
                 secretKeyRef:
                   name: ai-usage-exporter-secret-devin
                   key: DEVIN_ORG_ID
+                  optional: true
+            - name: DEVIN_ORG_ID_B
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-devin
+                  key: DEVIN_ORG_ID_B
+                  optional: true
+            - name: DEVIN_ORG_ID_R
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-devin
+                  key: DEVIN_ORG_ID_R
                   optional: true
             # Cursor est interroge par compte. Pas de compte "default" et pas de
             # CURSOR_API_KEY nue : chaque credential porte son suffixe de compte.
