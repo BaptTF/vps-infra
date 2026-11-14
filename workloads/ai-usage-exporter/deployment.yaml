@@ -43,7 +43,7 @@ spec:
             - name: PORT
               value: "8080"
             - name: POLL_INTERVAL
-              value: "5m"
+              value: "1m"
             - name: REQUEST_TIMEOUT
               value: "15s"
             - name: OPENCODE_GO_API_KEY_B
