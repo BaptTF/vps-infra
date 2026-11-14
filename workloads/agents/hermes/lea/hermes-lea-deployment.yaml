@@ -56,7 +56,7 @@ spec:
               mountPath: /opt/data
       containers:
         - name: hermes-lea
-          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.13.1
+          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.14
           securityContext:
             allowPrivilegeEscalation: false
           args: ["gateway", "run"]
