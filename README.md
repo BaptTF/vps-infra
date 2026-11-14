@@ -528,7 +528,7 @@ CoreDNS is a k3s AddOn, not an Argo CD app: k3s writes `/var/lib/rancher/k3s/ser
 
 Two replicas matter because the packaged manifest already spreads them: `topologySpreadConstraints` with `maxSkew: 1` and `whenUnsatisfiable: DoNotSchedule` on `kubernetes.io/hostname` guarantees one CoreDNS per node. With the single packaged replica the scheduler put it on the Contabo node, so every lookup from a pod on the Hetzner node crossed Tailscale: ~50 ms round trip, multiplied by the `ndots:5` search list (up to five queries per resolution), i.e. ~250 ms per resolution for Immich. Two replicas bring it to ~80 ms.
 
-k3s resets `replicas: 1` when it restarts. Argo CD `selfHeal` restores two within minutes, and the packaged replica keeps answering in the meantime, so there is no outage. The Application has no finalizer and its resource carries `Prune=false,Delete=false`: deleting the app cannot delete CoreDNS.
+The packaged manifest does not set `spec.replicas` (it is absent from the `objectset.rio.cattle.io/applied` annotation), so a k3s restart does not touch it. The Application keeps two replicas if someone scales CoreDNS by hand or the Deployment is recreated with the default of one. The Application has no finalizer and its resource carries `Prune=false,Delete=false`: deleting the app cannot delete CoreDNS.
 
 The remaining ~80 ms is the `tail4c7c90.ts.net` search domain inherited from the node's `resolv.conf`: every lookup asks MagicDNS before the absolute name. `dnsConfig.options: [{name: ndots, value: "2"}]` on a workload skips those queries. Set it per workload, not globally, since it changes how short names resolve.
 
