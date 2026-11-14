@@ -22,3 +22,5 @@ spec:
       # The manifest is a partial Deployment (spec.replicas only): server-side
       # apply claims that field and leaves the rest to the k3s AddOn.
       - ServerSideApply=true
+      # Partial manifest: skip client-side schema validation (Argo CD docs).
+      - Validate=false
