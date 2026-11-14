@@ -18,6 +18,12 @@ prometheus:
     retention: 30d
     retentionSize: 18GB
     scrapeInterval: 30s
+    # Temporary Devin default->r migration: allow deleting the old series and
+    # backfilling the historical samples under the new label. Revert after.
+    enableAdminAPI: true
+    enableRemoteWriteReceiver: true
+    tsdb:
+      outOfOrderTimeWindow: 72h
     # Pinned to Contabo only because the PVC is local-path and must not land on
     # Hetzner (disk ~79%). Off-cluster targets go through the Tailscale egress
     # Services in tailscale-egress.yaml, not the host network.

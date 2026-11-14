@@ -10,6 +10,12 @@ metadata:
   namespace: monitoring
 spec:
   replicas: 1
+  # Temporary Devin default->r migration: allow deleting the old series and
+  # backfilling the historical samples under the new label. Revert after.
+  enableAdminAPI: true
+  enableRemoteWriteReceiver: true
+  tsdb:
+    outOfOrderTimeWindow: 72h
   retention: 365d
   # ~26-35 GB/year at the intervals below; the size cap only guards the 50Gi PVC.
   retentionSize: 45GB
