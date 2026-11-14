@@ -1,0 +1,29 @@
+# CoreDNS is a k3s AddOn: its manifest lives in
+# /var/lib/rancher/k3s/server/manifests/coredns.yaml and k3s rewrites it on every
+# start (see https://docs.k3s.io/installation/packaged-components), so editing it
+# or forking it here would only survive until the next k3s restart.
+#
+# This manifest is applied with ServerSideApply: it claims spec.replicas only and
+# leaves the rest of the Deployment (image, Corefile, probes, securityContext)
+# to k3s. The packaged manifest already carries topologySpreadConstraints with
+# maxSkew 1 and whenUnsatisfiable DoNotSchedule on kubernetes.io/hostname, so
+# bumping to 2 replicas puts exactly one CoreDNS on each node.
+#
+# Why: with a single replica the scheduler placed it on the Contabo node, so every
+# lookup from a pod on the Hetzner node crossed Tailscale (~50 ms RTT). The ndots:5
+# search list turns each lookup into up to 5 queries, so `Immich` saw ~250 ms per
+# resolution. Two replicas bring that to ~80 ms (the remainder is the
+# tail4c7c90.ts.net search domain, resolved by MagicDNS).
+#
+# k3s re-applies replicas: 1 when it restarts. Argo CD selfHeal puts it back within
+# minutes; the packaged single replica keeps serving DNS in the meantime, so there
+# is no outage.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  replicas: 2

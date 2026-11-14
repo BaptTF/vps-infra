@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coredns
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/BaptTF/vps-infra.git
+    targetRevision: HEAD
+    path: system/coredns
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # The manifest is a partial Deployment (spec.replicas only): server-side
+      # apply claims that field and leaves the rest to the k3s AddOn.
+      - ServerSideApply=true
