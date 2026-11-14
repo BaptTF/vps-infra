@@ -522,6 +522,16 @@ Home Assistant cannot ban brute force here: every request reaches it from the Ta
 
 ---
 
+## DNS (CoreDNS)
+
+CoreDNS is a k3s AddOn, not an Argo CD app: k3s writes `/var/lib/rancher/k3s/server/manifests/coredns.yaml` on every start and rewrites it, so that file cannot be edited. `apps/coredns.yaml` therefore applies a **partial Deployment** with `ServerSideApply`, which claims `spec.replicas: 2` only and leaves the rest (image, Corefile, probes, securityContext) to k3s.
+
+Two replicas matter because the packaged manifest already spreads them: `topologySpreadConstraints` with `maxSkew: 1` and `whenUnsatisfiable: DoNotSchedule` on `kubernetes.io/hostname` guarantees one CoreDNS per node. With the single packaged replica the scheduler put it on the Contabo node, so every lookup from a pod on the Hetzner node crossed Tailscale: ~50 ms round trip, multiplied by the `ndots:5` search list (up to five queries per resolution), i.e. ~250 ms per resolution for Immich. Two replicas bring it to ~80 ms.
+
+k3s resets `replicas: 1` when it restarts. Argo CD `selfHeal` restores two within minutes, and the packaged replica keeps answering in the meantime, so there is no outage. The Application has no finalizer and its resource carries `Prune=false,Delete=false`: deleting the app cannot delete CoreDNS.
+
+The remaining ~80 ms is the `tail4c7c90.ts.net` search domain inherited from the node's `resolv.conf`: every lookup asks MagicDNS before the absolute name. `dnsConfig.options: [{name: ndots, value: "2"}]` on a workload skips those queries. Set it per workload, not globally, since it changes how short names resolve.
+
 ## Monitoring
 
 Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Alertmanager has no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector and no Grafana: agents query Prometheus and Loki through their APIs.
@@ -624,6 +634,7 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 |-----|-----------|------------|
 | `immich-library` | `immich` | `/k3s` |
 | `immich-storagebox` | `immich` | `/k3s/photos` |
+| `immich-archives` | `immich` | `/k3s/archives` |
 | `hermes-lea-data`, `hermes-lya-data`, `hermes-leo-data`, `kirocrew-home` | `openclaw` | `/k3s` |
 | `vikunja-files` | `vikunja` | `/k3s` |
 | `vaultwarden-data` | `vaultwarden` | `/k3s` |
@@ -632,6 +643,8 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 | `assisted-teacher-workspace` | `assisted-teacher` | `/k3s` |
 
 Caches (Immich machine-learning, Prometheus, Loki) and the CNPG data directories are left out. `hermes-leo-data` is the Hermes Leo volume. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
+
+On the NAS the repositories live under `/volume1/homes/Baptiste/restic/k3s/`: `k3s`, `photos` and `archives` for the three repositories above. In November 2026 they occupy 72 GiB, 583 GiB and 602 GiB on a volume with 566 GiB free. Nothing prunes `photos` or `archives` yet, so they only grow.
 
 Create these keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`, before the schedules can succeed. Secret `k8up-restic` is synced into each namespace above.
 
@@ -785,10 +798,12 @@ Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`
 
 v2 keeps its database as SQLite at `/home/filebrowser/data/database.sqlite` on PVC `filebrowser-data`. The first start imports the v1 BoltDB file `database.db` and does not modify it. Leave that file in place while `server.database.migrateFrom` is set: v2 exits if the path is missing. Copy `database.db` off the volume before the first v2 rollout.
 
-Immich can keep generated data on the local VPS while storing cold originals on a Hetzner Storage Box over SMB:
+Immich keeps almost nothing on the local disk. The split is defined by the `volumeMounts` of `workloads/immich/server/api.yaml`, not by the PVCs:
 
-- Local PVC `immich-library`: `/data/thumbs`, `/data/encoded-video`, `/data/profile`, `/data/backups` and other generated data
-- Storage Box PVC `immich-storagebox`: `/data/upload`, `/data/library`, `/data/family` and `/external/family`
+- Local PVC `immich-library` (local-path, 100 Gi): `/data/backups` (database dumps) and `/data/profile` (avatars); the other directories are empty mount points
+- Storage Box PVC `immich-storagebox`: `/data/upload`, `/data/library`, `/data/family`, `/external/family`, and also `/data/thumbs` and `/data/encoded-video`
+
+Thumbnails and transcoded videos therefore live on the Storage Box too: about 488 000 `preview`/`thumbnail` files, roughly 114 GiB. They are small files behind an SMB round trip, so anything that walks `/data/thumbs` pays ~36 ms per file — a full `find` there takes hours. Only `thumbs` is left out of the k8up backup (Immich regenerates it).
 
 Before enabling the Storage Box mounts in production:
 
