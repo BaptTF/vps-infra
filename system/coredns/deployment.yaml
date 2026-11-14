@@ -15,9 +15,10 @@
 # resolution. Two replicas bring that to ~80 ms (the remainder is the
 # tail4c7c90.ts.net search domain, resolved by MagicDNS).
 #
-# k3s re-applies replicas: 1 when it restarts. Argo CD selfHeal puts it back within
-# minutes; the packaged single replica keeps serving DNS in the meantime, so there
-# is no outage.
+# The packaged manifest does not set spec.replicas (it is absent from the
+# objectset.rio.cattle.io/applied annotation), so a k3s restart does not touch
+# it. This Application keeps the count at 2 if someone scales CoreDNS by hand or
+# the Deployment is recreated with the default of 1.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
