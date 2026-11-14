@@ -20,7 +20,7 @@ helmCharts:
           memory: 128Mi
   - name: plugin-barman-cloud
     repo: https://cloudnative-pg.github.io/charts
-    version: 0.8.1
+    version: 0.9.0
     releaseName: plugin-barman-cloud
     namespace: cnpg-system
     valuesInline:
