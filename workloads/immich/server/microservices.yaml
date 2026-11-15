@@ -138,17 +138,17 @@ spec:
           startupProbe:
             tcpSocket:
               port: metrics
-            initialDelaySeconds: 20
-            periodSeconds: 10
+            initialDelaySeconds: 0
+            periodSeconds: 2
             timeoutSeconds: 5
-            failureThreshold: 30
+            failureThreshold: 160
           readinessProbe:
             tcpSocket:
               port: metrics
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 0
+            periodSeconds: 5
             timeoutSeconds: 5
-            failureThreshold: 6
+            failureThreshold: 12
           livenessProbe:
             tcpSocket:
               port: metrics
