@@ -98,8 +98,9 @@ spec:
             httpGet:
               path: /api/health
               port: 9091
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            failureThreshold: 15
       volumes:
         - name: config
           configMap:
