@@ -9,6 +9,9 @@ metadata:
     secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
+  # The PVC is RWO: never run two Valkey on the same AOF.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: authelia-valkey
@@ -29,10 +32,12 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       # local-path leaves the volume root-owned and ignores fsGroup.
+      # Only the volume root needs it: Valkey creates everything below as 999,
+      # and appendonlydir is 0700, so a recursive find fails without DAC_READ_SEARCH.
       initContainers:
         - name: data-ownership
           image: busybox:1.38.0
-          command: ["sh", "-c", "find /data -xdev ! -user 999 -exec chown 999:999 {} +"]
+          command: ["chown", "999:999", "/data"]
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
