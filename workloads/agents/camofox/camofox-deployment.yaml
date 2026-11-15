@@ -55,10 +55,10 @@ spec:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 30
+            initialDelaySeconds: 0
+            periodSeconds: 5
             timeoutSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 30
           resources:
             requests:
               cpu: "100m"
