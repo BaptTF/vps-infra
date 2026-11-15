@@ -32,9 +32,10 @@ spec:
             - sh
             - -c
             - |
+              # Ownership/mode come from the SMB mount options of the
+              # immich-storagebox PV (uid=1000,gid=1000,dir_mode=0775), so a
+              # recursive chown/chmod is a no-op that only costs startup time.
               mkdir -p /data/family/inbox /data/family/library
-              chown -R 1000:1000 /data/family
-              chmod -R 775 /data/family
           securityContext:
             runAsUser: 0
             allowPrivilegeEscalation: false
@@ -70,8 +71,9 @@ spec:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            failureThreshold: 15
           livenessProbe:
             httpGet:
               path: /health
