@@ -90,17 +90,17 @@ spec:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 10
-            periodSeconds: 30
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 15
           startupProbe:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            failureThreshold: 12
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            failureThreshold: 63
           resources:
             requests:
               memory: "128Mi"
