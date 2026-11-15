@@ -4,7 +4,7 @@ metadata:
   name: authelia-valkey
   namespace: authelia
   annotations:
-    k8up.io/backup: "true"
+    k8up.io/backup: "false"
 spec:
   accessModes:
     - ReadWriteOnce

@@ -643,9 +643,8 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 | `vulcain-data` | `vulcain` | `/k3s` |
 | `gowa-storage` | `gowa` | `/k3s` |
 | `assisted-teacher-workspace` | `assisted-teacher` | `/k3s` |
-| `authelia-valkey` | `authelia` | `/k3s` |
 
-Caches (Immich machine-learning, Prometheus, Loki) and the CNPG data directories are left out. `hermes-leo-data` is the Hermes Leo volume. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
+Caches (Immich machine-learning, Prometheus, Loki), Authelia sessions (`authelia-valkey`), and the CNPG data directories are left out. `hermes-leo-data` is the Hermes Leo volume. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
 
 On the NAS the repositories live under `/volume1/homes/Baptiste/restic/k3s/`: `k3s`, `photos` and `archives` for the three repositories above. In November 2026 they occupy 72 GiB, 583 GiB and 602 GiB on a volume with 566 GiB free. Nothing prunes `photos` or `archives` yet, so they only grow.
 
@@ -912,7 +911,7 @@ Restic will ask for the Storage Box SFTP password and for the restic repository 
 
 The `authelia_session` cookie is stored in Valkey (`authelia-valkey` in the `authelia` namespace), encrypted with `session-secret` from `/authelia`. A restart of Authelia keeps existing logins. Expiration, inactivity and remember-me still apply: Valkey holds each session until Authelia's own lifetime elapses.
 
-Valkey persists an AOF on the PVC `authelia-valkey` (local-path, 1 Gi request, pinned to `debian-16gb-hel1-2` next to Authelia). `maxmemory` is 32mb with `noeviction`, so a full store refuses new writes instead of dropping logins. The password is Infisical path `/authelia/valkey`, key `password` (`openssl rand -hex 32`), synced to the Kubernetes secret `authelia-valkey`. Create that key before the app syncs. Without it the new pods stay unready and the previous Authelia pod keeps serving.
+Valkey persists an AOF on the PVC `authelia-valkey` (local-path, 1 Gi request, pinned to `debian-16gb-hel1-2` next to Authelia). The PVC is annotated `k8up.io/backup: "false"`: sessions are disposable, and reusable session tokens must not land on the NAS. `maxmemory` is 32mb with `noeviction`, so a full store refuses new writes instead of dropping logins. The password is Infisical path `/authelia/valkey`, key `password` (`openssl rand -hex 32`), synced to the Kubernetes secret `authelia-valkey`. Create that key before the app syncs. Without it the new pods stay unready and the previous Authelia pod keeps serving.
 
 Rotating `password` or `session-secret` invalidates every session. The first sync that enables Valkey does too: sessions that existed only in the Authelia process are not imported.
 
