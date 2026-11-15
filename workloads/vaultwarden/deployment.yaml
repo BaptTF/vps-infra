@@ -32,6 +32,30 @@ spec:
               drop: [ALL]
           ports:
             - containerPort: 80
+              name: http
+          # /alive: Vaultwarden's built-in health endpoint (same as the image
+          # HEALTHCHECK); it also takes a DB pool connection.
+          startupProbe:
+            httpGet:
+              path: /alive
+              port: http
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 90
+          readinessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
           env:
             - name: DOMAIN
               value: "https://vault.bapttf.com"
