@@ -6,10 +6,17 @@ configMapGenerator:
     namespace: authelia
     files:
       - configuration.yml
+  - name: authelia-valkey-config
+    namespace: authelia
+    files:
+      - valkey.conf
 
 resources:
   - infisical-secret.yaml
   - deployment.yaml
+  - valkey-pvc.yaml
+  - valkey-deployment.yaml
+  - valkey-service.yaml
   - service.yaml
   - ingressroute.yaml
   - middleware.yaml
