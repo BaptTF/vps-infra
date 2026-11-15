@@ -25,6 +25,10 @@ session:
   expiration: 7d
   inactivity: 3d
   remember_me: 1M
+  # Portal sessions. Password: AUTHELIA_SESSION_REDIS_PASSWORD.
+  redis:
+    host: authelia-valkey.authelia.svc.cluster.local
+    port: 6379
   cookies:
     - domain: bapttf.com
       authelia_url: https://auth.bapttf.com

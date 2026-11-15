@@ -54,6 +54,11 @@ spec:
                 secretKeyRef:
                   name: authelia-secrets
                   key: session-secret
+            - name: AUTHELIA_SESSION_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authelia-valkey
+                  key: password
             - name: AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET
               valueFrom:
                 secretKeyRef:

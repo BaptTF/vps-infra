@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authelia-valkey
+  namespace: authelia
+  labels:
+    app: authelia-valkey
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authelia-valkey
+  template:
+    metadata:
+      labels:
+        app: authelia-valkey
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      # Same node as Authelia. The AOF stays well under maxmemory (32mb).
+      nodeSelector:
+        kubernetes.io/hostname: debian-16gb-hel1-2
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      # local-path leaves the volume root-owned and ignores fsGroup.
+      initContainers:
+        - name: data-ownership
+          image: busybox:1.38.0
+          command: ["sh", "-c", "find /data -xdev ! -user 999 -exec chown 999:999 {} +"]
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:9.1.3@sha256:3add1a336a920ea54770a001ab6feb3da5fceea96a40373a3a2cd469b815f0b7
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              umask 077
+              if [ -z "${VALKEYCLI_AUTH}" ]; then
+                echo "VALKEYCLI_AUTH is empty" >&2
+                exit 1
+              fi
+              cp /etc/valkey/valkey.conf /tmp/valkey.conf
+              printf 'requirepass %s\n' "${VALKEYCLI_AUTH}" >> /tmp/valkey.conf
+              exec valkey-server /tmp/valkey.conf
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: redis
+              containerPort: 6379
+          env:
+            # valkey-cli reads this for the probes, so the password stays out of argv.
+            - name: VALKEYCLI_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: authelia-valkey
+                  key: password
+          volumeMounts:
+            - name: config
+              mountPath: /etc/valkey/valkey.conf
+              subPath: valkey.conf
+              readOnly: true
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: config
+          configMap:
+            name: authelia-valkey-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: authelia-valkey
