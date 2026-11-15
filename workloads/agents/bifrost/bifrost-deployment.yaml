@@ -53,20 +53,11 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-          # startupProbe gives Bifrost up to 300 s to come up (v2.5.1 can wait
-          # ~60 s on "database is locked" at boot) before liveness applies.
-          startupProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            periodSeconds: 5
-            timeoutSeconds: 5
-            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 0
+            initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3 
@@ -74,7 +65,7 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 0
+            initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
