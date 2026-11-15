@@ -10,9 +10,165 @@ spec:
   ingressClassName: tailscale
   tls:
     - hosts:
-        - bifrost 
-  defaultBackend:
-    service:
-      name: bifrost
-      port:
-        number: 8080
+        - bifrost
+  # No defaultBackend: the Tailscale operator registers it at "/", which would
+  # keep serving the embedded dashboard. v2.5.x has no flag or config key to
+  # disable the UI itself, so only inference (+ /health) is exposed here.
+  # In-cluster clients and the weights sidecar are unchanged (Service / localhost).
+  rules:
+    - http:
+        paths:
+        - path: /health
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /v1
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /openai
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /anthropic
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /genai
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /cohere
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /azure
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /bedrock
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /litellm
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /langchain
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /pydanticai
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /typesafe
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /cursor
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /mcp
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /openai_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /anthropic_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /azure_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /bedrock_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /sagemaker_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /runware_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /genai_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
+        - path: /chatgpt_passthrough
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost
+              port:
+                number: 8080
