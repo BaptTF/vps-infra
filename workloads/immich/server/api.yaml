@@ -140,18 +140,18 @@ spec:
             httpGet:
               path: /api/server/ping
               port: http
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 0
+            periodSeconds: 2
             timeoutSeconds: 5
-            failureThreshold: 30
+            failureThreshold: 165
           readinessProbe:
             httpGet:
               path: /api/server/ping
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
+            initialDelaySeconds: 0
+            periodSeconds: 5
             timeoutSeconds: 5
-            failureThreshold: 6
+            failureThreshold: 12
           livenessProbe:
             httpGet:
               path: /api/server/ping
