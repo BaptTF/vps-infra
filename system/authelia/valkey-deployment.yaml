@@ -103,12 +103,14 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 30
             timeoutSeconds: 5
+          # Ready as soon as Valkey answers, so a restart only costs a few seconds.
           readinessProbe:
             exec:
               command: ["valkey-cli", "ping"]
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 3
       volumes:
         - name: config
           configMap:
