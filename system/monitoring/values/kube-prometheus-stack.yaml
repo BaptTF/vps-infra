@@ -133,12 +133,30 @@ alertmanager:
           - 'namespace'
       - target_matchers:
           - 'alertname = InfoInhibitor'
+      # One outage, one page: while a pod crashloops, its rollout, replica,
+      # readiness and scrape alerts in the same namespace are consequences.
+      - source_matchers:
+          - 'alertname = KubePodCrashLooping'
+        target_matchers:
+          - 'alertname =~ "^(KubePodNotReady|KubeDeploymentReplicasMismatch|KubeDeploymentRolloutStuck|KubeStatefulSetReplicasMismatch|KubeContainerWaiting|TargetDown)$"'
+        equal:
+          - 'namespace'
+      # A finished-but-failed Job already says what a stuck one would.
+      - source_matchers:
+          - 'alertname = KubeJobFailed'
+        target_matchers:
+          - 'alertname = KubeJobNotCompleted'
+        equal:
+          - 'namespace'
+    # Every sre notification wakes the agent. Group per namespace so the
+    # alerts of one outage arrive together, batch for 2m, re-send changes
+    # at most every 15m and repeat a still-firing group every 12h.
     route:
       receiver: sre
-      group_by: ["alertname", "namespace"]
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 4h
+      group_by: ["namespace"]
+      group_wait: 2m
+      group_interval: 15m
+      repeat_interval: 12h
       routes:
         # Home Assistant is outside the cluster. Only these scrape jobs, and
         # only the two public IngressRoutes. Other TargetDown and Traefik
@@ -175,6 +193,12 @@ alertmanager:
           repeat_interval: 4h
           matchers:
             - alertname = "LocalPathPVCOverRequested"
+        # Load per core on hel1 during the weekly restic backups over SMB to
+        # dsplay. Seven episodes a week, none actionable by the agent.
+        - receiver: discord
+          repeat_interval: 4h
+          matchers:
+            - alertname = "NodeSystemSaturation"
         # kube-prometheus-stack 92.17.0 ships node pressure and saturation at
         # severity info. Those stay on sre. The rest of info is noise,
         # including CPUThrottlingHigh, KubeQuotaAlmostFull and KubeQuotaFullyUsed.
