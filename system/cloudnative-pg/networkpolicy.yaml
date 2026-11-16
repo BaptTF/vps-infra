@@ -28,7 +28,7 @@ spec:
             matchExpressions:
               - key: kubernetes.io/metadata.name
                 operator: In
-                values: [authelia, jujudb, lldap, tripkit, vaultwarden, vikunja]
+                values: [archive-index, authelia, jujudb, lldap, tripkit, vaultwarden, vikunja]
       ports:
         - protocol: TCP
           port: 5432

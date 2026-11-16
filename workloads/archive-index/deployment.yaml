@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: archive-index
+  namespace: archive-index
+  labels:
+    app: archive-index
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: archive-index
+  template:
+    metadata:
+      labels:
+        app: archive-index
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: archive-index
+          image: ghcr.io/bapttf/archive-index:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: http-metrics
+              containerPort: 8081
+              protocol: TCP
+          env:
+            - name: ARCHIVE_ROOT
+              value: /mnt/archives
+            - name: API_ADDR
+              value: ":8080"
+            - name: METRICS_ADDR
+              value: ":8081"
+            - name: QUIET_CRON
+              value: "0 18 * * 6"
+            - name: QUIET_FOR
+              value: 12h
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: archive-index-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: archive-index-db-secret
+                  key: password
+            - name: DATABASE_URL
+              value: postgres://$(DB_USERNAME):$(DB_PASSWORD)@postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/archive_index?sslmode=disable
+          volumeMounts:
+            - name: archives
+              mountPath: /mnt/archives
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+        - name: archives
+          persistentVolumeClaim:
+            claimName: archive-index-archives

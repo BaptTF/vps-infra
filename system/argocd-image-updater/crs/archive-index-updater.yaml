@@ -1,0 +1,19 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: archive-index-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: archive-index
+      images:
+        - alias: archive-index
+          imageName: ghcr.io/bapttf/archive-index
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^sha-[0-9a-f]{7}$"
+            pullSecret: pullsecret:argocd/ai-platform-ghcr-login-secret
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

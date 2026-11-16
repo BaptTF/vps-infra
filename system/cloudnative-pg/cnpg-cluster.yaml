@@ -91,3 +91,10 @@ spec:
         login: true
         passwordSecret:
           name: vaultwarden-db-secret
+      - connectionLimit: 5
+        ensure: present
+        inherit: true
+        name: archive_index
+        login: true
+        passwordSecret:
+          name: archive-index-db-secret

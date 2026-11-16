@@ -1,0 +1,33 @@
+# Second mount of the NAS archives share (same SMB source as immich-archives).
+# The pod mounts it read-only. Credentials stay in the immich namespace.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: archive-index-archives
+  annotations:
+    pv.kubernetes.io/provisioned-by: smb.csi.k8s.io
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: immich-archives
+  mountOptions:
+    - dir_mode=0775
+    - file_mode=0664
+    - uid=1000
+    - gid=1000
+    - vers=3.1.1
+    - cache=strict
+    - noserverino
+    - mfsymlinks
+  csi:
+    driver: smb.csi.k8s.io
+    volumeHandle: archive-index-archives
+    volumeAttributes:
+      source: //u619007-sub3.your-storagebox.de/u619007-sub3
+      subDir: archives
+    nodeStageSecretRef:
+      name: immich-archives-secret
+      namespace: immich
