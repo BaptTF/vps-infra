@@ -35,10 +35,10 @@ spec:
             # observed working set (~450-670Mi) so a missed mutation cannot OOM.
             requests:
               cpu: "100m"
-              memory: "512Mi"
+              memory: "768Mi"
             limits:
               cpu: "1000m"
-              memory: "1Gi"
+              memory: "2Gi"
           env:
             - name: APP_DIR
               value: "/app/data"
