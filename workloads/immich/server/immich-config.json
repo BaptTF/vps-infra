@@ -104,7 +104,7 @@
       "concurrency": 5
     },
     "metadataExtraction": {
-      "concurrency": 5
+      "concurrency": 8
     },
     "migration": {
       "concurrency": 5
@@ -125,7 +125,7 @@
       "concurrency": 2
     },
     "thumbnailGeneration": {
-      "concurrency": 5
+      "concurrency": 8
     },
     "videoConversion": {
       "concurrency": 1
