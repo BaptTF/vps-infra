@@ -103,3 +103,35 @@ spec:
             severity: warning
           annotations:
             summary: "archive-index is failing to hash files"
+    # Replaces the kube-prometheus-stack defaults, disabled below. k8up Jobs are
+    # excluded: weekly archives/storagebox backups regularly run past the 12h
+    # KubeJobNotCompleted window, and failed Jobs are garbage-collected by
+    # failedJobsHistoryLimit: 0. Coverage is K8upBackupTooOld / K8upBackupFailedRecently.
+    - name: kubernetes-apps-jobs
+      rules:
+        - alert: KubeJobNotCompleted
+          expr: |
+            time() - max by (namespace, job_name, cluster) (
+              kube_job_status_start_time{job="kube-state-metrics", namespace=~".*"}
+              and
+              kube_job_status_active{job="kube-state-metrics", namespace=~".*"} > 0
+            ) > 43200
+            unless on (namespace, job_name)
+              kube_job_owner{owner_kind="Backup"}
+          labels:
+            severity: warning
+          annotations:
+            summary: "Job did not complete in time"
+            description: "Job {{ $labels.namespace }}/{{ $labels.job_name }} is taking more than 12h to complete."
+        - alert: KubeJobFailed
+          expr: |
+            kube_job_failed{job="kube-state-metrics", namespace=~".*"} > 0
+            unless on (namespace, job_name)
+              kube_job_owner{owner_kind="Backup"}
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Job failed to complete."
+            description: "Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete. Removing the failed job after investigation should clear this alert."
+

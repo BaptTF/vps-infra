@@ -32,8 +32,9 @@ helmCharts:
           enabled: true
           createDefaultRules: true
           # Prune and check run on the Home Assistant Pi, not in the cluster.
-          jobFailedRulesFor:
-            - backup
+          # K8upBackupFailed joins kube_job_labels, which this cluster does
+          # not export. Replaced by K8upBackupFailedRecently (operator counter).
+          jobFailedRulesFor: []
 
 resources:
   - infisical-secret.yaml

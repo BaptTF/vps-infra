@@ -199,6 +199,17 @@ alertmanager:
           repeat_interval: 4h
           matchers:
             - alertname = "NodeSystemSaturation"
+        # Baptiste wants k8up backup alerts on Discord (#alerts) as well as
+        # the sre webhook. continue alone does not fall through to the default
+        # receiver, so a second route sends the same alerts to sre.
+        - receiver: discord
+          continue: true
+          repeat_interval: 4h
+          matchers:
+            - alertname =~ "^(K8upBackupTooOld|K8upBackupFailedRecently)$"
+        - receiver: sre
+          matchers:
+            - alertname =~ "^(K8upBackupTooOld|K8upBackupFailedRecently)$"
         # kube-prometheus-stack 92.17.0 ships node pressure and saturation at
         # severity info. Those stay on sre. The rest of info is noise,
         # including CPUThrottlingHigh, KubeQuotaAlmostFull and KubeQuotaFullyUsed.
@@ -261,6 +272,9 @@ defaultRules:
     # Replaced in local-path-exporter.yaml (local-path) and prometheusrules.yaml (other classes).
     KubePersistentVolumeFillingUp: true
     KubePersistentVolumeInodesFillingUp: true
+    # Replaced in prometheusrules.yaml, excluding k8up Backup Jobs.
+    KubeJobFailed: true
+    KubeJobNotCompleted: true
 
 prometheus-node-exporter:
   service:

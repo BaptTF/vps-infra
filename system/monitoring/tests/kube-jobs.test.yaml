@@ -1,0 +1,53 @@
+# Run from system/monitoring:
+#   yq '.spec' prometheusrules.yaml > /tmp/cluster-apps-rules.yaml
+#   promtool test rules tests/kube-jobs.test.yaml
+rule_files:
+  - /tmp/cluster-apps-rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # A long-running k8up Backup Job must not fire KubeJobNotCompleted.
+  - interval: 1h
+    input_series:
+      - series: 'kube_job_status_start_time{job="kube-state-metrics", namespace="immich", job_name="backup-archives-backup-backup-run-0"}'
+        values: '0x40'
+      - series: 'kube_job_status_active{job="kube-state-metrics", namespace="immich", job_name="backup-archives-backup-backup-run-0"}'
+        values: '1x40'
+      - series: 'kube_job_owner{namespace="immich", job_name="backup-archives-backup-backup-run-0", owner_kind="Backup", owner_name="archives-backup-backup-run"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 20h
+        alertname: KubeJobNotCompleted
+        exp_alerts: []
+
+  # A non-k8up Job running past 12h still fires.
+  - interval: 1h
+    input_series:
+      - series: 'kube_job_status_start_time{job="kube-state-metrics", namespace="default", job_name="manual-job"}'
+        values: '0x20'
+      - series: 'kube_job_status_active{job="kube-state-metrics", namespace="default", job_name="manual-job"}'
+        values: '1x20'
+    alert_rule_test:
+      - eval_time: 13h
+        alertname: KubeJobNotCompleted
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: default
+              job_name: manual-job
+            exp_annotations:
+              summary: "Job did not complete in time"
+              description: "Job default/manual-job is taking more than 12h to complete."
+
+  # A failed k8up Backup Job must not fire KubeJobFailed.
+  - interval: 5m
+    input_series:
+      - series: 'kube_job_failed{job="kube-state-metrics", namespace="gowa", job_name="backup-pvc-backup-backup-x-0"}'
+        values: '1x10'
+      - series: 'kube_job_owner{namespace="gowa", job_name="backup-pvc-backup-backup-x-0", owner_kind="Backup", owner_name="pvc-backup-backup-x"}'
+        values: '1x10'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubeJobFailed
+        exp_alerts: []

@@ -145,6 +145,95 @@ spec:
           annotations:
             summary: "cloudflare-exporter is down"
             description: "No healthy scrape for 30 minutes; the R2 size alert is running on stale data."
+        # k8up last-success time comes from the kept successful Job
+        # (successfulJobsHistoryLimit: 1). k8up_jobs_* counters reset on every
+        # operator restart and have no Schedule label (immich has three).
+        # kube_job_* of failed Jobs is dropped by failedJobsHistoryLimit: 0.
+        # A weekly job still running (grace 72h) is not "too old" yet.
+        - alert: K8upBackupTooOld
+          expr: |
+            (
+              time() - max by (namespace, schedule) (
+                label_replace(
+                  kube_job_status_completion_time
+                    * on(namespace, job_name) group_left(owner_name)
+                      kube_job_owner{owner_kind="Backup", owner_name=~"^pvc-backup-backup-.*"}
+                    and on(namespace, job_name)
+                      (kube_job_status_succeeded > 0),
+                  "schedule", "pvc-backup", "owner_name", ".*"
+                )
+              )
+            ) > 36 * 3600
+            unless on (namespace, schedule)
+            (
+              min by (namespace, schedule) (
+                label_replace(
+                  (time() - kube_job_status_start_time)
+                    * on(namespace, job_name) group_left(owner_name)
+                      kube_job_owner{owner_kind="Backup", owner_name=~"^(pvc|archives|storagebox)-backup-backup-.*"}
+                    and on(namespace, job_name)
+                      (kube_job_status_active > 0),
+                  "schedule", "$1", "owner_name", "^([a-z]+-backup)-backup-.*"
+                )
+              ) < 12 * 3600
+            )
+          for: 1h
+          labels:
+            severity: warning
+            period: daily
+          annotations:
+            summary: "No recent k8up backup for {{ $labels.namespace }}/{{ $labels.schedule }}"
+            description: "Last successful backup is {{ $value | humanizeDuration }} old; the schedule is daily (threshold 36h)."
+        - alert: K8upBackupTooOld
+          expr: |
+            (
+              time() - max by (namespace, schedule) (
+                label_replace(
+                  kube_job_status_completion_time
+                    * on(namespace, job_name) group_left(owner_name)
+                      kube_job_owner{owner_kind="Backup", owner_name=~"^(archives|storagebox)-backup-backup-.*"}
+                    and on(namespace, job_name)
+                      (kube_job_status_succeeded > 0),
+                  "schedule", "$1", "owner_name", "^([a-z]+-backup)-backup-.*"
+                )
+              )
+            ) > 8 * 86400
+            unless on (namespace, schedule)
+            (
+              min by (namespace, schedule) (
+                label_replace(
+                  (time() - kube_job_status_start_time)
+                    * on(namespace, job_name) group_left(owner_name)
+                      kube_job_owner{owner_kind="Backup", owner_name=~"^(pvc|archives|storagebox)-backup-backup-.*"}
+                    and on(namespace, job_name)
+                      (kube_job_status_active > 0),
+                  "schedule", "$1", "owner_name", "^([a-z]+-backup)-backup-.*"
+                )
+              ) < 72 * 3600
+            )
+          for: 1h
+          labels:
+            severity: warning
+            period: weekly
+          annotations:
+            summary: "No recent k8up backup for {{ $labels.namespace }}/{{ $labels.schedule }}"
+            description: "Last successful backup is {{ $value | humanizeDuration }} old; the schedule is weekly (threshold 8d)."
+        # Operator counter: survives Job cleanup. Resets on operator restart
+        # (may miss, no false positive). No Schedule label, so this is per namespace.
+        - alert: K8upBackupFailedRecently
+          expr: |
+            sum by (namespace) (
+              label_replace(
+                increase(k8up_jobs_failed_counter{jobType="backup"}[24h]),
+                "namespace", "$1", "exported_namespace", "(.+)"
+              )
+            ) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "k8up backup failed in {{ $labels.namespace }}"
+            description: "{{ $value | humanize }} k8up backup job(s) failed in the last 24 hours."
     - name: sre-cert-manager
       rules:
         - alert: CertificateExpiringSoon

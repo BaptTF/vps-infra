@@ -87,3 +87,121 @@ tests:
             exp_annotations:
               summary: "cloudflare-exporter is down"
               description: "No healthy scrape for 30 minutes; the R2 size alert is running on stale data."
+
+  # Daily k8up backup completed 2h ago: under the 36h threshold.
+  - interval: 5m
+    input_series:
+      - series: 'kube_job_status_completion_time{namespace="vikunja", job_name="backup-pvc-backup-backup-aaa-0"}'
+        values: '0x50'
+      - series: 'kube_job_status_succeeded{namespace="vikunja", job_name="backup-pvc-backup-backup-aaa-0"}'
+        values: '1x50'
+      - series: 'kube_job_owner{namespace="vikunja", job_name="backup-pvc-backup-backup-aaa-0", owner_kind="Backup", owner_name="pvc-backup-backup-aaa", owner_is_controller="true"}'
+        values: '1x50'
+    alert_rule_test:
+      - eval_time: 2h
+        alertname: K8upBackupTooOld
+        exp_alerts: []
+
+  # Daily k8up backup last succeeded 40h ago: fires after the 1h pending window.
+  - interval: 5m
+    input_series:
+      - series: 'kube_job_status_completion_time{namespace="vikunja", job_name="backup-pvc-backup-backup-aaa-0"}'
+        values: '0x500'
+      - series: 'kube_job_status_succeeded{namespace="vikunja", job_name="backup-pvc-backup-backup-aaa-0"}'
+        values: '1x500'
+      - series: 'kube_job_owner{namespace="vikunja", job_name="backup-pvc-backup-backup-aaa-0", owner_kind="Backup", owner_name="pvc-backup-backup-aaa", owner_is_controller="true"}'
+        values: '1x500'
+    alert_rule_test:
+      - eval_time: 40h
+        alertname: K8upBackupTooOld
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: vikunja
+              schedule: pvc-backup
+              period: daily
+            exp_annotations:
+              summary: "No recent k8up backup for vikunja/pvc-backup"
+              description: "Last successful backup is 1d 16h 0m 0s old; the schedule is daily (threshold 36h)."
+
+  # Weekly archives last succeeded 16d ago, but a Job has been running 33h: suppressed.
+  - interval: 5m
+    input_series:
+      - series: 'kube_job_status_completion_time{namespace="immich", job_name="backup-archives-backup-backup-old-0"}'
+        values: '0x4700'
+      - series: 'kube_job_status_succeeded{namespace="immich", job_name="backup-archives-backup-backup-old-0"}'
+        values: '1x4700'
+      - series: 'kube_job_owner{namespace="immich", job_name="backup-archives-backup-backup-old-0", owner_kind="Backup", owner_name="archives-backup-backup-old", owner_is_controller="true"}'
+        values: '1x4700'
+      - series: 'kube_job_status_start_time{namespace="immich", job_name="backup-archives-backup-backup-run-0"}'
+        values: '1263600x4700'
+      - series: 'kube_job_status_active{namespace="immich", job_name="backup-archives-backup-backup-run-0"}'
+        values: '1x4700'
+      - series: 'kube_job_owner{namespace="immich", job_name="backup-archives-backup-backup-run-0", owner_kind="Backup", owner_name="archives-backup-backup-run", owner_is_controller="true"}'
+        values: '1x4700'
+    alert_rule_test:
+      - eval_time: 16d
+        alertname: K8upBackupTooOld
+        exp_alerts: []
+
+  # Weekly storagebox last succeeded 9d ago, no Job running: fires.
+  - interval: 5m
+    input_series:
+      - series: 'kube_job_status_completion_time{namespace="immich", job_name="backup-storagebox-backup-backup-old-0"}'
+        values: '0x2700'
+      - series: 'kube_job_status_succeeded{namespace="immich", job_name="backup-storagebox-backup-backup-old-0"}'
+        values: '1x2700'
+      - series: 'kube_job_owner{namespace="immich", job_name="backup-storagebox-backup-backup-old-0", owner_kind="Backup", owner_name="storagebox-backup-backup-old", owner_is_controller="true"}'
+        values: '1x2700'
+    alert_rule_test:
+      - eval_time: 9d
+        alertname: K8upBackupTooOld
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: immich
+              schedule: storagebox-backup
+              period: weekly
+            exp_annotations:
+              summary: "No recent k8up backup for immich/storagebox-backup"
+              description: "Last successful backup is 9d 0h 0m 0s old; the schedule is weekly (threshold 8d)."
+
+  # Weekly storagebox last succeeded 5d ago: under the 8d threshold.
+  - interval: 5m
+    input_series:
+      - series: 'kube_job_status_completion_time{namespace="immich", job_name="backup-storagebox-backup-backup-ok-0"}'
+        values: '0x1500'
+      - series: 'kube_job_status_succeeded{namespace="immich", job_name="backup-storagebox-backup-backup-ok-0"}'
+        values: '1x1500'
+      - series: 'kube_job_owner{namespace="immich", job_name="backup-storagebox-backup-backup-ok-0", owner_kind="Backup", owner_name="storagebox-backup-backup-ok", owner_is_controller="true"}'
+        values: '1x1500'
+    alert_rule_test:
+      - eval_time: 5d
+        alertname: K8upBackupTooOld
+        exp_alerts: []
+
+  # No k8up failure in 24h.
+  - interval: 5m
+    input_series:
+      - series: 'k8up_jobs_failed_counter{jobType="backup", exported_namespace="gowa", namespace="k8up"}'
+        values: '0x360'
+    alert_rule_test:
+      - eval_time: 25h
+        alertname: K8upBackupFailedRecently
+        exp_alerts: []
+
+  # A failure increment is visible in the last 24h.
+  - interval: 5m
+    input_series:
+      - series: 'k8up_jobs_failed_counter{jobType="backup", exported_namespace="gowa", namespace="k8up"}'
+        values: '0x120 1x240'
+    alert_rule_test:
+      - eval_time: 25h
+        alertname: K8upBackupFailedRecently
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: gowa
+            exp_annotations:
+              summary: "k8up backup failed in gowa"
+              description: "1 k8up backup job(s) failed in the last 24 hours."
