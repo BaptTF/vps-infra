@@ -222,7 +222,7 @@ egress-selector-mode: disabled
 EOF
 
 # 3. Install k3s (picks up config.yaml automatically at first boot)
-curl -sfL https://get.k3s.io | sh
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=v1.36 sh
 ```
 
 > **Note on egress-selector-mode:** the workers bind their kubelet to the Tailscale address (`address=` in the agent config below). With the default mode (`agent`), the API server reaches kubelets through the k3s agent tunnel, which dials `127.0.0.1:10250` on the worker and gets refused: `kubectl logs`, `kubectl exec` and `kubectl port-forward` then fail with `EOF` for every pod on that worker. `disabled` makes the API server dial each kubelet directly on its node IP over Tailscale (`tag:k3s` to `tag:k3s` is open). On an existing server, add the line to `/etc/rancher/k3s/config.yaml` and run `systemctl restart k3s`.
@@ -335,10 +335,12 @@ The `address` argument makes the kubelet listen on the node's Tailscale address,
 ### Step 2: Install k3s agent
 
 ```bash
-curl -sfL https://get.k3s.io | sh -s - agent
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=v1.36 sh -s - agent
 ```
 
 K3s reads `/etc/rancher/k3s/config.yaml` automatically. The agent will connect to the master over Tailscale and join the cluster.
+
+> Pin `INSTALL_K3S_CHANNEL` to the same minor as the system-upgrade channel (`v1.36`). `stable` currently installs v1.37, which a v1.36 server rejects.
 
 ### Step 3: Label the node
 
@@ -409,7 +411,6 @@ node-ip: "${WORKER_TS_IP}"
 flannel-iface: "tailscale0"
 node-label:
   - "node-role=spare"
-  - "node-role.kubernetes.io/spare=true"
   - "dedicated=spare"
 node-taint:
   - "dedicated=spare:NoSchedule"
@@ -420,10 +421,12 @@ kubelet-arg:
 EOF
 ```
 
+> Do not set `node-role.kubernetes.io/*` labels through `--node-labels`: kubelet refuses reserved labels. Use `node-role=spare`; the standard `node-role.kubernetes.io/*` label is managed by the API server.
+
 #### 4. Install the agent
 
 ```bash
-curl -sfL https://get.k3s.io | sh -s - agent
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=v1.36 sh -s - agent
 ```
 
 #### 5. Restart k3s with Tailscale
