@@ -1,4 +1,4 @@
-# Prometheus scrapes metrics. The lookup API is reached with kubectl port-forward.
+# Prometheus scrapes metrics. The lookup API (8080) is reached through its Tailscale ingress proxy.
 # Postgres is the shared CNPG cluster; DNS is required to resolve it.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -13,6 +13,17 @@ spec:
     - Ingress
     - Egress
   ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: archive-index
+              tailscale.com/parent-resource-ns: archive-index
+      ports:
+        - protocol: TCP
+          port: 8080
     - from:
         - namespaceSelector:
             matchLabels:
