@@ -73,7 +73,7 @@ spec:
               mountPath: /opt/data
       containers:
         - name: hermes-leo
-          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.15
+          image: ghcr.io/rjullien/hermes-leo-config/hermes-leo-custom:v2026.11.16.1
           imagePullPolicy: IfNotPresent
           # Pas de capabilities.drop: [ALL] ici : l'image démarre root pour que
           # s6-rc (cont-init 01/015/02) chown /run et /opt/data puis passe aux
