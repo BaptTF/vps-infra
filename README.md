@@ -117,6 +117,8 @@ The system-upgrade plans follow `https://update.k3s.io/v1-release/channels/v1.36
 
 kured labels a node `kured=rebooting` while it reboots, and the plans skip that node. Deleting a plan stops further k3s upgrades.
 
+kured tolerates `dedicated=spare:NoSchedule`, so spare workers (`tag:server`) are rebooted after `unattended-upgrades`. The system-upgrade `agent-plan` does not tolerate that taint; k3s upgrades on spare workers are manual.
+
 ### Restart k3s with Tailscale
 
 k3s runs entirely on `tailscale0`: `node-ip`, `flannel-iface`, and on the server `bind-address`. When tailscaled restarts (Tailscale auto-update, `systemctl restart tailscaled`, crash), `tailscale0` is deleted and recreated, and the kernel deletes `flannel.1` with it. Since k3s v1.36.6, flannel recreates `flannel.1` in place but does not restore the route, FDB and ARP entries for the other nodes (`reCreateVxlan`, still the case on flannel `master`). k3s stays `active`, and pods lose the other node and the cluster DNS. Older k3s versions crashed at that point, so systemd restarted them and the problem did not show. First seen on 2026-11-08 after the Tailscale 1.104.5 auto-update.
@@ -296,6 +298,8 @@ Worker nodes run k3s in agent mode and join the existing cluster over Tailscale.
 - Debian/Ubuntu VM with Tailscale installed and connected to the same tailnet
 - SSH access as root through Tailscale SSH
 - The k3s server node-token (on the master at `/var/lib/rancher/k3s/server/node-token`)
+- Swap disabled (kubelet fails with swap on): `swapoff -a`, then comment the swap entry in `/etc/fstab`
+- NTP active and inotify limits raised (see "NTP" and "inotify limits" above)
 
 ### Step 1: Create the agent config
 
@@ -346,6 +350,112 @@ kubectl label nodes <worker-node-name> node-role=worker
 
 # Verify
 kubectl get nodes -o wide
+```
+
+### Personal server worker (`tag:server`, tainted)
+
+Personal/home servers join as spare workers. They keep `tag:server` (not `tag:k3s`); the Tailscale policy in `infra-private` opens only the k3s ports between `tag:server` and `tag:k3s`. The worker is tainted so nothing schedules on it by default.
+
+Prerequisites: the generic worker prerequisites above, plus:
+
+- Tailscale tag `tag:server` and the policy applied (see `infra-private/tailscale/policy.hujson`).
+- `unattended-upgrades` installed and configured (see "Unattended upgrades" above); kured reboots the node when needed.
+- The worker must not receive application workloads: use `dedicated=spare:NoSchedule`.
+
+#### 1. Disable swap
+
+```bash
+swapoff -a
+cp -a /etc/fstab /etc/fstab.bak.$(date +%F)
+sed -i 's|^UUID=<swap-uuid>[[:space:]]|#&|' /etc/fstab
+swapon --show   # must be empty
+```
+
+Use the swap UUID from `swapon --show` or `/etc/fstab`.
+
+#### 2. inotify limits
+
+```bash
+cat <<'EOF' > /etc/sysctl.d/99-inotify.conf
+fs.inotify.max_user_instances=1024
+fs.inotify.max_user_watches=524288
+EOF
+sysctl --system
+```
+
+#### 3. Agent config
+
+The token must be copied from the admin machine: `tag:server` is denied SSH to the master. The worker only needs the token file.
+
+```bash
+# From the admin machine
+ssh root@<master> 'cat /var/lib/rancher/k3s/server/node-token' \
+  | ssh root@<worker> 'umask 077; install -d -m 700 /var/lib/rancher/k3s/agent; cat > /var/lib/rancher/k3s/agent/token'
+```
+
+On the worker:
+
+```bash
+MASTER_TS_IP="<tailscale IP of the master>"
+WORKER_TS_IP=$(tailscale ip -4)
+NODE_NAME=$(hostname)
+
+install -d -m 755 /etc/rancher/k3s
+cat <<EOF > /etc/rancher/k3s/config.yaml
+server: "https://${MASTER_TS_IP}:6443"
+token-file: "/var/lib/rancher/k3s/agent/token"
+node-name: "${NODE_NAME}"
+node-ip: "${WORKER_TS_IP}"
+flannel-iface: "tailscale0"
+node-label:
+  - "node-role=spare"
+  - "node-role.kubernetes.io/spare=true"
+  - "dedicated=spare"
+node-taint:
+  - "dedicated=spare:NoSchedule"
+kubelet-arg:
+  - "address=${WORKER_TS_IP}"
+  - "system-reserved=memory=512Mi"
+  - "kube-reserved=memory=256Mi"
+EOF
+```
+
+#### 4. Install the agent
+
+```bash
+curl -sfL https://get.k3s.io | sh -s - agent
+```
+
+#### 5. Restart k3s with Tailscale
+
+Apply the drop-in from "Restart k3s with Tailscale" with `UNIT=k3s-agent`, then:
+
+```bash
+systemctl daemon-reload
+systemctl restart k3s-agent
+```
+
+#### 6. Verify
+
+```bash
+kubectl get nodes -o wide
+kubectl get node <node-name> -o jsonpath='{.spec.taints}'
+kubectl describe node <node-name> | grep -A4 Taints
+kubectl get pods -A -o wide --field-selector spec.nodeName=<node-name>
+```
+
+Expected: `Ready`, taint `dedicated=spare:NoSchedule`, and only the node-exporter and kured pods. A pod without the toleration must stay `Pending`; a pod with `dedicated=spare:NoSchedule` must run.
+
+#### 7. Rollback
+
+```bash
+/usr/local/bin/k3s-agent-uninstall.sh
+# From kubectl
+kubectl delete node <node-name>
+rm -rf /etc/rancher/k3s /var/lib/rancher/k3s
+rm -f /etc/systemd/system/k3s-agent.service.d/10-tailscale.conf
+systemctl daemon-reload
+# Swap: restore /etc/fstab.bak.* and run swapon -a
 ```
 
 ### Removing a worker node
