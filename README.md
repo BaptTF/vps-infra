@@ -447,7 +447,9 @@ kubectl describe node <node-name> | grep -A4 Taints
 kubectl get pods -A -o wide --field-selector spec.nodeName=<node-name>
 ```
 
-Expected: `Ready`, taint `dedicated=spare:NoSchedule`, and only the node-exporter and kured pods. A pod without the toleration must stay `Pending`; a pod with `dedicated=spare:NoSchedule` must run.
+Expected: `Ready`, taint `dedicated=spare:NoSchedule`, and only the system DaemonSets that tolerate the taint: node-exporter, kured, and csi-smb-node. A pod without the toleration must stay `Pending`; a pod with `dedicated=spare:NoSchedule` must run.
+
+`csi-smb-node` tolerates all taints and runs on the spare. If a workload mounting SMB storage is later scheduled here, install `cifs-utils` (see "CIFS utilities").
 
 #### 7. Rollback
 
