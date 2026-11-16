@@ -1,0 +1,21 @@
+# Lookup API on the tailnet, for comparing the archives with the photos on the NAS.
+# tag:archive-index (infra-private policy.hujson): admin, tag:agents and dsplay only, not the family.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: archive-index
+  namespace: archive-index
+  labels:
+    app: archive-index
+  annotations:
+    tailscale.com/tags: tag:archive-index
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: archive-index
+      port:
+        number: 8080
+  tls:
+    - hosts:
+        - archive-index
