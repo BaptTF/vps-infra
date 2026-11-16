@@ -262,3 +262,19 @@ subjects:
   - kind: ServiceAccount
     name: kps-prometheus
     namespace: monitoring
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: archive-index
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: [archive-index]
+  selector:
+    matchLabels:
+      app: archive-index
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 30s

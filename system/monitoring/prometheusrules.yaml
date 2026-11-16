@@ -85,3 +85,21 @@ spec:
             severity: warning
           annotations:
             summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} has {{ $value | humanizePercentage }} free inodes"
+        - alert: ArchiveIndexWalkStalled
+          expr: |
+            archive_index_walk_running == 1
+            and increase(archive_index_files_hashed_total[2h]) == 0
+            and increase(archive_index_files_skipped_total[2h]) == 0
+          for: 2h
+          labels:
+            severity: warning
+          annotations:
+            summary: "archive-index walk is running but hashing nothing"
+        - alert: ArchiveIndexHashErrors
+          expr: |
+            increase(archive_index_hash_errors_total[15m]) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "archive-index is failing to hash files"

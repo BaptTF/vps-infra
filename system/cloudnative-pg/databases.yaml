@@ -124,3 +124,14 @@ spec:
   ensure: absent
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: archive-index-db
+  namespace: cnpg-system
+spec:
+  name: archive_index
+  owner: archive_index
+  cluster:
+    name: postgres-cluster
