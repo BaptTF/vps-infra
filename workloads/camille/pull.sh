@@ -13,10 +13,15 @@ find /www -mindepth 1 -exec chmod a+rX {} +
 if [ "${GIT_PULL_ONCE:-}" = "1" ]; then
   exit 0
 fi
+# Only reset when the site branch moved: the chmod above bumps every ctime, so an
+# unconditional reset --hard rewrote all files each minute and hit the CPU limit.
 while true; do
-  if git -C /www fetch --depth 1 origin site && git -C /www reset --hard FETCH_HEAD; then
-    find /www -mindepth 1 -exec chmod a+rX {} +
-    echo "synced $(git -C /www rev-parse --short HEAD)"
+  if git -C /www fetch --quiet --depth 1 origin site; then
+    if [ "$(git -C /www rev-parse HEAD)" != "$(git -C /www rev-parse FETCH_HEAD)" ]; then
+      git -C /www reset --quiet --hard FETCH_HEAD
+      find /www -mindepth 1 -exec chmod a+rX {} +
+      echo "synced $(git -C /www rev-parse --short HEAD)"
+    fi
   else
     echo "git sync failed, retrying in 60s" >&2
   fi
