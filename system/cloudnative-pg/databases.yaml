@@ -130,6 +130,9 @@ kind: Database
 metadata:
   name: archive-index-db
   namespace: cnpg-system
+  annotations:
+    # Le rôle archive_index est créé par le Cluster (wave 1) : la Database doit passer après.
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   name: archive_index
   owner: archive_index
