@@ -18,9 +18,12 @@ fi
 while true; do
   if git -C /www fetch --quiet --depth 1 origin site; then
     if [ "$(git -C /www rev-parse HEAD)" != "$(git -C /www rev-parse FETCH_HEAD)" ]; then
-      git -C /www reset --quiet --hard FETCH_HEAD
-      find /www -mindepth 1 -exec chmod a+rX {} +
-      echo "synced $(git -C /www rev-parse --short HEAD)"
+      if git -C /www reset --quiet --hard FETCH_HEAD; then
+        find /www -mindepth 1 -exec chmod a+rX {} +
+        echo "synced $(git -C /www rev-parse --short HEAD)"
+      else
+        echo "git reset failed, retrying in 60s" >&2
+      fi
     fi
   else
     echo "git sync failed, retrying in 60s" >&2
