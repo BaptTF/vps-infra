@@ -119,6 +119,8 @@ _CATALOGUE = {
     "us.anthropic.claude-opus-5-5": (4.40e-6, 22e-6, 0.22e-6, 5.50e-6),
     # OpenCode Go list price, same as DeepSeek V4 Flash: $0.15 / $0.60 / $0.003.
     "deepseek-v4-flash-vision-exp": (1.5e-7, 6e-7, 3e-9, 0.0),
+    # OpenCode Go table, 2026-11-17: $1.50 / $4.50 / $0.075 / $1.875.
+    "qwen4-max": (1.5e-6, 4.5e-6, 7.5e-8, 1.875e-6),
 }
 
 
