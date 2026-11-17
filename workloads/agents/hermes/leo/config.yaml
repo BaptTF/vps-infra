@@ -28,6 +28,12 @@ model_aliases:
     provider: custom
     base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
     key_env: BIFROST_API_KEY
+  # Vercel AI Gateway : même DeepSeek V4.1 Flash 1017, servi par Baseten en fast.
+  turbo:
+    model: vercel/deepseek/deepseek-v4.1-flash-1017-fast
+    provider: custom
+    base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+    key_env: BIFROST_API_KEY
 approvals:
   mode: false
 terminal:

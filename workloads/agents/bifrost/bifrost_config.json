@@ -104,6 +104,30 @@
         "retry_backoff_initial_ms": 1000,
         "retry_backoff_max_ms": 30000
       }
+    },
+    "vercel": {
+      "keys": [
+        {
+          "name": "vercel-key-1",
+          "value": "env.VERCEL_API_KEY",
+          "models": ["deepseek/deepseek-v4.1-flash-1017-fast"],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://ai-gateway.vercel.sh/v1",
+        "default_request_timeout_in_seconds": 600,
+        "max_retries": 3,
+        "retry_backoff_initial_ms": 1000,
+        "retry_backoff_max_ms": 30000
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "chat_completion": true,
+          "chat_completion_stream": true
+        }
+      }
     }
   },
   "governance": {
@@ -123,7 +147,8 @@
         "provider_configs": [
           { "provider": "gemini", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
           { "provider": "groq", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
-          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
+          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
+          { "provider": "vercel", "allowed_models": ["deepseek/deepseek-v4.1-flash-1017-fast"], "key_ids": ["*"], "weight": 1 }
         ]
       },
       {
@@ -199,7 +224,8 @@
       {"id": "opencode-go-gpt-6-luna", "name": "opencode-go gpt-6-luna", "scope_kind": "provider", "provider_id": "opencode-go", "match_type": "exact", "pattern": "gpt-6-luna", "request_types": ["chat_completion", "responses"], "pricing_patch": "{\"input_cost_per_token\":1e-07,\"output_cost_per_token\":5e-07,\"cache_read_input_token_cost\":1e-08,\"cache_creation_input_token_cost\":1.25e-07,\"input_cost_per_token_above_272k_tokens\":2e-07,\"output_cost_per_token_above_272k_tokens\":7.5e-07,\"cache_read_input_token_cost_above_272k_tokens\":2e-08,\"cache_creation_input_token_cost_above_272k_tokens\":2.5e-07}"},
       {"id": "opencode-go-gpt-5.6-luna", "name": "opencode-go gpt-5.6-luna", "scope_kind": "provider", "provider_id": "opencode-go", "match_type": "exact", "pattern": "gpt-5.6-luna", "request_types": ["chat_completion", "responses"], "pricing_patch": "{\"input_cost_per_token\":2e-07,\"output_cost_per_token\":1.2e-06,\"cache_read_input_token_cost\":2e-08,\"cache_creation_input_token_cost\":2.5e-07,\"input_cost_per_token_above_272k_tokens\":4e-07,\"output_cost_per_token_above_272k_tokens\":1.8e-06,\"cache_read_input_token_cost_above_272k_tokens\":4e-08,\"cache_creation_input_token_cost_above_272k_tokens\":5e-07}"},
       {"id": "opencode-go-claude-haiku-5-5", "name": "opencode-go claude-haiku-5-5", "scope_kind": "provider", "provider_id": "opencode-go", "match_type": "exact", "pattern": "claude-haiku-5-5", "request_types": ["chat_completion", "responses"], "pricing_patch": "{\"input_cost_per_token\":1e-07,\"output_cost_per_token\":5e-07,\"cache_read_input_token_cost\":1e-08,\"cache_creation_input_token_cost\":1.25e-07,\"input_cost_per_token_above_100k_tokens\":5e-07,\"output_cost_per_token_above_100k_tokens\":2.5e-06,\"cache_read_input_token_cost_above_100k_tokens\":5e-08,\"cache_creation_input_token_cost_above_100k_tokens\":6.25e-07}"},
-      {"id": "opencode-go-gemini-4-argon", "name": "opencode-go gemini-4-argon", "scope_kind": "provider", "provider_id": "opencode-go", "match_type": "exact", "pattern": "gemini-4-argon", "request_types": ["chat_completion", "responses"], "pricing_patch": "{\"input_cost_per_token\":2e-06,\"output_cost_per_token\":1e-05,\"cache_read_input_token_cost\":1e-07}"}
+      {"id": "opencode-go-gemini-4-argon", "name": "opencode-go gemini-4-argon", "scope_kind": "provider", "provider_id": "opencode-go", "match_type": "exact", "pattern": "gemini-4-argon", "request_types": ["chat_completion", "responses"], "pricing_patch": "{\"input_cost_per_token\":2e-06,\"output_cost_per_token\":1e-05,\"cache_read_input_token_cost\":1e-07}"},
+      {"id": "vercel-deepseek-v4.1-flash-1017-fast", "name": "vercel deepseek-v4.1-flash-1017-fast", "scope_kind": "provider", "provider_id": "vercel", "match_type": "exact", "pattern": "deepseek/deepseek-v4.1-flash-1017-fast", "request_types": ["chat_completion", "responses"], "pricing_patch": "{\"input_cost_per_token\":6e-07,\"output_cost_per_token\":2.4e-06,\"cache_read_input_token_cost\":1e-08}"}
     ],
     "routing_rules": [
       {
@@ -209,6 +235,16 @@
         "cel_expression": "provider == \"opencode-go\" && model.endsWith(\"deepseek-v4.1-flash\")",
         "targets": [{ "weight": 1 }],
         "fallbacks": ["opencode-go/glm-5.3-flash", "opencode-go/mimo-v2.6-flash"],
+        "scope": "global",
+        "priority": 0
+      },
+      {
+        "id": "leo-turbo-fallback",
+        "name": "vercel fast -> opencode-go deepseek",
+        "enabled": true,
+        "cel_expression": "provider == \"vercel\" && model == \"deepseek/deepseek-v4.1-flash-1017-fast\"",
+        "targets": [{ "weight": 1 }],
+        "fallbacks": ["opencode-go/deepseek-v4.1-flash"],
         "scope": "global",
         "priority": 0
       }

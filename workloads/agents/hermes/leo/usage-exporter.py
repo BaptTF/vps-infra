@@ -121,6 +121,8 @@ _CATALOGUE = {
     "deepseek-v4-flash-vision-exp": (1.5e-7, 6e-7, 3e-9, 0.0),
     # OpenCode Go table, 2026-11-17: $1.50 / $4.50 / $0.075 / $1.875.
     "qwen4-max": (1.5e-6, 4.5e-6, 7.5e-8, 1.875e-6),
+    # Vercel AI Gateway, DeepSeek V4.1 Flash 1017 Fast: $0.60 / $2.40 / $0.01.
+    "deepseek/deepseek-v4.1-flash-1017-fast": (6.0e-7, 2.4e-6, 1.0e-8, 0.0),
 }
 
 
