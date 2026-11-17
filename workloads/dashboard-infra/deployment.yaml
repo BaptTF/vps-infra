@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: dashboard-infra
-          image: ghcr.io/bapttf/dashboard-infra:latest
+          image: ghcr.io/bapttf/dashboard-infra:sha-4cd7b5b
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
