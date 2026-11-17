@@ -115,7 +115,7 @@
         }
       ],
       "network_config": {
-        "base_url": "https://ai-gateway.vercel.sh/v1",
+        "base_url": "https://ai-gateway.vercel.sh",
         "default_request_timeout_in_seconds": 600,
         "max_retries": 3,
         "retry_backoff_initial_ms": 1000,
