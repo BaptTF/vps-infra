@@ -124,6 +124,7 @@
       "custom_provider_config": {
         "base_provider_type": "openai",
         "allowed_requests": {
+          "list_models": true,
           "chat_completion": true,
           "chat_completion_stream": true
         }
@@ -246,7 +247,7 @@
         "targets": [{ "weight": 1 }],
         "fallbacks": ["opencode-go/deepseek-v4.1-flash"],
         "scope": "global",
-        "priority": 0
+        "priority": 1
       }
     ]
   }
