@@ -132,6 +132,14 @@ spec:
                   name: ai-usage-exporter-secret-cursor
                   key: CURSOR_REFRESH_TOKEN
                   optional: true
+            # Même clé que Bifrost (env.VERCEL_API_KEY), dossier Infisical
+            # /agents/bifrost/vercel. Optionnelle : l'exporter démarre sans elle.
+            - name: VERCEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-usage-exporter-secret-vercel
+                  key: VERCEL_API_KEY
+                  optional: true
           livenessProbe:
             httpGet:
               path: /healthz
