@@ -101,7 +101,7 @@ spec:
     matchExpressions:
       - key: tailscale.com/parent-resource
         operator: In
-        values: [ha, ha-eyg, ha-home, ha-cam, nas-snmp, nas-proxy, leo-ha, leo-dsplay, leo-diskstation]
+        values: [ha, ha-eyg, ha-home, ha-cam, nas-snmp, nas-proxy, leo-ha, leo-dsplay, leo-diskstation, leo-talos]
   policyTypes:
     - Ingress
   ingress:

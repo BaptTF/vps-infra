@@ -60,3 +60,9 @@ spec:
       namespace: openclaw
       jsonPointers:
       - /spec/externalName
+    - group: ""
+      kind: Service
+      name: leo-talos
+      namespace: openclaw
+      jsonPointers:
+      - /spec/externalName

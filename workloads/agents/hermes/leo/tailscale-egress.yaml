@@ -20,6 +20,22 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: leo-talos
+  namespace: openclaw
+  annotations:
+    tailscale.com/tailnet-fqdn: talos.tail4c7c90.ts.net
+    tailscale.com/tags: tag:agents
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: https
+      port: 443
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: leo-dsplay
   namespace: openclaw
   annotations:
