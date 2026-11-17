@@ -10,6 +10,24 @@ providers:
     api_key: ${BIFROST_API_KEY}
     api_mode: chat_completions
     session_affinity_header: x-bf-eh-x-opencode-session
+# Modes par chat : /model fast|slow|deep, /model reset pour revenir au défaut.
+# Le switch est local à la session (pas de persistance globale) ; --once pour un tour.
+model_aliases:
+  fast:
+    model: opencode-go/claude-haiku-5-5
+    provider: custom
+    base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+    key_env: BIFROST_API_KEY
+  slow:
+    model: opencode-go/deepseek-v4.1-flash
+    provider: custom
+    base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+    key_env: BIFROST_API_KEY
+  deep:
+    model: opencode-go/qwen4-max
+    provider: custom
+    base_url: http://bifrost.openclaw.svc.cluster.local:8080/v1
+    key_env: BIFROST_API_KEY
 approvals:
   mode: false
 terminal:
