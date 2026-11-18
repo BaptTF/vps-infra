@@ -179,6 +179,22 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  name: billing-exporter
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: [billing-exporter]
+  selector:
+    matchLabels:
+      app: billing-exporter
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 1m
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
   name: hermes-leo
   namespace: monitoring
 spec:

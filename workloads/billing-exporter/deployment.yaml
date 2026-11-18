@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-exporter
+  namespace: billing-exporter
+  labels:
+    app: billing-exporter
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: billing-exporter
+  template:
+    metadata:
+      labels:
+        app: billing-exporter
+    spec:
+      imagePullSecrets:
+        - name: ghcr-login-secret
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: billing-exporter
+          image: ghcr.io/bapttf/billing-exporter:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+          ports:
+            - containerPort: 8080
+              name: http-metrics
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: POLL_INTERVAL
+              value: "1h"
+            - name: REQUEST_TIMEOUT
+              value: "30s"
+            # The declared ledger is the billing.yaml key of this secret.
+            # Its labels are role names. It is re-read on every poll.
+            - name: BILLING_CONFIG
+              value: /config/billing.yaml
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: billing-exporter
+                  key: CLOUDFLARE_API_TOKEN
+            - name: CLOUDFLARE_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: billing-exporter
+                  key: CLOUDFLARE_ACCOUNT_ID
+            - name: HETZNER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: billing-exporter
+                  key: HETZNER_API_TOKEN
+            - name: VERCEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: billing-exporter
+                  key: VERCEL_API_KEY
+          volumeMounts:
+            - name: ledger
+              mountPath: /config
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http-metrics
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http-metrics
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+      volumes:
+        - name: ledger
+          secret:
+            secretName: billing-exporter
+            items:
+              - key: billing.yaml
+                path: billing.yaml
