@@ -121,7 +121,7 @@ kured tolerates `dedicated=spare:NoSchedule`, so spare workers (`tag:server`) ar
 
 ### Restart k3s with Tailscale
 
-k3s runs entirely on `tailscale0`: `node-ip`, `flannel-iface`, and on the server `bind-address`. When tailscaled restarts (Tailscale auto-update, `systemctl restart tailscaled`, crash), `tailscale0` is deleted and recreated, and the kernel deletes `flannel.1` with it. Since k3s v1.36.6, flannel recreates `flannel.1` in place but does not restore the route, FDB and ARP entries for the other nodes (`reCreateVxlan`, still the case on flannel `master`). k3s stays `active`, and pods lose the other node and the cluster DNS. Older k3s versions crashed at that point, so systemd restarted them and the problem did not show. First seen on 2026-11-08 after the Tailscale 1.104.5 auto-update.
+k3s runs entirely on `tailscale0`: `node-ip`, `flannel-iface`, and on the server `bind-address`. When tailscaled restarts (Tailscale auto-update, `systemctl restart tailscaled`, crash), `tailscale0` is deleted and recreated, and the kernel deletes `flannel.1` with it. Since k3s v1.36.6, flannel recreates `flannel.1` in place but does not restore the route, FDB and ARP entries for the other nodes (`reCreateVxlan`, still the case on flannel `master`). k3s stays `active`, and pods lose the other node and the cluster DNS.
 
 A drop-in orders k3s after tailscaled and ties it to it with `PartOf=`: when tailscaled is stopped or restarted, systemd stops k3s first and starts it again once tailscaled is up. On startup, flannel rebuilds every route. Pods keep running (`KillMode=process`). On the server, the API is unavailable for about 15 seconds. Tailscale auto-update stays enabled.
 
@@ -490,8 +490,6 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 ### Current node layout (for reference)
 
-> **Note:** Historically the control-plane ran on Contabo and a worker (`bapt-debian`, a friend's VM with 8Gi) handled overflow. When that VM died, I replaced it with a Hetzner VPS and flipped the roles: the beefier Hetzner box became control-plane and the old Contabo VPS was demoted to worker.
-
 | Host | k3s node name | Role | vCPU | RAM | Allocatable | OS | Typical workloads |
 |------|---------------|------|------|-----|-------------|-----|-------------------|
 | `zeus` (Hetzner VPS) | `debian-16gb-hel1-2` | control-plane | 8 | 15Gi | ~12Gi | Debian 13 | ArgoCD, CNPG, Traefik, cert-manager, agents, critical stateful services |
@@ -505,25 +503,15 @@ To rename a host: pin the current `node-name:`, add the new name to `tls-san` on
 
 ### Upgrading a node to a new Debian release
 
-Done on Contabo, 12 to 13, on 2026-11-10 (provider snapshot taken first). The node keeps its k3s, Tailscale and firewall setup; only apt changes.
+Take a provider snapshot first. The node keeps its k3s, Tailscale and firewall setup; only apt changes.
 
-1. Silence Alertmanager except `Watchdog` (`amtool silence add 'alertname!=Watchdog' --duration=90m`), then `kubectl drain <node> --ignore-daemonsets --delete-emptydir-data`. Pods on the node's local-path volumes stay Pending until it is back (on Contabo: Prometheus, Loki, vikunja, vulcain, assisted-teacher-backend, kirocrew). kured only reboots between 08:30 and 10:30.
+1. Silence Alertmanager except `Watchdog` (`amtool silence add 'alertname!=Watchdog' --duration=90m`), then `kubectl drain <node> --ignore-daemonsets --delete-emptydir-data`. Pods on the node's local-path volumes stay Pending until it is back (on atlas: Prometheus, Loki, vikunja, vulcain, assisted-teacher-backend, kirocrew). kured only reboots between 08:30 and 10:30.
 2. Run apt from a transient unit, `systemd-run --unit=upgrade sh -c '... > /root/upgrade.log 2>&1'`: the tailscaled upgrade cuts the Tailscale SSH session. Use `DEBIAN_FRONTEND=noninteractive APT_LISTCHANGES_FRONTEND=none` and `-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold` to keep local config (`/etc/default/grub` holds `net.ifnames=0`, which names the interface `eth0`). First `full-upgrade` on the current release, then `sed -i s/bookworm/trixie/g` on `/etc/apt/sources.list` and `/etc/apt/sources.list.d/tailscale.list`, `upgrade --without-new-pkgs`, `full-upgrade`, `autoremove --purge`, `dpkg --audit`.
 3. Before rebooting, check `find /etc -name '*.ucf-dist' -o -name '*.dpkg-dist'` and `systemctl --failed`, then reboot.
 4. After the reboot:
    - **sshd:** the openssh upgrade enables `ssh.service` again. Run `systemctl disable --now ssh`.
-   - **sysctl:** Debian 13 no longer reads `/etc/sysctl.conf` and renames a modified one to `.dpkg-bak`. Move its settings to `/etc/sysctl.d/`. Contabo's image sets `net.ipv6.conf.all.disable_ipv6 = 1` and `kernel.panic = 10`, now in `/etc/sysctl.d/99-contabo.conf`.
+   - **sysctl:** Debian 13 no longer reads `/etc/sysctl.conf` and renames a modified one to `.dpkg-bak`. Move its settings to `/etc/sysctl.d/`. On atlas, the Contabo image settings (`net.ipv6.conf.all.disable_ipv6 = 1`, `kernel.panic = 10`) are in `/etc/sysctl.d/99-contabo.conf`.
    - **Checks:** `nftables-edge`, `k3s-agent`, `tailscaled`, `timedatectl`, and from another host the NodePorts and udp 8472 filtered. Then `kubectl uncordon` and expire the silence.
-
-Docker (left over from the Docker Compose era, inactive) was purged from Contabo during that upgrade; k3s ships its own containerd.
-
----
-
-## Manual scale-down during worker outage (2026-06-23)
-
-> **Historical context:** This incident happened when the old worker `bapt-debian` (a friend's VM, 8Gi RAM) went `NotReady`. Its pods rescheduled onto the then-control-plane (`vmi2735515`, Contabo, ~6.9Gi allocatable), which hit 99% memory and started evicting critical workloads (`bifrost`, `openclaw`).
->
-> This is no longer the current topology. MinIO, LaCoope and Meilisearch, which were scaled to 0 during the incident, have been removed. The image updater was scaled back up. A manual `kubectl scale` does not survive the next ArgoCD sync unless the replica count is also committed.
 
 ---
 
@@ -607,7 +595,7 @@ Application containers run as non-root with `runAsNonRoot: true`, an explicit `r
 
 What breaks when an image moves to non-root:
 
-- **Volumes stay root-owned.** `fsGroup` is not applied to local-path volumes. To move a volume written by root, deploy once with an init container `data-ownership` (busybox, `runAsUser: 0`, `runAsNonRoot: false`, `drop: [ALL]`, `add: [CHOWN]`) that runs `find <path> -xdev ! -user <uid> -exec chown <uid>:<uid> {} +`, check `find <path> ! -user <uid>` is empty, then remove it (vaultwarden, Immich, vulcain and assisted-teacher went through it, see `git log -S data-ownership`). Only `CHOWN` is allowed: `DAC_READ_SEARCH` and other extra capabilities are outside baseline, and the namespace refuses the pod. A restic restore of a snapshot taken before 2026-11-09 brings back root-owned files: run the same init container once after it. The SMB volumes are already mounted `uid=1000`.
+- **Volumes stay root-owned.** `fsGroup` is not applied to local-path volumes. To move a volume written by root, deploy once with an init container `data-ownership` (busybox, `runAsUser: 0`, `runAsNonRoot: false`, `drop: [ALL]`, `add: [CHOWN]`) that runs `find <path> -xdev ! -user <uid> -exec chown <uid>:<uid> {} +`, check `find <path> ! -user <uid>` is empty, then remove it. Only `CHOWN` is allowed: `DAC_READ_SEARCH` and other extra capabilities are outside baseline, and the namespace refuses the pod. A restic restore of a snapshot taken before 2026-11-09 brings back root-owned files: run the same init container once after it. The SMB volumes are already mounted `uid=1000`.
 - **Root-only paths in the image.** `HOME=/root` is not writable: assisted-teacher-backend and Immich machine learning set `HOME=/tmp`. nginx gets emptyDirs on `/run` and `/var/cache/nginx`. tripkit-frontend renders `config.js` in an init container (same image) into an emptyDir mounted with `subPath` over `/usr/share/nginx/html/config.js`. Authelia sets `X_AUTHELIA_HEALTHCHECK=""` so it does not write `/app/.healthcheck.env`.
 - **git and emptyDir mount points.** The mount point stays root-owned: `chmod` it fails and git reports dubious ownership. camille's `pull.sh` only chmods the content and trusts `/www` through `GIT_CONFIG_*`.
 
@@ -650,17 +638,15 @@ Home Assistant cannot ban brute force here: every request reaches it from the Ta
 
 CoreDNS is a k3s AddOn, not an Argo CD app: k3s writes `/var/lib/rancher/k3s/server/manifests/coredns.yaml` on every start and rewrites it, so that file cannot be edited. `apps/coredns.yaml` therefore applies a **partial Deployment** with `ServerSideApply`, which claims `spec.replicas: 2` only and leaves the rest (image, Corefile, probes, securityContext) to k3s.
 
-Two replicas matter because the packaged manifest already spreads them: `topologySpreadConstraints` with `maxSkew: 1` and `whenUnsatisfiable: DoNotSchedule` on `kubernetes.io/hostname` guarantees one CoreDNS per node. With the single packaged replica the scheduler put it on the Contabo node, so every lookup from a pod on the Hetzner node crossed Tailscale: ~50 ms round trip, multiplied by the `ndots:5` search list (up to five queries per resolution), i.e. ~250 ms per resolution for Immich.
-
-Two replicas alone are not enough: kube-proxy picks an endpoint at random from the ClusterIP, so half the lookups still went to the remote replica (36-120 ms against 0.5-1 ms locally). `system/coredns/service.yaml` claims `spec.trafficDistribution: PreferSameNode` on the `kube-dns` Service, again with `ServerSideApply`. kube-proxy then prefers the endpoint on the caller's node and falls back to any endpoint when there is none, so DNS keeps answering while a CoreDNS pod is rescheduled. Do not use `PreferClose`: it is deprecated in 1.36 and zone-based, and these nodes carry no `topology.kubernetes.io/zone`, so it changes nothing.
+The packaged `topologySpreadConstraints` (`maxSkew: 1`, `DoNotSchedule` on `kubernetes.io/hostname`) put one replica on each VPS, so no lookup has to cross Tailscale (~50 ms per query, times the `ndots:5` search list). kube-proxy picks a ClusterIP endpoint at random, so `system/coredns/service.yaml` also claims `spec.trafficDistribution: PreferSameNode` on the `kube-dns` Service, again with `ServerSideApply`. kube-proxy then prefers the endpoint on the caller's node and falls back to any endpoint when there is none, so DNS keeps answering while a CoreDNS pod is rescheduled. Do not use `PreferClose`: it is deprecated in 1.36 and zone-based, and these nodes carry no `topology.kubernetes.io/zone`, so it changes nothing.
 
 The packaged manifest does not set `spec.replicas` (it is absent from the `objectset.rio.cattle.io/applied` annotation), so a k3s restart does not touch it. The Application keeps two replicas if someone scales CoreDNS by hand or the Deployment is recreated with the default of one. The Application has no finalizer and its resource carries `Prune=false,Delete=false`: deleting the app cannot delete CoreDNS.
 
-Measured on the `immich-server` pod: ~250 ms per resolution before, 1-3 ms after, and 8-15 ms for a cold lookup of a name never resolved before. The `ndots:5` search list still adds four queries per lookup, but CoreDNS caches them for 30 s, so they no longer show: `dnsConfig.options: [{name: ndots, value: "2"}]` would only shave the first lookup of a new name, and is not worth changing name-resolution semantics for.
+Lookups take 1-3 ms (8-15 ms for a name never resolved before). CoreDNS caches the `ndots:5` search-list queries for 30 s, so lowering `ndots` is not needed.
 
 ## Monitoring
 
-Prometheus and Loki run on Contabo (`atlas`, node `vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Alertmanager has no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector and no Grafana: agents query Prometheus and Loki through their APIs.
+Prometheus and Loki run on `atlas` (node `vmi2735515.contaboserver.net`): their disks are local-path volumes and `zeus`'s disk is nearly full. Alertmanager has no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector and no Grafana: agents query Prometheus and Loki through their APIs.
 
 Two Prometheus instances:
 
@@ -689,11 +675,9 @@ Tailscale is the only interactive access path to the monitoring backends. The SR
 
 Alertmanager posts firing and resolved alerts to the webhook URL in Infisical. That webhook is what wakes the SRE agent. A real alert that stays firing is repeated every 4 hours.
 
-Alerts the agent cannot act on go to the `discord` receiver. Alertmanager 0.34.2 (kube-prometheus-stack 92.17.1) reads `discord_configs.webhook_url_file` when it sends, and `send_resolved` is true. Each of those routes sets `repeat_interval: 4h`, so a firing alert is not repeated more often than on the SRE webhook. The Discord URL is not in git. It is the key `ALERTMANAGER_DISCORD_WEBHOOK_URL` on the existing Secret `alertmanager-webhook` (Infisical path `/monitoring/alertmanager`, already mounted via `alertmanagerSpec.secrets`). `InfoInhibitor` stays on the `null` receiver and is still dropped. `ALERTMANAGER_WEBHOOK_URL` and `ALERTMANAGER_WEBHOOK_KEY` are unchanged.
+Alerts the agent cannot act on go to the `discord` receiver. Alertmanager 0.34.2 (kube-prometheus-stack 92.17.1) reads `discord_configs.webhook_url_file` when it sends, and `send_resolved` is true. Each of those routes sets `repeat_interval: 4h`, so a firing alert is not repeated more often than on the SRE webhook. The Discord URL is not in git. It is the key `ALERTMANAGER_DISCORD_WEBHOOK_URL` on the existing Secret `alertmanager-webhook` (Infisical path `/monitoring/alertmanager`, already mounted via `alertmanagerSpec.secrets`). A missing key does not stop Alertmanager from loading the config (the file is read at send time), but every Discord notification fails.
 
-Create the Discord webhook and that key before merging. A missing file does not stop Alertmanager from loading the config (the file is read at send time), but every Discord notification fails until the key exists.
-
-`Watchdog` is the dead man's switch. It always fires, and Alertmanager posts it every minute to the Healthchecks.io ping URL in Infisical (`ALERTMANAGER_HEALTHCHECKS_PING_URL` on the same Secret `alertmanager-webhook`). Alertmanager reads `webhook_configs.url_file` when it sends (`send_resolved: false`, `group_wait: 0s`, `group_interval: 1m`, `repeat_interval: 1m`, `continue: false`). Create the Healthchecks.io check (period 1 minute, grace 10 minutes, Discord integration) and the Infisical key before merging. A missing file does not stop Alertmanager from loading the config, but the check goes down once the grace expires.
+`Watchdog` is the dead man's switch. It always fires, and Alertmanager posts it every minute to the Healthchecks.io ping URL in Infisical (`ALERTMANAGER_HEALTHCHECKS_PING_URL` on the same Secret `alertmanager-webhook`). Alertmanager reads `webhook_configs.url_file` when it sends (`send_resolved: false`, `group_wait: 0s`, `group_interval: 1m`, `repeat_interval: 1m`, `continue: false`). The Healthchecks.io check has a 1-minute period, a 10-minute grace and the Discord integration: if the key is missing, the check goes down once the grace expires.
 
 The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Sent to Discord:
 
@@ -709,7 +693,7 @@ The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Sent to
 
 OOMKilled, CrashLoop, pods not ready, Argo CD out of sync or degraded, node pressure and saturation, disk and volume full, exporter down, CNPG and backup failures, the R2 bucket, certificates, and every other warning or critical alert stay on the webhook.
 
-Create these keys in Infisical project `infrastructure`, environment `prod`, before expecting alerts and external scrapes to work. Each path feeds its own Kubernetes Secret, so Prometheus and Alertmanager each only see their own credentials.
+Keys in Infisical project `infrastructure`, environment `prod`. Each path feeds its own Kubernetes Secret, so Prometheus and Alertmanager each only see their own credentials.
 
 Path `/monitoring/alertmanager` -> Secret `alertmanager-webhook` (mounted in Alertmanager only):
 
@@ -717,8 +701,8 @@ Path `/monitoring/alertmanager` -> Secret `alertmanager-webhook` (mounted in Ale
 |-----|---------|
 | `ALERTMANAGER_WEBHOOK_URL` | Alertmanager webhook URL, one line. |
 | `ALERTMANAGER_WEBHOOK_KEY` | Bearer token sent as `Authorization: Bearer`. One line, no quotes. |
-| `ALERTMANAGER_DISCORD_WEBHOOK_URL` | Discord webhook URL for the `discord` receiver (`https://discord.com/api/webhooks/...`). One line, no quotes. Create it before the Discord route is synced. |
-| `ALERTMANAGER_HEALTHCHECKS_PING_URL` | Healthchecks.io ping URL for the `watchdog-hc` receiver (`https://hc-ping.com/...`). One line, no quotes. Create the check (period 1m, grace 10m, Discord integration) before this route is synced. |
+| `ALERTMANAGER_DISCORD_WEBHOOK_URL` | Discord webhook URL for the `discord` receiver (`https://discord.com/api/webhooks/...`). One line, no quotes. |
+| `ALERTMANAGER_HEALTHCHECKS_PING_URL` | Healthchecks.io ping URL for the `watchdog-hc` receiver (`https://hc-ping.com/...`). One line, no quotes. |
 
 Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth` (mounted in Prometheus; snmp-exporter only gets `SNMP_COMMUNITY`):
 
@@ -748,7 +732,7 @@ Path `/monitoring/cloudflare` -> Secret `cloudflare-exporter` (cloudflare-export
 
 SearXNG `/metrics` stays off until path `/agents/searxng` also has `OPEN_METRICS` (the basic-auth password; the username is ignored).
 
-Nothing uses the host network. Off-cluster targets (the three Home Assistants and the NAS over SNMP/UDP 161) are reached through Tailscale egress Services in `system/monitoring/tailscale-egress.yaml` (`ha-home`, `ha-cam`, `ha-eyg`, `nas-snmp`), the same pattern as `nas-proxy`. Prometheus stays pinned to Contabo only because its local-path PVC must not land on Hetzner. App metrics that are enabled in-cluster: Traefik, Argo CD, cert-manager, sealed-secrets, CNPG, Authelia (`:9959`), Immich (`8081` and `8082`), Vikunja (`/api/v1/metrics`, denied on the public ingress), Bifrost, Camille, the image updater, and R2 storage through cloudflare-exporter. Vaultwarden and LLDAP have no metrics endpoint.
+Nothing uses the host network. Off-cluster targets (the three Home Assistants and the NAS over SNMP/UDP 161) are reached through Tailscale egress Services in `system/monitoring/tailscale-egress.yaml` (`ha-home`, `ha-cam`, `ha-eyg`, `nas-snmp`), the same pattern as `nas-proxy`. App metrics that are enabled in-cluster: Traefik, Argo CD, cert-manager, sealed-secrets, CNPG, Authelia (`:9959`), Immich (`8081` and `8082`), Vikunja (`/api/v1/metrics`, denied on the public ingress), Bifrost, Camille, the image updater, and R2 storage through cloudflare-exporter. Vaultwarden and LLDAP have no metrics endpoint.
 
 ### CNPG backups
 
@@ -780,9 +764,9 @@ k8up only backs up a PVC annotated `k8up.io/backup: "true"`:
 
 Caches (Immich machine-learning, Prometheus, Loki), Authelia sessions (`authelia-valkey`), and the CNPG data directories are left out. `hermes-leo-data` is the Hermes Leo volume. `immich-library` and `immich-storagebox` carry `backup.bapttf.com/repository` so each schedule takes only its own volume. Schedules run between 02:00 and 04:00 UTC. Prune and check are not scheduled in the cluster: the listener k8up uses is append-only. The Pi prunes `/k3s` only.
 
-On the NAS the repositories live under `/volume1/homes/Baptiste/restic/k3s/`: `k3s`, `photos` and `archives` for the three repositories above. In November 2026 they occupy 72 GiB, 583 GiB and 602 GiB on a volume with 566 GiB free. Nothing prunes `photos` or `archives` yet, so they only grow.
+On the NAS the repositories live under `/volume1/homes/Baptiste/restic/k3s/`: `k3s`, `photos` and `archives` for the three repositories above. Sizes (November 2026): 72 GiB, 583 GiB and 602 GiB, with 566 GiB free on the volume. Nothing prunes `photos` or `archives`: they only grow.
 
-Create these keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`, before the schedules can succeed. Secret `k8up-restic` is synced into each namespace above.
+Keys in Infisical project `infrastructure`, environment `prod`, path `/k8up`. Secret `k8up-restic` is synced into each namespace above.
 
 | Key | Description |
 |-----|-------------|
@@ -821,10 +805,10 @@ rm -f k3s.htpasswd
 
 `scp` cannot create `/var/services/homes/Baptiste/.config` on this NAS. Send the file over SSH instead.
 
-`--append-only` is process-wide, so k8up and prune cannot share one process. Tailscale on the DS218play now has a `tailscale0` interface, so both processes bind the Tailscale address `100.75.160.28` directly and `tailscale serve` is not used. The `tailscale-tun` boot task runs `tailscale configure-host` and restarts the package so Tailscale comes up in TUN mode; the script then waits up to 600 s for that address before starting. The DSM boot task above is what starts it again after a reboot.
+`--append-only` is process-wide, so k8up and prune cannot share one process. Tailscale on the DS218play has a `tailscale0` interface, so both processes bind the Tailscale address `100.75.160.28` directly and `tailscale serve` is not used. The `tailscale-tun` boot task runs `tailscale configure-host` and restarts the package so Tailscale comes up in TUN mode; the script then waits up to 600 s for that address before starting. The DSM boot task above is what starts it again after a reboot.
 
 - Append-only, for k8up: `100.75.160.28:8000`. URL `rest:http://k3s:<htpasswd>@dsplay.tail4c7c90.ts.net:8000/k3s`. `--private-repos` requires the first folder to be the username. A second folder is a separate repository, so Immich originals use `/k3s/photos`.
-- Prune: `100.75.160.28:8001`. It shares `k3s.htpasswd` with the append-only listener, so the k8up password can also delete snapshots. Until the prune host is chosen, the default-deny tailnet policy lets only the admin reach `tcp:8001`. The prune listener gets its own htpasswd at the same time.
+- Prune: `100.75.160.28:8001`. It shares `k3s.htpasswd` with the append-only listener, so the k8up password can also delete snapshots. Only the admin reaches `tcp:8001` on the tailnet. When a prune host is chosen, the prune listener gets its own htpasswd.
 
 The default-deny tailnet policy lets `tag:k3s` reach the NAS on `tcp:8000` only. The cluster reaches the NAS over a direct Tailscale path.
 
@@ -839,7 +823,7 @@ The repository `e10bfe4460` already exists, so `restic init` fails if run again.
 
 ### Prune
 
-The NAS does not run `restic`: it does not have the RAM. The machine that prunes is not chosen yet (the Home Assistant Pi 4 is a candidate), so nothing prunes `/k3s` today. `scripts/nas/prune.sh` still targets `127.0.0.1:8001` through an SSH tunnel; point it at `dsplay.tail4c7c90.ts.net:8001` and grant that host `tcp:8001` in the tailnet policy once it is chosen. Weekly, from that host:
+The NAS does not run `restic`: it does not have the RAM. No machine prunes `/k3s` (the Home Assistant Pi 4 is a candidate). `scripts/nas/prune.sh` targets `127.0.0.1:8001` through an SSH tunnel; point it at `dsplay.tail4c7c90.ts.net:8001` and grant that host `tcp:8001` in the tailnet policy once it is chosen. Weekly, from that host:
 
 ```bash
 REST_PASSWORD=... RESTIC_PASSWORD=... ./scripts/nas/prune.sh
@@ -857,11 +841,11 @@ ssh -t dsplay 'sudo sh ~/bin/dsplay-harden.sh report'   # read-only, ~/dsplay-ha
 ssh -t dsplay 'sudo sh ~/bin/dsplay-harden.sh apply'    # log in ~/dsplay-harden-apply.txt
 ```
 
-`apply` (2026-11-09):
+What `apply` sets:
 
-- **Squid (ProxyServer):** `squid/etc/local_hardening.conf`, included right after `acl_syno.conf`, accepts only tailnet sources and denies every private, CGNAT, loopback, link-local and multicast destination. It has to sit before the stock `http_access allow CONNECT SSL_ports`, which otherwise lets any source tunnel to any `host:443`. The agents keep Internet egress through the home IP; they no longer reach the LAN, DSM or Home Assistant through Squid (403). A ProxyServer package update can rewrite `squid.conf`: check `grep local_hardening /var/packages/ProxyServer/target/squid/etc/squid.conf` after one, and rerun `apply` if the line is gone.
+- **Squid (ProxyServer):** `squid/etc/local_hardening.conf`, included right after `acl_syno.conf`, accepts only tailnet sources and denies every private, CGNAT, loopback, link-local and multicast destination. It has to sit before the stock `http_access allow CONNECT SSL_ports`, which otherwise lets any source tunnel to any `host:443`. The agents keep Internet egress through the home IP; they do not reach the LAN, DSM or Home Assistant through Squid (403). A ProxyServer package update can rewrite `squid.conf`: check `grep local_hardening /var/packages/ProxyServer/target/squid/etc/squid.conf` after one, and rerun `apply` if the line is gone.
 - **SSH:** `PasswordAuthentication no` in `/etc/ssh/sshd_config` (backup `.bak-<date>`). Every SSH client uses a key: Baptiste's laptop, René's Pis, Hermes Léo and grokbot (in `Rene`'s `authorized_keys`). Saving the Terminal settings in DSM can rewrite the file; rerun `apply` after that.
-- **QuickConnect:** QuickConnect, its relay and UPnP port forwarding are off, so DSM is no longer reachable from the Internet through `rjullienplay.quickconnect.to`. The Synology DDNS `rjullienplay.synology.me` stays, for the fallback VPN (VPN Center, OpenVPN `udp/1194` forwarded by the Livebox).
+- **QuickConnect:** QuickConnect, its relay and UPnP port forwarding are off, so DSM is not reachable from the Internet through `rjullienplay.quickconnect.to`. The Synology DDNS `rjullienplay.synology.me` stays, for the fallback VPN (VPN Center, OpenVPN `udp/1194` forwarded by the Livebox).
 - **Services off:** FTP and FTPS, WebDAV, iSCSI, Tailscale web client. NFS (exports to the LAN) and AFP (Time Machine is advertised over AFP only) stay on.
 
 ---
@@ -876,7 +860,7 @@ Deploy key `k3s-camille.bapttf.com` (read-only). Private key in Infisical, proje
 
 ## Tailscale VPN Setup
 
-The tailnet policy (ACL) and the inventory of machines on the tailnet are kept in a private repository, `BaptTF/infra-private`, because they list personal email addresses and home LAN ranges. The target policy is default deny and grants access by tag: `tag:k3s` for the nodes, `tag:k8s` for operator proxies, with dedicated tags for sensitive ingresses (`tag:bifrost`, `tag:gowa`, `tag:monitoring`). Until it is applied, the tailnet still allows every connection.
+The tailnet policy (ACL) and the inventory of machines on the tailnet are kept in a private repository, `BaptTF/infra-private`, because they list personal email addresses and home LAN ranges. The policy is default deny and grants access by tag: `tag:k3s` for the nodes, `tag:k8s` for operator proxies, with dedicated tags for sensitive ingresses (`tag:bifrost`, `tag:gowa`, `tag:monitoring`).
 
 ### 1. Configure Tailscale in Infisical
 
@@ -932,7 +916,7 @@ This can be added directly to your service definitions in Git.
 
 Family file management runs on FileBrowser Quantum at `https://drive.bapttf.com`, protected by Authelia (`group:family`). Uploads land in `/data/family/inbox`; sorted files go in `/data/family/library`. The `NAS` source is PVC `immich-archives` (`/nas/archives`: `dsplay` and `diskstation`), mounted at `/srv/nas`. Indexing is disabled on that source (`viewable` on `/`). Family members can create, modify, and delete files there; a delete removes the file on the Storage Box.
 
-v2 keeps its database as SQLite at `/home/filebrowser/data/database.sqlite` on PVC `filebrowser-data`. The first start imports the v1 BoltDB file `database.db` and does not modify it. Leave that file in place while `server.database.migrateFrom` is set: v2 exits if the path is missing. Copy `database.db` off the volume before the first v2 rollout.
+v2 keeps its database as SQLite at `/home/filebrowser/data/database.sqlite` on PVC `filebrowser-data`. The first start imports the v1 BoltDB file `database.db` and does not modify it. Leave that file in place while `server.database.migrateFrom` is set: v2 exits if the path is missing.
 
 Immich keeps almost nothing on the local disk. The split is defined by the `volumeMounts` of `workloads/immich/server/api.yaml`, not by the PVCs:
 
@@ -941,113 +925,31 @@ Immich keeps almost nothing on the local disk. The split is defined by the `volu
 
 Thumbnails and transcoded videos therefore live on the Storage Box too: about 488 000 `preview`/`thumbnail` files, roughly 114 GiB. They are small files behind an SMB round trip, so anything that walks `/data/thumbs` pays ~36 ms per file — a full `find` there takes hours. Only `thumbs` is left out of the k8up backup (Immich regenerates it).
 
-Before enabling the Storage Box mounts in production:
+Storage Box PV `immich-storagebox` (`workloads/immich/server/storagebox-pv.yaml`): sub-account `u619007-sub1`, Hetzner base directory `/immich`, SMB source `//u619007-sub1.your-storagebox.de/u619007-sub1`. Credentials in Infisical `infrastructure`/`prod`, path `/immich/storagebox` (`username`, `password`). `csi-driver-smb` cannot read `source` from a Secret, so it is committed.
 
-1. Create a dedicated Hetzner Storage Box sub-account for Immich.
-2. In Infisical project `infrastructure`, environment `prod`, path `/immich/storagebox`, add:
-
-| Key | Description |
-|---|---|
-| `username` | Storage Box sub-account, e.g. `u619007-sub1` |
-| `password` | Storage Box password |
-
-3. Replace the SMB source in `workloads/immich/server/storagebox-pv.yaml`:
-
-```yaml
-source: //u619007-sub1.your-storagebox.de/u619007-sub1
-```
-
-For the Immich sub-account, the Hetzner base directory is `/immich`, so the SMB source points at the sub-account share itself. The `source` value cannot be read from a Kubernetes Secret by `csi-driver-smb`, so it must be committed explicitly.
+Sorted photos are an Immich external library, import path `/external/family/library` (Immich rejects paths under its media root `/data`). Do not sort files already indexed by Immich via FileBrowser: move photos in `inbox` before scanning. Immich native upload folders (`/data/upload`, `/data/library`) are not exposed in FileBrowser.
 
 ### NAS archives (Immich external libraries)
 
 The imported NAS photos live under `/nas` on the Storage Box (`archives/dsplay`, `archives/diskstation`). They are mounted **read-write** in `immich-server` at `/mnt/archives` and in FileBrowser at `/srv/nas` (source `NAS`) through PVC `immich-archives` (sub-account `u619007-sub3`, base directory `/nas`), so photos can be sorted and deleted from Immich or drive: emptying the Immich trash, or deleting a file in drive, deletes the file on the Storage Box. Credentials in Infisical `infrastructure`/`prod`, path `/immich/archives`: `username`, `password`. Only `/nas/archives` is mounted (PV `volumeAttributes.subDir: archives`). Import paths: `/mnt/archives/dsplay` and `/mnt/archives/diskstation`. Backed up by k8up Schedule `archives-backup` to restic repo `k3s/archives`.
 
-4. Benchmark from the VPS before migration:
+## Old Contabo data backup
+
+The Storage Box sub-account `u619007-sub2` holds a restic repository over SFTP with `/root`, `/var/lib/rancher/k3s/storage` (old local-path PVC data) and `/opt/openclaw` (legacy OpenCLAW config) from `atlas` before its cleanup. It is not a system backup: the system is rebuilt from this repo. restic asks for the SFTP password and the repository password; without the repository password the backup cannot be decrypted.
 
 ```bash
-STORAGEBOX_HOST="u619007-sub1.your-storagebox.de" \
-STORAGEBOX_SHARE="u619007-sub1" \
-STORAGEBOX_USER="u619007-sub1" \
-STORAGEBOX_PASSWORD="..." \
-./scripts/immich-storagebox-benchmark.sh
+REPO=sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo
+restic -r $REPO snapshots
+restic -r $REPO restore latest --target /tmp/restic-restore --include /opt/openclaw
 ```
-
-5. Pause ArgoCD auto-sync for `immich-workload`, scale down Immich and FileBrowser, sync the Storage Box PV/PVC and run:
-
-```bash
-./scripts/immich-storagebox-migrate.sh
-```
-
-6. Re-enable the Immich manifests, verify the Immich storage integrity checks, test old assets, mobile upload, video playback and FileBrowser, then keep the old local PVC data intact for a few days before cleanup.
-
-After the first ArgoCD sync, configure Immich to view sorted photos as an external library (one-time admin setup):
-
-1. Open Immich admin → **External Libraries** → **Create Library**
-2. Add import path: `/external/family/library` (must be outside `/data` — Immich rejects paths under its media root)
-3. Run **Scan** (or enable periodic scan in settings)
-
-Do not sort files already indexed by Immich via FileBrowser — move photos in `inbox` before scanning. Immich native upload folders (`/data/upload`, `/data/library`) are not exposed in FileBrowser.
-
-## Manual Contabo backup before cleanup
-
-Before cleaning the old Contabo VPS, keep a restic backup of personal/application data on the Hetzner Storage Box sub-account `u619007-sub2`.
-
-This is intentionally not a full system backup: the system is reconstructible from GitOps manifests and this README. The backup focuses on data that may not be recoverable from Git:
-
-- `/var/lib/rancher/k3s/storage`: old k3s `local-path` PVC data
-- `/root`: old service folders, migration artifacts, dumps, SSH/config leftovers
-- `/opt/openclaw`: small legacy OpenCLAW data/config directory
-
-Install restic on Contabo:
-
-```bash
-ssh contabo
-apt update
-apt install -y restic
-```
-
-Initialize the encrypted restic repository on the Storage Box via SFTP:
-
-```bash
-restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo init
-```
-
-Run the backup:
-
-```bash
-restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo backup \
-  /root \
-  /var/lib/rancher/k3s/storage \
-  /opt/openclaw
-```
-
-Verify the backup before cleaning Contabo:
-
-```bash
-restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo snapshots
-restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo check
-```
-
-Test a partial restore if needed:
-
-```bash
-mkdir -p /tmp/restic-test-restore
-restic -r sftp:u619007-sub2@u619007-sub2.your-storagebox.de:backups/contabo restore latest \
-  --target /tmp/restic-test-restore \
-  --include /var/lib/rancher/k3s/storage \
-  --include /opt/openclaw
-```
-
-Restic will ask for the Storage Box SFTP password and for the restic repository password. Keep the restic password safe: without it, the backup cannot be decrypted.
 
 ## Authelia sessions
 
 The `authelia_session` cookie is stored in Valkey (`authelia-valkey` in the `authelia` namespace), encrypted with `session-secret` from `/authelia`. A restart of Authelia keeps existing logins. Expiration, inactivity and remember-me still apply: Valkey holds each session until Authelia's own lifetime elapses.
 
-Valkey persists an AOF on the PVC `authelia-valkey` (local-path, 1 Gi request, pinned to `debian-16gb-hel1-2` next to Authelia). The PVC is annotated `k8up.io/backup: "false"`: sessions are disposable, and reusable session tokens must not land on the NAS. `maxmemory` is 32mb with `noeviction`, so a full store refuses new writes instead of dropping logins. The password is Infisical path `/authelia/valkey`, key `password` (`openssl rand -hex 32`), synced to the Kubernetes secret `authelia-valkey`. Create that key before the app syncs. Without it the new pods stay unready and the previous Authelia pod keeps serving.
+Valkey persists an AOF on the PVC `authelia-valkey` (local-path, 1 Gi request, pinned to `zeus` (node `debian-16gb-hel1-2`) next to Authelia). The PVC is annotated `k8up.io/backup: "false"`: sessions are disposable, and reusable session tokens must not land on the NAS. `maxmemory` is 32mb with `noeviction`, so a full store refuses new writes instead of dropping logins. The password is Infisical path `/authelia/valkey`, key `password` (`openssl rand -hex 32`), synced to the Kubernetes secret `authelia-valkey`. Without that key, new pods stay unready and the previous Authelia pod keeps serving.
 
-Rotating `password` or `session-secret` invalidates every session. The first sync that enables Valkey does too: sessions that existed only in the Authelia process are not imported.
+Rotating `password` or `session-secret` invalidates every session.
 
 ## Authelia OIDC
 
@@ -1120,7 +1022,9 @@ Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in n
 | `GROQ_API_KEY` | Groq API key (provider `groq`, whisper transcriptions) |
 | `OPENCODE_GO_API_KEY_B` | OpenCode Go subscription API key, account B (https://opencode.ai/auth → Go). Backs two providers: `opencode-go` (OpenAI-compatible, models `glm-5.2`/`glm-5.1`/`glm-5`/`kimi-k2.7-code`/`kimi-k2.6`/`kimi-k2.5`/`deepseek-v4-pro`/`deepseek-v4-flash`/`mimo-v2.5`/`mimo-v2.5-pro`/`mimo-v2-pro`/`mimo-v2-omni`) and `opencode-go-anthropic` (Anthropic-compatible, models `minimax-m3`/`minimax-m2.7`/`minimax-m2.5`/`qwen3.7-max`/`qwen3.7-plus`/`qwen3.6-plus`/`qwen3.5-plus`). Same key used for both — Bifrost sends the right auth header per `base_provider_type`. |
 
-The `opencode-go` provider rotates over four keys from `bifrost-secret-opencode` (`/agents/bifrost/opencode`): `OPENCODE_GO_API_KEY_B` (B), `OPENCODE_GO_API_KEY_R` (R), `OPENCODE_GO_API_KEY_A` (A) and `OPENCODE_GO_API_KEY_N` (N). `OPENCODE_GO_API_KEY` without a suffix is gone.
+The `opencode-go` provider rotates over four keys from `bifrost-secret-opencode` (`/agents/bifrost/opencode`): `OPENCODE_GO_API_KEY_B` (B), `OPENCODE_GO_API_KEY_R` (R), `OPENCODE_GO_API_KEY_A` (A) and `OPENCODE_GO_API_KEY_N` (N).
+
+The Bedrock provider (`bedrock` in `bifrost_config.json`) does not reference a key `value` — Bifrost's Bedrock provider resolves AWS credentials via the standard SDK chain (env vars / IAM), so the AWS credentials for Bedrock are also stored in this Infisical path under the conventional `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names.
 
 ### Virtual keys
 
@@ -1145,7 +1049,7 @@ Values live in Infisical `/agents/bifrost/virtual-keys` (keys `BIFROST_VK_<ID>`,
 
 Add a key: create `BIFROST_VK_<ID>` in Infisical (`echo "sk-bf-$(openssl rand -hex 24)"`), add the VK to `governance.virtual_keys`, push. Rotate: change the value in Infisical; the auto-reload annotation restarts Bifrost and the agent.
 
-Bifrost's pricing catalog has no `opencode-go` models, so their cost was 0. `governance.pricing_overrides` sets one override per model (scope `provider`, `pattern` = model without the `opencode-go/` prefix) with the per-token prices from https://opencode.ai/docs/go ("Usage limits", the same for every plan). This is the API-equivalent price counted against the Go allowance, not money paid (the subscription is flat). Limits of the mapping:
+Bifrost's pricing catalog has no `opencode-go` models. `governance.pricing_overrides` sets one override per model (scope `provider`, `pattern` = model without the `opencode-go/` prefix) with the per-token prices from https://opencode.ai/docs/go ("Usage limits", the same for every plan). This is the API-equivalent price counted against the Go allowance, not money paid (the subscription is flat). Limits of the mapping:
 
 - DeepSeek V4.1 Flash / V4 Pro use the Off-Peak price: Bifrost has no time-of-day pricing (Peak is 01:00-04:00 and 06:00-10:00 UTC on weekdays, 2x)
 - Qwen3.7 Plus (> 256K) and MiniMax M3 (> 512K) are priced at their base tier: Bifrost tiers only exist above 100k/128k/200k/272k. Grok 4.7 (200k), GPT 6 / 5.6 Luna (272k) and Claude Haiku 5.5 (100k) have their tier
@@ -1192,10 +1096,3 @@ curl -skS -m 45 -H "Authorization: Bearer $KEY" -H "Content-Type: application/js
 ```
 
 Then bump **only** the stuck ID (`ses_<name>_YYYYMMDDTHHMMSS`) and push. Hashed ConfigMaps restart the touched workload (Hermes init copies `config.yaml` onto the PVC at pod start). Bifrost SQLite is pod-local: a live `PUT /api/providers/opencode-go` unsticks the default immediately, but git must follow or the next Bifrost restart reloads the old ID. Rotating the default does not affect Hermes overrides; rotating a Hermes ID does not bounce the other agents.
-
-The Bedrock provider (`bedrock` in `bifrost_config.json`) does not reference a key `value` — Bifrost's Bedrock provider resolves AWS credentials via the standard SDK chain (env vars / IAM), so the AWS credentials for Bedrock are also stored in this Infisical path under the conventional `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names.
-
-## Note
-
-HTTPS certificates via Let's Encrypt will work after:
-- ArgoCD syncs the InfisicalSecret
