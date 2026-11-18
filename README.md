@@ -207,6 +207,7 @@ TS_IP=$(tailscale ip -4)
 #    (config must exist before install so k3s picks it up at first boot)
 sudo mkdir -p /etc/rancher/k3s
 cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml > /dev/null
+node-name: "$(hostname)"
 disable:
   - traefik
 bind-address: "$TS_IP"
@@ -214,6 +215,7 @@ node-ip: "$TS_IP"
 advertise-address: "$TS_IP"
 tls-san:
   - "$TS_IP"
+  - "$(hostname)"
 flannel-iface: "tailscale0"
 kubelet-arg:
   - "system-reserved=memory=800Mi"
@@ -236,8 +238,8 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=v1.36 sh
 mkdir -p ~/.kube
 cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 chown $USER:$USER ~/.kube/config
-# Point to the Hetzner control-plane node
-kubectl config set-cluster default --server=https://debian-16gb-hel1-2:6443 --tls-server-name=debian-16gb-hel1-2
+# Point to the control-plane node (zeus, Hetzner)
+kubectl config set-cluster default --server=https://zeus:6443 --tls-server-name=zeus
 ```
 
 ### Step 3: Deploy ArgoCD
@@ -319,6 +321,7 @@ sudo chmod 600 /var/lib/rancher/k3s/agent/token
 cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml > /dev/null
 server: "https://${MASTER_TS_IP}:6443"
 token-file: "/var/lib/rancher/k3s/agent/token"
+node-name: "$(hostname)"
 node-ip: "${WORKER_TS_IP}"
 flannel-iface: "tailscale0"
 kubelet-arg:
@@ -489,10 +492,21 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 > **Note:** Historically the control-plane ran on Contabo and a worker (`bapt-debian`, a friend's VM with 8Gi) handled overflow. When that VM died, I replaced it with a Hetzner VPS and flipped the roles: the beefier Hetzner box became control-plane and the old Contabo VPS was demoted to worker.
 
-| Node | Role | vCPU | RAM | Allocatable | OS | Typical workloads |
-|------|------|------|-----|-------------|-----|-------------------|
-| `debian-16gb-hel1-2` (Hetzner VPS) | control-plane | 8 | 15Gi | ~12Gi | Debian 13 | ArgoCD, CNPG, Traefik, cert-manager, agents, critical stateful services |
-| `vmi2735515.contaboserver.net` (Contabo VPS) | worker | 6 | 12Gi | ~11Gi | Debian 13 | Prometheus, Loki, overflow workloads |
+| Host | k3s node name | Role | vCPU | RAM | Allocatable | OS | Typical workloads |
+|------|---------------|------|------|-----|-------------|-----|-------------------|
+| `zeus` (Hetzner VPS) | `debian-16gb-hel1-2` | control-plane | 8 | 15Gi | ~12Gi | Debian 13 | ArgoCD, CNPG, Traefik, cert-manager, agents, critical stateful services |
+| `atlas` (Contabo VPS) | `vmi2735515.contaboserver.net` | worker | 6 | 12Gi | ~11Gi | Debian 13 | Prometheus, Loki, overflow workloads |
+
+### Node names
+
+The host name (OS and Tailscale MagicDNS) and the k3s node name are separate. Every node pins `node-name:` in `/etc/rancher/k3s/config.yaml`; without it k3s uses the hostname, and a hostname change registers a new node. Local-path PVs are bound to the node name by a `nodeAffinity` that cannot be edited, and the `kubernetes.io/hostname` nodeSelectors in this repo use it too. A host is renamed without changing its node name.
+
+Hetzner and Contabo were renamed `zeus` and `atlas` on 2026-11-18 (sheets in `infra-private/devices/`):
+
+1. Back up `/etc/rancher/k3s/config.yaml` and `/etc/hosts`. Add `node-name: "<current node name>"` to the k3s config. On the server, add the new name and its MagicDNS name to `tls-san`.
+2. Hetzner only: cloud-init sets the hostname back to the server name at boot. `/etc/cloud/cloud.cfg.d/99-hostname.cfg` holds `preserve_hostname: true` and `manage_etc_hosts: false`; `/etc/hosts` is then edited by hand (`127.0.1.1 zeus`).
+3. `hostnamectl set-hostname <name>`, fix the host line in `/etc/hosts`, `tailscale set --hostname=<name>`. The Tailscale IPs do not change, so the k3s configs (which use IPs) need nothing else.
+4. Restart `k3s-agent` (worker first) or `k3s` (server; the API is down for about a minute, pods keep running). Check that `kubectl get nodes` shows the old name `Ready` and that no pod restarted.
 
 ### Upgrading a node to a new Debian release
 
@@ -651,7 +665,7 @@ Measured on the `immich-server` pod: ~250 ms per resolution before, 1-3 ms after
 
 ## Monitoring
 
-Prometheus and Loki run on Contabo (`vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Alertmanager has no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector and no Grafana: agents query Prometheus and Loki through their APIs.
+Prometheus and Loki run on Contabo (`atlas`, node `vmi2735515.contaboserver.net`) because their disks are local-path volumes and Hetzner's disk is nearly full. Alertmanager has no volume. Alloy is a DaemonSet on both nodes and ships pod stdout to Loki. There is no OTLP collector and no Grafana: agents query Prometheus and Loki through their APIs.
 
 Two Prometheus instances:
 
