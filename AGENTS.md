@@ -81,3 +81,9 @@ build: automatic update of voyage
 ## Manual operations policy
 
 Any manual setup performed directly on a node (SSH, package installs, kernel config, DNS changes, etc.) **must** be documented in the README for reproducibility. This does not apply to GitOps commits or kubectl cluster operations -- those are self-documenting via Git history and manifests.
+
+## Writing documentation
+
+- Describe the current state: what is configured, where, and what to know to operate it. Not a log: no dated narrative ("renamed on…", "was…"), no list of steps already done, no backup files. Git history keeps that.
+- Keep it short: one fact per line, tables over prose, link to another doc instead of repeating it.
+- No rationale that does not help operate the system (e.g. why a host has its name).
