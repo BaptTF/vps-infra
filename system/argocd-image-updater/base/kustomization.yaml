@@ -8,7 +8,7 @@ resources:
   # Install ArgoCD Image Updater from official manifests, pinned to a release
   # (Renovate bumps the tag). This controller pushes to main: a moving branch
   # would let upstream change its RBAC or image without review.
-  - https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/v1.4.0/config/install.yaml
+  - https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/v1.5.0/config/install.yaml
   # Git credentials for write-back
   - infisical-secret.yaml
 
