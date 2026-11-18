@@ -570,7 +570,7 @@ Rollback: remove the `clientAuth` block from the `default` TLSOption, then turn 
 
 ## Pod security
 
-Application namespaces (`ai-usage-exporter`, `assisted-teacher`, `authelia`, `bapttf-front`, `camille`, `dashboard-infra`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
+Application namespaces (`ai-usage-exporter`, `assisted-teacher`, `authelia`, `bapttf-front`, `billing-exporter`, `camille`, `dashboard-infra`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
 
 Every application pod sets:
 
@@ -593,7 +593,7 @@ Application containers run as non-root with `runAsNonRoot: true`, an explicit `r
 | 1000 | bapttf-front, dashboard-infra, lldap, vikunja, filebrowser, bifrost, vaultwarden, immich (server, microservices, machine learning), vulcain |
 | 999 / 977 / 101 | valkey (immich, authelia) / searxng / nginx (assisted-teacher and tripkit frontends) |
 | 20001:20000 | gowa (started as `/app/whatsapp`, not through the root entrypoint's `su-exec`) |
-| 65532 | ai-usage-exporter, sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
+| 65532 | ai-usage-exporter, billing-exporter, sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
 | 65534 | camille git sync (`nobody`: ssh needs a passwd entry) |
 
 What breaks when an image moves to non-root:
@@ -719,6 +719,15 @@ Path `/monitoring/scrape` -> Secret `monitoring-scrape-auth` (mounted in Prometh
 | `HA_CAM_TOKEN` | Prometheus scrape of `homeassistant-cam` (60s) |
 | `HA_EYG_TOKEN` | Prometheus scrape of `homeassistant-eyg` (120s, the Pi 3) |
 | `SNMP_COMMUNITY` | snmp-exporter read of `dsplay.tail4c7c90.ts.net`. Read-only community, no quotes, backslashes or spaces. |
+
+Path `/monitoring/billing` -> Secret `billing-exporter` (billing-exporter only):
+
+| Key | Used by |
+|-----|---------|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare Billing Read token. |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account id, 32 characters. The metric label stays `main`. |
+| `HETZNER_API_TOKEN` | Hetzner Cloud token for the project labelled `cloud`. A second project is `HETZNER_API_TOKEN_<SUFFIX>`. |
+| `billing.yaml` | Declared ledger mounted at `/config/billing.yaml`. Contabo and OpenCode Go prices live here, not in git. `account`, `item` and `resource` are role names (`vps`, `b`), never an instance id, an IP, a hostname or a person's name. |
 
 Path `/monitoring/cloudflare` -> Secret `cloudflare-exporter` (cloudflare-exporter only, for the R2 bucket size):
 

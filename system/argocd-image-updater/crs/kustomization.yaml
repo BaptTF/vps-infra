@@ -8,6 +8,7 @@ namespace: argocd
 resources:
   - ai-platform-ghcr-secret.yaml
   - ai-usage-exporter-updater.yaml
+  - billing-exporter-updater.yaml
   - archive-index-updater.yaml
   - bapttf-front-updater.yaml
   - dashboard-infra-updater.yaml
