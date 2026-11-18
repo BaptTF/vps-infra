@@ -727,6 +727,7 @@ Path `/monitoring/billing` -> Secret `billing-exporter` (billing-exporter only):
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Billing Read token. |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account id, 32 characters. The metric label stays `main`. |
 | `HETZNER_API_TOKEN` | Hetzner Cloud token for the project labelled `cloud`. A second project is `HETZNER_API_TOKEN_<SUFFIX>`. |
+| `VERCEL_API_KEY` | Vercel personal access token (`vcp_`) that can read team invoices. The metric label stays `team`. This is not the AI Gateway key. |
 | `billing.yaml` | Declared ledger mounted at `/config/billing.yaml`. Contabo and OpenCode Go prices live here, not in git. `account`, `item` and `resource` are role names (`vps`, `b`), never an instance id, an IP, a hostname or a person's name. |
 
 Path `/monitoring/cloudflare` -> Secret `cloudflare-exporter` (cloudflare-exporter only, for the R2 bucket size):

@@ -65,6 +65,11 @@ spec:
                 secretKeyRef:
                   name: billing-exporter
                   key: HETZNER_API_TOKEN
+            - name: VERCEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: billing-exporter
+                  key: VERCEL_API_KEY
           volumeMounts:
             - name: ledger
               mountPath: /config
