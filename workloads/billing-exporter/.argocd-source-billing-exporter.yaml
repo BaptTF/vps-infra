@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/bapttf/billing-exporter:sha-8615d47
+  - ghcr.io/bapttf/billing-exporter:sha-b38f764
