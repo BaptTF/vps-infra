@@ -499,14 +499,9 @@ The cluster uses the default Kubernetes scheduler with correctly-sized resource 
 
 ### Node names
 
-The host name (OS and Tailscale MagicDNS) and the k3s node name are separate. Every node pins `node-name:` in `/etc/rancher/k3s/config.yaml`; without it k3s uses the hostname, and a hostname change registers a new node. Local-path PVs are bound to the node name by a `nodeAffinity` that cannot be edited, and the `kubernetes.io/hostname` nodeSelectors in this repo use it too. A host is renamed without changing its node name.
+The host name (OS and Tailscale) and the k3s node name are separate. Every node pins `node-name:` in `/etc/rancher/k3s/config.yaml`: without it k3s takes the hostname, and a new hostname registers a new node. Local-path PVs (immutable `nodeAffinity`) and the `kubernetes.io/hostname` nodeSelectors use the node name.
 
-Hetzner and Contabo were renamed `zeus` and `atlas` on 2026-11-18 (sheets in `infra-private/devices/`):
-
-1. Back up `/etc/rancher/k3s/config.yaml` and `/etc/hosts`. Add `node-name: "<current node name>"` to the k3s config. On the server, add the new name and its MagicDNS name to `tls-san`.
-2. Hetzner only: cloud-init sets the hostname back to the server name at boot. `/etc/cloud/cloud.cfg.d/99-hostname.cfg` holds `preserve_hostname: true` and `manage_etc_hosts: false`; `/etc/hosts` is then edited by hand (`127.0.1.1 zeus`).
-3. `hostnamectl set-hostname <name>`, fix the host line in `/etc/hosts`, `tailscale set --hostname=<name>`. The Tailscale IPs do not change, so the k3s configs (which use IPs) need nothing else.
-4. Restart `k3s-agent` (worker first) or `k3s` (server; the API is down for about a minute, pods keep running). Check that `kubectl get nodes` shows the old name `Ready` and that no pod restarted.
+To rename a host: pin the current `node-name:`, add the new name to `tls-san` on the server, `hostnamectl set-hostname`, fix `/etc/hosts`, `tailscale set --hostname`, then restart k3s. On Hetzner, `/etc/cloud/cloud.cfg.d/99-hostname.cfg` (`preserve_hostname: true`, `manage_etc_hosts: false`) keeps cloud-init from restoring the server name at boot.
 
 ### Upgrading a node to a new Debian release
 
