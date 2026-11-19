@@ -881,6 +881,20 @@ After Infisical is deployed, add your Tailscale OAuth credentials:
 4. Copy the Client ID and Client Secret
 5. Add them to Infisical
 
+### Hermes Léo on the tailnet
+
+The `hermes-leo` pod is a tailnet node itself (`tag:agents`, like the grokbot bots): a `tailscale` native sidecar (`workloads/agents/hermes/leo/hermes-leo-deployment.yaml`) runs `tailscaled` in userspace mode, without `NET_ADMIN` or `/dev/net/tun` (the `openclaw` namespace enforces `baseline`).
+
+| | |
+|---|---|
+| Node | `hermes-leo`, ephemeral, state in an `emptyDir`: each new pod is a new node. During a rolling update the second one is `hermes-leo-1` for a few seconds |
+| Credential | Its own OAuth client (Auth Keys write, `tag:agents`), Infisical `/agents/hermes-leo/tailscale`, key `TS_AUTHKEY` (the bare client secret). `hermes-leo-infisical-secret-tailscale` renders it as `TS_AUTHKEY` with `?ephemeral=true&preauthorized=true`, in `hermes-leo-secret-tailscale`, read by the sidecar only |
+| Proxies | SOCKS5 `127.0.0.1:1055`, HTTP (CONNECT) `127.0.0.1:1056`. The `hermes-leo` container gets them as `TAILNET_SOCKS5_PROXY` and `TAILNET_HTTP_PROXY`; nothing is proxied by default |
+| Use | `curl --proxy "$TAILNET_SOCKS5_PROXY" https://iris.tail4c7c90.ts.net/status` (`socks5h`: MagicDNS names resolve through Tailscale). SSH: `ProxyCommand nc -X 5 -x 127.0.0.1:1055 %h %p` |
+| Reach | What the tailnet policy grants `tag:agents` (`infra-private`, `tailscale/README.md`). No NetworkPolicy applies inside the tunnel |
+
+The sidecar has no probe and its secret is optional: if Tailscale cannot log in, Léo still starts, without the tailnet. The `leo-*` egress Services stay until Léo's skills use the `*.ts.net` names.
+
 ### 3. Connect to VPN
 
 ```bash
