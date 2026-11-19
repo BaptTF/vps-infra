@@ -893,7 +893,7 @@ The `hermes-leo` pod is a tailnet node itself (`tag:agents`, like the grokbot bo
 | Use | `curl --proxy "$TAILNET_SOCKS5_PROXY" https://iris.tail4c7c90.ts.net/status` (`socks5h`: MagicDNS names resolve through Tailscale). SSH: `ProxyCommand tailnet-nc %h %p` (`/usr/local/bin/tailnet-nc`, stdlib Python, ConfigMap `hermes-leo-tailnet-nc`; the image has no `nc`) |
 | Reach | What the tailnet policy grants `tag:agents` (`infra-private`, `tailscale/README.md`). No NetworkPolicy applies inside the tunnel |
 
-The sidecar has no probe and its secret is optional: if Tailscale cannot log in, Léo still starts, without the tailnet. The `leo-*` egress Services stay until Léo's skills use the `*.ts.net` names.
+The sidecar has no probe and its secret is optional: if Tailscale cannot log in, Léo still starts, without the tailnet. Léo has no egress Service: a new tailnet target only needs a `tag:agents` grant in the policy.
 
 ### 3. Connect to VPN
 

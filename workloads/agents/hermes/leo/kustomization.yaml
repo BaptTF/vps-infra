@@ -9,7 +9,6 @@ resources:
   - hermes-leo-deployment.yaml
   - hermes-leo-service.yaml
   - tailscale-ingress.yaml
-  - tailscale-egress.yaml
 
 configMapGenerator:
   - name: hermes-leo-config
