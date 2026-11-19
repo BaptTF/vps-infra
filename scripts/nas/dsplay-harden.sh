@@ -134,8 +134,8 @@ apply_quickconnect() {
 }
 
 apply_services() {
-	echo "## ftp, webdav, iscsi, tailscale web client off"
-	api api=SYNO.Core.FileServ.FTP method=set version=3 enable_ftp=false enable_ftps=false
+	echo "## ftp and ftps on (brother scan to nas); webdav, iscsi, tailscale web client off"
+	api api=SYNO.Core.FileServ.FTP method=set version=3 enable_ftp=true enable_ftps=true
 	api api=SYNO.Core.FileServ.FTP method=get version=3
 	/usr/syno/bin/synopkg stop WebDAVServer
 	/usr/syno/bin/synopkg stop ScsiTarget

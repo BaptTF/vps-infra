@@ -846,7 +846,8 @@ What `apply` sets:
 - **Squid (ProxyServer):** `squid/etc/local_hardening.conf`, included right after `acl_syno.conf`, accepts only tailnet sources and denies every private, CGNAT, loopback, link-local and multicast destination. It has to sit before the stock `http_access allow CONNECT SSL_ports`, which otherwise lets any source tunnel to any `host:443`. The agents keep Internet egress through the home IP; they do not reach the LAN, DSM or Home Assistant through Squid (403). A ProxyServer package update can rewrite `squid.conf`: check `grep local_hardening /var/packages/ProxyServer/target/squid/etc/squid.conf` after one, and rerun `apply` if the line is gone.
 - **SSH:** `PasswordAuthentication no` in `/etc/ssh/sshd_config` (backup `.bak-<date>`). Every SSH client uses a key: Baptiste's laptop, René's Pis, Hermes Léo and grokbot (in `Rene`'s `authorized_keys`). Saving the Terminal settings in DSM can rewrite the file; rerun `apply` after that.
 - **QuickConnect:** QuickConnect, its relay and UPnP port forwarding are off, so DSM is not reachable from the Internet through `rjullienplay.quickconnect.to`. The Synology DDNS `rjullienplay.synology.me` stays, for the fallback VPN (VPN Center, OpenVPN `udp/1194` forwarded by the Livebox).
-- **Services off:** FTP and FTPS, WebDAV, iSCSI, Tailscale web client. NFS (exports to the LAN) and AFP (Time Machine is advertised over AFP only) stay on.
+- **Services off:** WebDAV, iSCSI, Tailscale web client. NFS (exports to the LAN) and AFP (Time Machine is advertised over AFP only) stay on.
+- **FTP and FTPS on:** the Brother printer scans to the NAS over FTP (Roquefort LAN). Not granted on the tailnet beyond the admin.
 
 ---
 
