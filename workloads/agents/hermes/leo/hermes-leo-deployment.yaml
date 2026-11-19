@@ -92,7 +92,7 @@ spec:
             - name: TS_OUTBOUND_HTTP_PROXY_LISTEN
               value: "127.0.0.1:1056"
             - name: TS_STATE_DIR
-              value: /var/lib/tailscale
+              value: /var/lib/tailscale/state
             - name: TS_KUBE_SECRET
               value: ""
             - name: TS_SOCKET
