@@ -18,6 +18,9 @@ configMapGenerator:
   - name: hermes-leo-usage-exporter
     files:
       - usage-exporter.py=usage-exporter.py
+  - name: hermes-leo-tailnet-nc
+    files:
+      - tailnet-nc=tailnet-nc
   # Passwd minimal pour init-config lancé en uid 10000 : ssh sort en erreur
   # (getpwuid) si l'uid courant n'a pas d'entrée, et alpine/git n'en a pas.
   - name: hermes-leo-init-passwd

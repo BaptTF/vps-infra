@@ -182,6 +182,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/data
+            - name: tailnet-nc
+              mountPath: /usr/local/bin/tailnet-nc
+              subPath: tailnet-nc
+              readOnly: true
           # hermes-probe (dans l'image) : OK en standby (relais en attente de
           # gateway.lock), sinon curl /health:8642 comme avant.
           # ⚠️ Absent des images antérieures au relais : ne pas combiner ces
@@ -280,5 +284,9 @@ spec:
             claimName: hermes-leo-data
         - name: tailscale-state
           emptyDir: {}
+        - name: tailnet-nc
+          configMap:
+            name: hermes-leo-tailnet-nc
+            defaultMode: 0555
         - name: tailscale-tmp
           emptyDir: {}
