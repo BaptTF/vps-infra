@@ -44,7 +44,7 @@ spec:
       serviceAccountName: hermes-leo
       initContainers:
         - name: init-config
-          image: alpine/git:2.54.0
+          image: alpine/git:v2.54.1
           # uid 10000 : /opt/data et /opt/data/skills lui appartiennent déjà,
           # le script n'a pas besoin d'un autre uid pour écrire.
           securityContext:
