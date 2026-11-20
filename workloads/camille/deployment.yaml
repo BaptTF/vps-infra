@@ -25,7 +25,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: git-clone
-          image: alpine/git:2.54.0
+          image: alpine/git:v2.54.1
           command: ["/bin/sh", "/scripts/pull.sh"]
           securityContext:
             allowPrivilegeEscalation: false
@@ -55,7 +55,7 @@ spec:
               memory: 512Mi
       containers:
         - name: git-pull
-          image: alpine/git:2.54.0
+          image: alpine/git:v2.54.1
           command: ["/bin/sh", "/scripts/pull.sh"]
           securityContext:
             allowPrivilegeEscalation: false
