@@ -38,7 +38,7 @@ spec:
       serviceAccountName: hermes-lea
       initContainers:
         - name: init-config
-          image: alpine/git:2.54.0
+          image: alpine/git:v2.54.1
           securityContext:
             allowPrivilegeEscalation: false
           command: ["/bin/sh", "/scripts/init-skills.sh"]
