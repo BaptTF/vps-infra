@@ -85,6 +85,12 @@ spec:
                 name: bifrost-secret-opencode
             - secretRef:
                 name: bifrost-secret-vk
+            # Same VERCEL_API_KEY as ai-usage-exporter, from /agents/bifrost/vercel.
+            # Optional so a missing folder does not stop the gateway; once the
+            # secret exists it overrides a leftover key on bifrost-secret.
+            - secretRef:
+                name: bifrost-secret-vercel
+                optional: true
           volumeMounts:
             - name: config-volume
               mountPath: /app/data/config.json

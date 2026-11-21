@@ -657,7 +657,7 @@ Two Prometheus instances:
 
 To keep a job for a year, add it to the `match[]` of `longterm-federate-30s` or `longterm-federate-5m`. The ScrapeConfigs have no `release: kps` label, so the main Prometheus does not pick them up. Federation only copies what the main Prometheus still has: a job added later starts its history then.
 
-`ai-usage-exporter` polls the OpenCode, Cursor and Devin subscription APIs and has no ingress. Its OpenCode Go key comes from `/agents/bifrost/opencode` (`OPENCODE_GO_API_KEY_B`, `_R`, `_A`, `_N`). Cursor is polled per account: `ai-usage-exporter-secret-cursor` (Infisical `/agents/cursor`) must hold three keys, with no `default` account and no bare `CURSOR_API_KEY`:
+`ai-usage-exporter` polls the OpenCode, Cursor, Devin and Vercel AI Gateway APIs and has no ingress. Its OpenCode Go key comes from `/agents/bifrost/opencode` (`OPENCODE_GO_API_KEY_B`, `_R`, `_A`, `_N`). The Vercel team key is `VERCEL_API_KEY` in `/agents/bifrost/vercel`, the same value Bifrost loads as `env.VERCEL_API_KEY`; the exporter publishes it as `subscription="team"`. Cursor is polled per account: `ai-usage-exporter-secret-cursor` (Infisical `/agents/cursor`) must hold three keys, with no `default` account and no bare `CURSOR_API_KEY`:
 
 | Key | Account |
 |---|---|
@@ -1040,6 +1040,8 @@ Bifrost loads provider API keys from the Kubernetes secret `bifrost-secret` in n
 The `opencode-go` provider rotates over four keys from `bifrost-secret-opencode` (`/agents/bifrost/opencode`): `OPENCODE_GO_API_KEY_B` (B), `OPENCODE_GO_API_KEY_R` (R), `OPENCODE_GO_API_KEY_A` (A) and `OPENCODE_GO_API_KEY_N` (N).
 
 The Bedrock provider (`bedrock` in `bifrost_config.json`) does not reference a key `value` — Bifrost's Bedrock provider resolves AWS credentials via the standard SDK chain (env vars / IAM), so the AWS credentials for Bedrock are also stored in this Infisical path under the conventional `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names.
+
+The Vercel provider (`vercel` in `bifrost_config.json`, `value: env.VERCEL_API_KEY`) reads `VERCEL_API_KEY` from `bifrost-secret-vercel` (`/agents/bifrost/vercel`). Infisical does not recurse, so the key must live in that folder, not only in `/agents/bifrost`. `ai-usage-exporter` syncs the same folder into `ai-usage-exporter-secret-vercel` and polls `GET /v1/credits`. Create `VERCEL_API_KEY` there before expecting the gateway or the subscription series; both mounts are optional until the secret exists. A copy left on the parent path still works for Bifrost until the folder secret is present, then the folder value wins.
 
 ### Virtual keys
 
