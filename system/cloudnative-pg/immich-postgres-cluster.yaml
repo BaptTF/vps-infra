@@ -23,6 +23,8 @@ spec:
   postgresql:
     shared_preload_libraries:
       - "vchord.so"
+    parameters:
+      wal_compression: "lz4"
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       # Defaulted by the CNPG webhook; set here to keep Argo CD in sync.
