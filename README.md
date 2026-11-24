@@ -875,7 +875,7 @@ Discord bot from `lmandrelli/some-roast-bot` (image `ghcr.io/lmandrelli/some-roa
 | What | Where |
 |---|---|
 | Discord token | Infisical `/some-roast`, key `DISCORD_TOKEN`. Other bot env vars (e.g. `MAGIC_WORD`) can go in the same folder (`envFrom`) |
-| LLM | Bifrost VK `some-roast`, `opencode-go/mimo-v2.6-pro`, vision `opencode-go/mimo-v2.6-flash` |
+| LLM | Bifrost VK `some-roast`, `opencode-go/glm-5.3-flash`, vision `opencode-go/mimo-v2.6-flash` |
 | Database | `some_roast` on `postgres-cluster` (`DATABASE_URL`), credentials in Infisical `/some-roast/db`. Schema migrations run at bot startup |
 | Egress | DNS, Bifrost, Postgres, Internet on 443 without private ranges |
 

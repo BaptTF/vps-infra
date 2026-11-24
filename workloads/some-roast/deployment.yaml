@@ -44,7 +44,7 @@ spec:
                   name: some-roast-bifrost
                   key: BIFROST_API_KEY
             - name: MODEL_NAME
-              value: opencode-go/mimo-v2.6-pro
+              value: opencode-go/glm-5.3-flash
             - name: VISION_MODEL_NAME
               value: opencode-go/mimo-v2.6-flash
             - name: DB_USERNAME
