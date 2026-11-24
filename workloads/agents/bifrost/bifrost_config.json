@@ -195,6 +195,15 @@
           { "provider": "groq", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 },
           { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
         ]
+      },
+      {
+        "id": "some-roast",
+        "name": "some-roast",
+        "value": "env.BIFROST_VK_SOME_ROAST",
+        "is_active": true,
+        "provider_configs": [
+          { "provider": "opencode-go", "allowed_models": ["*"], "key_ids": ["*"], "weight": 1 }
+        ]
       }
     ],
     "pricing_overrides": [

@@ -138,3 +138,17 @@ spec:
   owner: archive_index
   cluster:
     name: postgres-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: some-roast-db
+  namespace: cnpg-system
+  annotations:
+    # Le rôle some_roast est créé par le Cluster (wave 1) : la Database doit passer après.
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  name: some_roast
+  owner: some_roast
+  cluster:
+    name: postgres-cluster

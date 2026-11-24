@@ -568,7 +568,7 @@ Rollback: remove the `clientAuth` block from the `default` TLSOption, then turn 
 
 ## Pod security
 
-Application namespaces (`ai-usage-exporter`, `alex-site`, `assisted-teacher`, `authelia`, `bapttf-front`, `billing-exporter`, `camille`, `dashboard-infra`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
+Application namespaces (`ai-usage-exporter`, `alex-site`, `assisted-teacher`, `authelia`, `bapttf-front`, `billing-exporter`, `camille`, `dashboard-infra`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `some-roast`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
 
 Every application pod sets:
 
@@ -591,7 +591,7 @@ Application containers run as non-root with `runAsNonRoot: true`, an explicit `r
 | 1000 | bapttf-front, dashboard-infra, lldap, vikunja, filebrowser, bifrost, vaultwarden, immich (server, microservices, machine learning), vulcain |
 | 999 / 977 / 101 | valkey (immich, authelia) / searxng / nginx (assisted-teacher and tripkit frontends) |
 | 20001:20000 | gowa (started as `/app/whatsapp`, not through the root entrypoint's `su-exec`) |
-| 65532 | ai-usage-exporter, alex-site, billing-exporter, sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
+| 65532 | ai-usage-exporter, alex-site, billing-exporter, sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend, some-roast |
 | 65534 | camille git sync (`nobody`: ssh needs a passwd entry) |
 
 What breaks when an image moves to non-root:
@@ -868,6 +868,19 @@ Image `ghcr.io/bapttf/alex-site`, private. The repo is not on GitHub yet: the im
 
 ---
 
+## Some(roast) Discord bot
+
+Discord bot from `lmandrelli/some-roast-bot` (image `ghcr.io/lmandrelli/some-roast-bot`, bumped by Image Updater on every `X.Y.Z` release, not Renovate). Gateway connection only: no Service, no ingress. One replica (`Recreate`), or every message gets two answers.
+
+| What | Where |
+|---|---|
+| Discord token | Infisical `/some-roast`, key `DISCORD_TOKEN`. Other bot env vars (e.g. `MAGIC_WORD`) can go in the same folder (`envFrom`) |
+| LLM | Bifrost VK `some-roast`, `opencode-go/mimo-v2.6-pro`, vision `opencode-go/mimo-v2.6-flash` |
+| Database | `some_roast` on `postgres-cluster` (`DATABASE_URL`), credentials in Infisical `/some-roast/db`. Schema migrations run at bot startup |
+| Egress | DNS, Bifrost, Postgres, Internet on 443 without private ranges |
+
+---
+
 ## Tailscale VPN Setup
 
 The tailnet policy (ACL) and the inventory of machines on the tailnet are kept in a private repository, `BaptTF/infra-private`, because they list personal email addresses and home LAN ranges. The policy is default deny and grants access by tag: `tag:k3s` for the nodes, `tag:k8s` for operator proxies, with dedicated tags for sensitive ingresses (`tag:bifrost`, `tag:gowa`, `tag:monitoring`).
@@ -1060,6 +1073,7 @@ Every Bifrost client authenticates with its own virtual key (VK), so cost and to
 | `hermes-leo` | Hermes Leo | `gemini`, `groq`, `opencode-go` (no `bedrock`) |
 | `hermes-lya` | Hermes Lya | same as Leo |
 | `vulcain` | Vulcain | same as Leo |
+| `some-roast` | Discord bot Some(roast) | `opencode-go` only |
 | `tailscale-baptiste` | Baptiste's OpenCode, through the Tailscale ingress | same as Leo |
 | `tailscale-emma` | Emma's OpenCode (Mac), through the Tailscale ingress | same as Leo |
 
@@ -1068,6 +1082,7 @@ The "same as Leo" keys list their providers explicitly (deny by default): a prov
 Values live in Infisical `/agents/bifrost/virtual-keys` (keys `BIFROST_VK_<ID>`, value `sk-bf-<random>`). Bifrost loads the whole folder (`bifrost-secret-vk`, referenced as `env.BIFROST_VK_*` in `bifrost_config.json`). Each agent has its own InfisicalSecret on the same folder that templates only its key into `BIFROST_API_KEY`:
 
 - Hermes: `api_key: ${BIFROST_API_KEY}` in `config.yaml` (Hermes expands `${VAR}`)
+- Some(roast): `OPENAI_API_KEY` env var (`workloads/some-roast/deployment.yaml`)
 - Vulcain: `llm.provider.apiKey: "${BIFROST_API_KEY}"` in `/data/.vulcain/config/config.json` on the PVC (pi expands `${VAR}`). Set once with `kubectl -n vulcain exec`, it is not in git
 - OpenCode v2 (laptops): the key goes in the OpenCode credential store, not in `opencode.jsonc` (v2 ignores `settings.apiKey` and sends the stored credential, even an empty one). Replace the `bifrost` credential: `opencode auth export` → set `.value.key` on the `bifrost` entry → `opencode auth logout bifrost <id>` → `opencode auth import <file>` → `opencode reload` (the background service caches credentials and config)
 

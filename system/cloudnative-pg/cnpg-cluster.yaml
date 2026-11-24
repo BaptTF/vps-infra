@@ -98,3 +98,10 @@ spec:
         login: true
         passwordSecret:
           name: archive-index-db-secret
+      - connectionLimit: 5
+        ensure: present
+        inherit: true
+        name: some_roast
+        login: true
+        passwordSecret:
+          name: some-roast-db-secret

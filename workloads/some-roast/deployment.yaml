@@ -1,0 +1,72 @@
+# Discord bot Some(roast) (https://github.com/lmandrelli/some-roast-bot).
+# Gateway connection only: no Service, no ingress. One replica, or the bot
+# answers every message twice.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: some-roast
+  labels:
+    app: some-roast
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: some-roast
+  template:
+    metadata:
+      labels:
+        app: some-roast
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bot
+          image: ghcr.io/lmandrelli/some-roast-bot:0.7.0
+          envFrom:
+            - secretRef:
+                name: some-roast
+          env:
+            - name: OPENAI_BASE_URL
+              value: http://bifrost.openclaw.svc.cluster.local:8080/v1
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: some-roast-bifrost
+                  key: BIFROST_API_KEY
+            - name: MODEL_NAME
+              value: opencode-go/mimo-v2.6-pro
+            - name: VISION_MODEL_NAME
+              value: opencode-go/mimo-v2.6-flash
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: some-roast-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: some-roast-db-secret
+                  key: password
+            - name: DATABASE_URL
+              value: postgres://$(DB_USERNAME):$(DB_PASSWORD)@postgres-cluster-rw.cnpg-system.svc.cluster.local:5432/some_roast?sslmode=require
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]

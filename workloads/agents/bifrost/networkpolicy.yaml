@@ -29,6 +29,12 @@ spec:
               app: opencode-dashboard
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: some-roast
+          podSelector:
+            matchLabels:
+              app: some-roast
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: tailscale
           podSelector:
             matchLabels:

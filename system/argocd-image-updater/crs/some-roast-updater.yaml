@@ -1,0 +1,21 @@
+# Third-party image owned by Image Updater instead of Renovate: releases of
+# lmandrelli/some-roast-bot are deployed as soon as they are published.
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: some-roast-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: some-roast
+      images:
+        - alias: some-roast
+          imageName: ghcr.io/lmandrelli/some-roast-bot
+          commonUpdateSettings:
+            updateStrategy: semver
+            # Full X.Y.Z tags only; the release also pushes X.Y and latest.
+            allowTags: "regexp:^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

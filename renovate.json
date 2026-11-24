@@ -70,7 +70,8 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": [
         "/^ghcr\\.io\\/bapttf\\//",
-        "/^ghcr\\.io\\/rjullien\\//"
+        "/^ghcr\\.io\\/rjullien\\//",
+        "ghcr.io/lmandrelli/some-roast-bot"
       ],
       "enabled": false
     },

@@ -1,0 +1,52 @@
+# No ingress. Egress: cluster DNS, Bifrost, Postgres, and HTTPS to the
+# Internet (Discord gateway and CDN, Exa MCP, link fixers) without private
+# ranges (LAN, pods, services, tailnet).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: some-roast
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openclaw
+          podSelector:
+            matchLabels:
+              app: bifrost
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+          podSelector:
+            matchLabels:
+              cnpg.io/cluster: postgres-cluster
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 100.64.0.0/10, 172.16.0.0/12, 192.168.0.0/16]
+      ports:
+        - protocol: TCP
+          port: 443
