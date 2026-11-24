@@ -44,7 +44,7 @@ spec:
               mountPath: /data
       containers:
         - name: filebrowser
-          image: ghcr.io/gtsteffaniak/filebrowser:2.0.2-stable
+          image: ghcr.io/gtsteffaniak/filebrowser:2.1.0-stable
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
