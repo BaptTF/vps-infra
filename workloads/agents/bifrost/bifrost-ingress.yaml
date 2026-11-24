@@ -195,7 +195,9 @@ kind: Service
 metadata:
   name: bifrost-blocked
   labels:
-    app: bifrost
+    # Not app=bifrost: the bifrost ServiceMonitor selects that label and would
+    # scrape this sink.
+    app: bifrost-blocked
 spec:
   selector:
     app: bifrost
