@@ -25,6 +25,18 @@ spec:
               name: bifrost
               port:
                 number: 8080
+        # Bifrost >= v2.6.0 serves POST /v1/mcp, which exposes the admin /api as
+        # MCP tools. /api is deliberately not exposed, so /v1/mcp (and sub-paths)
+        # is sent to a Service with no endpoints: longest prefix wins over /v1,
+        # the connection is refused and the request never reaches Bifrost.
+        # The MCP gateway on /mcp is unaffected.
+        - path: /v1/mcp
+          pathType: Prefix
+          backend:
+            service:
+              name: bifrost-blocked
+              port:
+                number: 8080
         - path: /v1
           pathType: Prefix
           backend:
@@ -172,3 +184,17 @@ spec:
               name: bifrost
               port:
                 number: 8080
+---
+# Selector-less Service with no endpoints, used as a sink for ingress paths that
+# must not reach Bifrost (see /v1/mcp above).
+apiVersion: v1
+kind: Service
+metadata:
+  name: bifrost-blocked
+  labels:
+    app: bifrost
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
