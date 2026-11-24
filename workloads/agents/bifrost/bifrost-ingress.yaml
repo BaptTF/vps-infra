@@ -27,8 +27,9 @@ spec:
                 number: 8080
         # Bifrost >= v2.6.0 serves POST /v1/mcp, which exposes the admin /api as
         # MCP tools. /api is deliberately not exposed, so /v1/mcp (and sub-paths)
-        # is sent to a Service with no endpoints: longest prefix wins over /v1,
-        # the connection is refused and the request never reaches Bifrost.
+        # is sent to bifrost-blocked (longest prefix wins over /v1), which targets
+        # a closed port: the connection is refused, the proxy answers 502 at once
+        # and the request never reaches Bifrost.
         # The MCP gateway on /mcp is unaffected.
         - path: /v1/mcp
           pathType: Prefix
@@ -185,8 +186,10 @@ spec:
               port:
                 number: 8080
 ---
-# Selector-less Service with no endpoints, used as a sink for ingress paths that
-# must not reach Bifrost (see /v1/mcp above).
+# Sink for ingress paths that must not reach Bifrost (see /v1/mcp above).
+# It targets port 8081 on the Bifrost pod, where nothing listens, so the
+# connection is refused immediately (a Service without endpoints made the
+# client hang instead). NetworkPolicy lets only the tailnet proxy reach 8081.
 apiVersion: v1
 kind: Service
 metadata:
@@ -194,7 +197,10 @@ metadata:
   labels:
     app: bifrost
 spec:
+  selector:
+    app: bifrost
   ports:
     - name: http
       protocol: TCP
       port: 8080
+      targetPort: 8081
