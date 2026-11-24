@@ -529,6 +529,7 @@ Take a provider snapshot first. The node keeps its k3s, Tailscale and firewall s
 | Bifrost (LLM gateway) | https://bifrost (Tailscale) | Tailscale VPN |
 | Infrastructure dashboards | https://dashboard.bapttf.com / https://dashboard (Tailscale) | Authelia (group:family) / Tailscale tag:monitoring |
 | Camille | https://camille.bapttf.com | Public (Authelia, group:family) |
+| Alex | https://alex.bapttf.com | Public (Authelia, group:family) |
 | Home Assistant (Roquefort) | https://ha.bapttf.com | Public (Home Assistant login) |
 | Home Assistant (Eyguians) | https://eyguians.bapttf.com | Public (Home Assistant login) |
 
@@ -567,7 +568,7 @@ Rollback: remove the `clientAuth` block from the `default` TLSOption, then turn 
 
 ## Pod security
 
-Application namespaces (`ai-usage-exporter`, `assisted-teacher`, `authelia`, `bapttf-front`, `billing-exporter`, `camille`, `dashboard-infra`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
+Application namespaces (`ai-usage-exporter`, `alex-site`, `assisted-teacher`, `authelia`, `bapttf-front`, `billing-exporter`, `camille`, `dashboard-infra`, `gowa`, `immich`, `lldap`, `openclaw`, `opencode-dashboard`, `tripkit`, `vaultwarden`, `vikunja`, `vulcain`) carry Pod Security Admission labels through `managedNamespaceMetadata` in their Application CR: `enforce: baseline`, `warn: restricted`, `audit: restricted`. The API server refuses a pod that is privileged, uses host namespaces, `hostPath` or added capabilities; restricted violations only print a warning. System namespaces (`kube-system`, `monitoring`, `tailscale`, `system-upgrade`) run node agents and stay unlabelled.
 
 Every application pod sets:
 
@@ -590,7 +591,7 @@ Application containers run as non-root with `runAsNonRoot: true`, an explicit `r
 | 1000 | bapttf-front, dashboard-infra, lldap, vikunja, filebrowser, bifrost, vaultwarden, immich (server, microservices, machine learning), vulcain |
 | 999 / 977 / 101 | valkey (immich, authelia) / searxng / nginx (assisted-teacher and tripkit frontends) |
 | 20001:20000 | gowa (started as `/app/whatsapp`, not through the root entrypoint's `su-exec`) |
-| 65532 | ai-usage-exporter, billing-exporter, sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
+| 65532 | ai-usage-exporter, alex-site, billing-exporter, sws, opencode-dashboard, authelia, tripkit-backend, assisted-teacher-backend |
 | 65534 | camille git sync (`nobody`: ssh needs a passwd entry) |
 
 What breaks when an image moves to non-root:
@@ -856,6 +857,14 @@ What `apply` sets:
 Camille's site. Static Web Server serves the current content and pulls it every 60s. The files come from the `site` branch of `rjullien/camille-potager`, which GitHub Actions rebuilds on push to `main`. Another site for Camille later is a path on this same host (`camille.bapttf.com/<path>`), not a new hostname.
 
 Deploy key `k3s-camille.bapttf.com` (read-only). Private key in Infisical, project `infrastructure`, environment `prod`, path `/camille`, key `id_ed25519`. Authelia allows `group:family`.
+
+---
+
+## Alex (alex.bapttf.com)
+
+Alex's site, repo `BaptTF/alex-site` (SvelteKit, static build served by Static Web Server on 8080). First page: the apartment home automation plan and shopping cart (`/appartement`). Another page for Alex is a route of this site, not a new hostname.
+
+Image `ghcr.io/bapttf/alex-site`, private. The repo is not on GitHub yet: the image is built and pushed by hand, tagged `sha-<commit>` (alex-site `AGENTS.md`, « Publier »). Image Updater deploys the newest `sha-*` tag. Pull secret and Image Updater credentials from Infisical `/github/b`. Authelia allows `group:family`. No egress.
 
 ---
 

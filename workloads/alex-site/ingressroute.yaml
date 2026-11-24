@@ -1,0 +1,19 @@
+# Whole host. A later page for Alex is a route of the same site, not a new hostname.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alex-site
+  namespace: alex-site
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`alex.bapttf.com`)
+      kind: Rule
+      middlewares:
+        - name: forwardauth-authelia
+          namespace: authelia
+      services:
+        - name: alex-site
+          port: 80
+  tls: {}

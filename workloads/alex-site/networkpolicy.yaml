@@ -1,0 +1,25 @@
+# Ingress only from Traefik. Static files: no egress at all.
+# Kubelet probes from the node are always allowed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alex-site
+  namespace: alex-site
+spec:
+  podSelector:
+    matchLabels:
+      app: alex-site
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8080

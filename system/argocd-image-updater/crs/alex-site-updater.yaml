@@ -1,0 +1,19 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: alex-site-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: alex-site
+      images:
+        - alias: alex-site
+          imageName: ghcr.io/bapttf/alex-site
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^sha-[0-9a-f]{7}$"
+            pullSecret: pullsecret:argocd/ai-platform-ghcr-login-secret
+  writeBackConfig:
+    method: "git:secret:argocd/argocd-image-updater-git-creds"
+    gitConfig:
+      branch: main

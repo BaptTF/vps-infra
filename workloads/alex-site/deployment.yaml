@@ -1,0 +1,60 @@
+# Alex's site at alex.bapttf.com (repo BaptTF/alex-site): static SvelteKit build
+# served by Static Web Server. Image tag bumped by ArgoCD Image Updater.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alex-site
+  namespace: alex-site
+  labels:
+    app: alex-site
+spec:
+  revisionHistoryLimit: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alex-site
+  template:
+    metadata:
+      labels:
+        app: alex-site
+    spec:
+      imagePullSecrets:
+        - name: ghcr-login-secret
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: alex-site
+          image: ghcr.io/bapttf/alex-site:sha-81dac1d
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
