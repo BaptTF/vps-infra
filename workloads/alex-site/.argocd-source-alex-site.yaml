@@ -1,3 +1,3 @@
 kustomize:
   images:
-  - ghcr.io/bapttf/alex-site:sha-4e824e0
+  - ghcr.io/bapttf/alex-site:sha-d1f337b
