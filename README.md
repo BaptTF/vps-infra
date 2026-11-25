@@ -864,7 +864,7 @@ Deploy key `k3s-camille.bapttf.com` (read-only). Private key in Infisical, proje
 
 Alex's site, repo `BaptTF/alex-site` (SvelteKit, static build served by Static Web Server on 8080). First page: the apartment home automation plan and shopping cart (`/appartement`). Another page for Alex is a route of this site, not a new hostname.
 
-Image `ghcr.io/bapttf/alex-site`, private. The repo is not on GitHub yet: the image is built and pushed by hand, tagged `sha-<commit>` (alex-site `AGENTS.md`, « Publier »). Image Updater deploys the newest `sha-*` tag. Pull secret and Image Updater credentials from Infisical `/github/b`. Authelia allows `group:family`. No egress.
+Image `ghcr.io/bapttf/alex-site`, private, built by GitHub Actions on push to `main` of the private repo `BaptTF/alex-site` and bumped by Image Updater (`sha-*` tags). The repo has the Write role in the package's Actions access. Pull secret and Image Updater credentials from Infisical `/github/b`. Authelia allows `group:family`. No egress.
 
 ---
 
