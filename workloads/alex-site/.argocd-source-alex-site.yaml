@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ghcr.io/bapttf/alex-site:sha-ac85b76
