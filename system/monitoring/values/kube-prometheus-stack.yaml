@@ -152,7 +152,7 @@ alertmanager:
       - source_matchers:
           - 'alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable)$"'
         target_matchers:
-          - 'alertname =~ "^(KubeDaemonSetRolloutStuck|KubeDaemonSetMisScheduled)$"'
+          - 'alertname =~ "^(KubeDaemonSetRolloutStuck|KubeDaemonSetMisScheduled|KubeletInstanceUnreachable)$"'
     # Every sre notification wakes the agent. Group per namespace so the
     # alerts of one outage arrive together, batch for 2m, re-send changes
     # at most every 15m and repeat a still-firing group every 12h.
@@ -208,7 +208,7 @@ alertmanager:
         - receiver: discord
           repeat_interval: 4h
           matchers:
-            - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeletDown)$"
+            - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeletDown|KubeletInstanceUnreachable)$"
         # TargetDown for node-level jobs only; app scrapes stay on sre.
         - receiver: discord
           repeat_interval: 4h
