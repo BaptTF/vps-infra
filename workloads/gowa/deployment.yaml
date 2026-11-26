@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gowa
-          image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:v9.10.0
+          image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice:v9.11.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
