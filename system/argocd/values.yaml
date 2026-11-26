@@ -71,7 +71,7 @@ controller:
       cpu: 100m
       memory: 768Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 2Gi
   env:
     - name: GOMEMLIMIT
