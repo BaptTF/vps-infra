@@ -148,6 +148,11 @@ alertmanager:
           - 'alertname = KubeJobNotCompleted'
         equal:
           - 'namespace'
+      # A down node makes every DaemonSet look stuck; a GitOps-broken rollout must still page sre.
+      - source_matchers:
+          - 'alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable)$"'
+        target_matchers:
+          - 'alertname =~ "^(KubeDaemonSetRolloutStuck|KubeDaemonSetMisScheduled)$"'
     # Every sre notification wakes the agent. Group per namespace so the
     # alerts of one outage arrive together, batch for 2m, re-send changes
     # at most every 15m and repeat a still-firing group every 12h.
@@ -199,11 +204,11 @@ alertmanager:
           repeat_interval: 4h
           matchers:
             - alertname = "NodeSystemSaturation"
-        # Node down and DaemonSet fallout: the agent cannot power-cycle a host.
+        # Node down: the agent cannot power-cycle a host. DaemonSet alerts stay on sre.
         - receiver: discord
           repeat_interval: 4h
           matchers:
-            - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeDaemonSetRolloutStuck|KubeDaemonSetMisScheduled|KubeletDown)$"
+            - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeletDown)$"
         # TargetDown for node-level jobs only; app scrapes stay on sre.
         - receiver: discord
           repeat_interval: 4h
