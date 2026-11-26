@@ -683,16 +683,17 @@ Alerts the agent cannot act on go to the `discord` receiver. Alertmanager 0.34.2
 The routes are in `system/monitoring/values/kube-prometheus-stack.yaml`. Sent to Discord:
 
 - `HomeAssistantDown`.
-- `TargetDown` only when `job` is `homeassistant`, `homeassistant-livebox`, or `homeassistant-eyg`. Any other `TargetDown` stays on the webhook.
+- `TargetDown` only when `job` is `homeassistant`, `homeassistant-livebox`, or `homeassistant-eyg` (instances outside the cluster), or `node-exporter` or `kubelet` (node-level scrapes that fail when a host is unreachable). Alertmanager cannot match "the node is down" more finely than the job label; routing every `TargetDown` would also hide an application scrape failure (Immich, bifrost, SNMP). Any other `TargetDown` stays on the webhook.
 - `TraefikService5xx` and `TraefikHighLatencyP95` only when `exported_service` is the Roquefort or Eyguians IngressRoute (`ha-ha-<20 hex>@kubernetescrd` or `ha-eyg-ha-eyg-<20 hex>@kubernetescrd`). Traefik errors for every other service stay on the webhook. The livebox instance has no IngressRoute.
 - `LocalPathPVCOverRequested`. local-path does not enforce the request. `LocalPathPVCGrowingFast` stays on the webhook.
+- `KubeNodeNotReady`, `KubeNodeUnreachable`, `KubeletDown`, `KubeDaemonSetRolloutStuck`, and `KubeDaemonSetMisScheduled`. A down node, and the DaemonSet pods stuck on it, cannot be fixed in GitOps.
 - `severity="info"`, except `KubeNodePressure`, `KubeNodeEviction`, `NodeCPUHighUsage`, and `KubeletTooManyPods`. kube-prometheus-stack 92.17.0 ships those four at info, and they are node pressure or saturation, so they stay on the webhook. The info route therefore sends `CPUThrottlingHigh`, `KubeQuotaAlmostFull`, and `KubeQuotaFullyUsed` to Discord. The chart's `InfoInhibitor` rule would still suppress those four while it is firing, so that inhibit rule excludes the same four names. A lone node-pressure alert reaches the webhook.
 
 `Watchdog` goes to `watchdog-hc`. `InfoInhibitor` (severity `none`) stays on `null`.
 
 `LocalPathExporterScanErrors` and `LocalPathExporterScanSlow` stay on the webhook. `local_path_exporter_scan_errors_total` and `local_path_exporter_scan_duration_seconds` are one series per node: they have no `persistentvolumeclaim` or volume `namespace` label. A matcher on `immich-library` would never match, and matching the alert name would also drop a real I/O error, including on the other large volume (`hermes-leo-data`).
 
-OOMKilled, CrashLoop, pods not ready, Argo CD out of sync or degraded, node pressure and saturation, disk and volume full, exporter down, CNPG and backup failures, the R2 bucket, certificates, and every other warning or critical alert stay on the webhook.
+OOMKilled, CrashLoop, pods not ready, Argo CD out of sync or degraded, node pressure and saturation, disk and volume full, exporter down (other than `node-exporter` and `kubelet` TargetDown), CNPG and backup failures, the R2 bucket, certificates, and every other warning or critical alert stay on the webhook.
 
 Keys in Infisical project `infrastructure`, environment `prod`. Each path feeds its own Kubernetes Secret, so Prometheus and Alertmanager each only see their own credentials.
 
