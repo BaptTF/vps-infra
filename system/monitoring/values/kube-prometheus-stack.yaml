@@ -199,6 +199,17 @@ alertmanager:
           repeat_interval: 4h
           matchers:
             - alertname = "NodeSystemSaturation"
+        # Node down and DaemonSet fallout: the agent cannot power-cycle a host.
+        - receiver: discord
+          repeat_interval: 4h
+          matchers:
+            - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeDaemonSetRolloutStuck|KubeDaemonSetMisScheduled|KubeletDown)$"
+        # TargetDown for node-level jobs only; app scrapes stay on sre.
+        - receiver: discord
+          repeat_interval: 4h
+          matchers:
+            - alertname = "TargetDown"
+            - job =~ "^(node-exporter|kubelet)$"
         # Baptiste wants k8up backup alerts on Discord (#alerts) as well as
         # the sre webhook. continue alone does not fall through to the default
         # receiver, so a second route sends the same alerts to sre.
